@@ -117,13 +117,10 @@
     });
 
     function initTokenUI() {
-      if (adminToken) {
-        document.getElementById('adminArea').classList.remove('hidden');
-      } else {
-        document.getElementById('adminArea').classList.add('hidden');
-      }
+  // 始终隐藏管理按钮，必须手动激活
+  document.getElementById('adminArea').classList.add('hidden');
     }
-    initTokenUI();
+    //initTokenUI();
 
     // ========== 暗色模式 ==========
     function toggleDark() {
