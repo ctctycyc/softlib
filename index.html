@@ -54,11 +54,11 @@
         <h1>软件库</h1>
         <div class="header-actions">
           <button class="icon-btn" onclick="toggleDark()" id="darkToggle">暗色模式</button>
+          <!-- 管理员按钮区域，默认隐藏，激活后显示 -->
           <span id="adminArea" class="hidden">
             <button class="icon-btn" onclick="toggleAdmin()" id="adminToggle">审核模式</button>
+            <a href="https://github.com/ctctycyc/softlib/issues" target="_blank" class="icon-btn" style="text-decoration:none;">后台</a>
           </span>
-          <button class="icon-btn" id="setTokenBtn" onclick="promptToken()">设置Token</button>
-          <a href="https://github.com/ctctycyc/softlib/issues" target="_blank" class="icon-btn" style="text-decoration:none;">后台</a>
         </div>
       </div>
       <input type="text" class="search-box" id="searchInput" placeholder="搜索软件..." oninput="filterSoftwares()" />
@@ -66,10 +66,10 @@
   </div>
 
   <div class="container" style="margin-top:12px;">
-    <a class="btn btn-block" href="#" onclick="openSubmitForm(); return false;">提交新软件</a>
+    <a class="btn btn-block" href="#" onclick="openSubmitForm(); return false;">上传新软件</a>
     <div id="submitModal" class="modal hidden" onclick="closeSubmitForm()">
       <div class="modal-content" onclick="event.stopPropagation()">
-        <h3>提交新软件</h3>
+        <h3>上传新软件</h3>
         <input type="text" id="swName" placeholder="软件名称（必填）">
         <textarea id="swDesc" placeholder="描述（选填）" rows="3"></textarea>
         <input type="text" id="swUrl" placeholder="下载链接（必填）">
@@ -78,12 +78,13 @@
           <button class="btn" onclick="submitSoftware()">提交审核</button>
         </div>
       </div>
-    </div> <div id="adminPanel" class="admin-panel hidden">
+    </div>
+    <div id="adminPanel" class="admin-panel hidden">
       <h3>待审核软件</h3>
       <div id="pendingList">加载中...</div>
     </div>
     <div id="list"></div>
-    <div class="footer">由 GitHub Issues 驱动 · 自建评论系统</div>
+    <div class="footer" id="secretTrigger"> RJK(✔zecir)</div>
   </div>
 
   <script>
@@ -93,28 +94,38 @@
     let allSoftwares = [];
     let adminToken = localStorage.getItem('adminToken');
 
-    // ========== Token UI ==========
+    // ========== 隐藏的管理员激活 (点击底部文字5次) ==========
+    let clickCount = 0;
+    document.getElementById('secretTrigger').addEventListener('click', () => {
+      clickCount++;
+      if (clickCount >= 5) {
+        clickCount = 0;
+        if (!adminToken) {
+          const input = prompt('管理员登录：请输入 GitHub Token');
+          if (input && input.trim()) {
+            adminToken = input.trim();
+            localStorage.setItem('adminToken', adminToken);
+            alert('已激活管理功能！');
+            initTokenUI();
+            if (!document.getElementById('adminPanel').classList.contains('hidden')) loadPendingIssues();
+          }
+        } else {
+          alert('管理功能已激活');
+        }
+      }
+      setTimeout(() => { clickCount = 0; }, 2000);
+    });
+
     function initTokenUI() {
       if (adminToken) {
         document.getElementById('adminArea').classList.remove('hidden');
-        document.getElementById('setTokenBtn').classList.add('hidden');
       } else {
-        document.getElementById('setTokenBtn').classList.remove('hidden');
+        document.getElementById('adminArea').classList.add('hidden');
       }
     }
-    window.promptToken = function() {
-      const input = prompt('请输入你的 GitHub Token：');
-      if (input && input.trim()) {
-        adminToken = input.trim();
-        localStorage.setItem('adminToken', adminToken);
-        alert('Token 已保存！');
-        initTokenUI();
-        if (!document.getElementById('adminPanel').classList.contains('hidden')) loadPendingIssues();
-      }
-    };
     initTokenUI();
 
- // ========== 暗色模式 ==========
+    // ========== 暗色模式 ==========
     function toggleDark() {
       document.documentElement.classList.toggle('dark');
       const isDark = document.documentElement.classList.contains('dark');
@@ -126,7 +137,7 @@
       document.getElementById('darkToggle').textContent = '亮色模式';
     }
 
-    // ========== 加载已审核软件 ==========
+    // ========== 加载软件 ==========
     async function loadSoftwares() {
       try {
         const res = await fetch(API + '?labels=approved&state=open&sort=created&direction=desc');
@@ -147,11 +158,11 @@
       }
     }
 
-    function renderSoftwares(softwares) {
+   function renderSoftwares(softwares) {
       const listDiv = document.getElementById('list');
       if (softwares.length === 0) {
-        listDiv.innerHTML = '<div class="card" style="text-align:center;color:var(--text-secondary);">暂无软件，快去提交吧</div>';
-      return;
+        listDiv.innerHTML = '<div class="card" style="text-align:center;color:var(--text-secondary);">暂无软件，快去上传吧</div>';
+        return;
       }
       let html = '';
       softwares.forEach(sw => {
@@ -161,7 +172,6 @@
           ${sw.downloadUrl ? `<a class="download-link" href="${sw.downloadUrl}" target="_blank">下载</a>` : ''}
           <div class="card-actions">
             <a href="#" onclick="toggleComments(${sw.id}); return false;">评论</a>
-            <a href="${sw.htmlUrl}" target="_blank">详情</a>
           </div>
           <div id="comments-${sw.id}" class="comments-section hidden">
             <div id="comment-list-${sw.id}"></div>
@@ -176,40 +186,38 @@
       listDiv.innerHTML = html;
     }
 
- // ========== 评论系统 (自建) ==========
+    // ========== 评论系统 ==========
     async function loadComments(issueNumber) {
-  const listEl = document.getElementById(`comment-list-${issueNumber}`);
-  if (!listEl) return;
-  listEl.innerHTML = '加载中...';
-  try {
-    const res = await fetch(`${WORKER_URL}/comments?issue=${issueNumber}`);
-    const comments = await res.json();
-    if (comments.length === 0) {
-      listEl.innerHTML = '<p style="color:var(--text-secondary);">暂无评论</p>';
-      return;
-    }
-    let html = '';
-    comments.forEach(c => {
-      let displayName = c.user;   // 这里 c.user 是 ctctycyc，但我们用 body 里的昵称
-      let body = c.body;
-      let badge = '';
-      // 检查是否以【官方】开头
-      if (body.startsWith('【官方】')) {
-        badge = '<span style="background:#e74c3c;color:white;border-radius:4px;padding:1px 6px;font-size:12px;margin-left:4px;">官方</span>';
-        body = body.slice(4); // 去掉前缀
+      const listEl = document.getElementById(`comment-list-${issueNumber}`);
+      if (!listEl) return;
+      listEl.innerHTML = '加载中...';
+      try {
+        const res = await fetch(`${WORKER_URL}/comments?issue=${issueNumber}`);
+        const comments = await res.json();
+        if (comments.length === 0) {
+          listEl.innerHTML = '<p style="color:var(--text-secondary);">暂无评论</p>';
+          return;
+        }
+        let html = '';
+        comments.forEach(c => {
+          let body = c.body;
+          let displayName = c.user;
+          let badge = '';
+          if (body.startsWith('【官方】')) {
+            badge = '<span style="background:#e74c3c;color:white;border-radius:4px;padding:1px 6px;font-size:12px;margin-left:4px;">官方</span>';
+            body = body.slice(4);
+          }
+          const colonIndex = body.indexOf(':');
+          if (colonIndex > 0) {
+            displayName = body.slice(0, colonIndex);
+            body = body.slice(colonIndex + 1).trim();
+          }
+          html += `<div class="comment-item"><strong>${displayName}</strong>${badge}: ${body}</div>`;
+        });
+        listEl.innerHTML = html;
+      } catch (e) {
+        listEl.innerHTML = '<p style="color:red;">加载失败</p>';
       }
-      // 分离昵称和内容（格式：昵称: 内容）
-      const colonIndex = body.indexOf(':');
-      if (colonIndex > 0) {
-        displayName = body.slice(0, colonIndex);
-        body = body.slice(colonIndex + 1).trim();
-      }
-      html += `<div class="comment-item"><strong>${displayName}</strong>${badge}: ${body}</div>`;
-    });
-    listEl.innerHTML = html;
-  } catch (e) {
-    listEl.innerHTML = '<p style="color:red;">加载失败</p>';
-  }
     }
 
     function toggleComments(id) {
@@ -227,27 +235,26 @@
     }
 
     async function postComment(issueNumber) {
-  const nickname = document.getElementById(`nickname-${issueNumber}`).value.trim();
-  const content = document.getElementById(`comment-input-${issueNumber}`).value.trim();
-  if (!nickname || !content) return alert('昵称和内容不能为空');
-  // 如果管理员已设置 Token，自动标记为官方
-  const isAdmin = !!adminToken;   // adminToken 存在即表示你是管理员
-  try {
-    const res = await fetch(`${WORKER_URL}/comments`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ issueNumber, nickname, content, isAdmin })
-    });
-    const data = await res.json();
-    if (data.success) {
-      document.getElementById(`comment-input-${issueNumber}`).value = '';
-      loadComments(issueNumber);
-    } else {
-      alert('评论失败: ' + (data.error || '未知错误'));
-    }
-  } catch (e) {
-    alert('网络错误');
-  }
+      const nickname = document.getElementById(`nickname-${issueNumber}`).value.trim();
+      const content = document.getElementById(`comment-input-${issueNumber}`).value.trim();
+      if (!nickname || !content) return alert('昵称和内容不能为空');
+      const isAdmin = !!adminToken;
+      try {
+        const res = await fetch(`${WORKER_URL}/comments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ issueNumber, nickname, content, isAdmin })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById(`comment-input-${issueNumber}`).value = '';
+          loadComments(issueNumber);
+        } else {
+          alert('评论失败: ' + (data.error || '未知错误'));
+        }
+      } catch (e) {
+        alert('网络错误');
+      }
     }
 
     // ========== 搜索 ==========
@@ -290,7 +297,7 @@
       }
     }
 
-   // ========== 审核 ==========
+    // ========== 审核面板（激活后可用） ==========
     function toggleAdmin() {
       const panel = document.getElementById('adminPanel');
       panel.classList.toggle('hidden');
@@ -304,7 +311,7 @@
 
     async function loadPendingIssues() {
       if (!adminToken) {
-        document.getElementById('pendingList').innerHTML = '<p>请先点击“设置Token”输入Token。</p>';
+        document.getElementById('pendingList').innerHTML = '<p>请先激活管理功能。</p>';
         return;
       }
       const res = await fetch(API + '?labels=pending&state=open&sort=created&direction=desc');
@@ -340,7 +347,7 @@
       loadSoftwares();
     }
 
-   async function reject(number) {
+    async function reject(number) {
       if (!adminToken) return alert('Token 未设置');
       await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${number}`, {
         method: 'PATCH',
