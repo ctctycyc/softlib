@@ -60,16 +60,8 @@
       justify-content: space-between;
       align-items: center;
     }
-    .header h1 {
-      font-size: 26px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-    .header-actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
+    .header h1 { font-size: 26px; font-weight: 700; letter-spacing: 0.5px; }
+    .header-actions { display: flex; gap: 8px; align-items: center; }
     .icon-btn {
       background: rgba(255,255,255,0.2);
       border: 1px solid rgba(255,255,255,0.3);
@@ -153,6 +145,20 @@
     }
     .footer { text-align: center; color: var(--text-secondary); font-size: 12px; margin-top: 30px; opacity: 0.8; }
     .hidden { display: none; }
+    .modal {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: var(--card-bg); border-radius: var(--radius); padding: 20px;
+      width: 90%; max-width: 400px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    }
+    .modal-content h3 { margin-bottom: 15px; }
+    .modal-content input, .modal-content textarea {
+      width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--border);
+      border-radius: 8px; background: var(--bg); color: var(--text);
+    }
   </style>
 </head>
 <body>
@@ -162,8 +168,6 @@
       <div class="header-actions">
         <button class="icon-btn" onclick="toggleDark()" id="darkToggle">🌙</button>
         <span id="adminArea" class="hidden">
-          <button class="icon-btn" onclick="toggleAdmin()" id="adminToggle">审核模式</button>
-        </span id="adminArea" class="hidden">
           <button class="icon-btn" onclick="toggleAdmin()" id="adminToggle">审核模式</button>
         </span>
         <button class="icon-btn" id="setTokenBtn" onclick="promptToken()">设置Token</button>
@@ -175,10 +179,20 @@
   <div class="container">
     <input type="text" class="search-box" id="searchInput" placeholder="搜索软件" oninput="filterSoftwares()" />
 
-    <a class="btn btn-block" href="https://github.com/ctctycyc/softlib/issues/new?labels=pending" target="_blank">
-      ＋ 上传新软件
-    </a>
+    <a class="btn btn-block" href="#" onclick="openSubmitForm(); return false;">＋ 上传新软件</a>
 
+    <div id="submitModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>上传新软件</h3>
+        <input type="text" id="swName" placeholder="软件名称（必填）">
+        <textarea id="swDesc" placeholder="描述（选填）" rows="3"></textarea>
+        <input type="text" id="swUrl" placeholder="下载链接（必填，http开头）">
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:10px;">
+          <button class="btn" style="background:#aaa;" onclick="closeSubmitForm()">取消</button>
+          <button class="btn" onclick="submitSoftware()">提交审核</button>
+        </div>
+      </div>
+    </div>
     <div id="adminPanel" class="admin-panel hidden">
       <h3 style="margin-bottom:10px;">待审核软件</h3>
       <div id="pendingList">加载中...</div>
@@ -188,7 +202,7 @@
 
     <div class="footer">由 GitHub Issues 驱动 · 评论系统 Cusdis</div>
   </div>
-  
+
   <!-- Cusdis -->
   <script>
     const CUSDIS_APP_ID = 'bea65001-cdd3-483a-8b75-7749040db913';
@@ -209,6 +223,8 @@
 
   <script>
     const ADMIN_USERNAMES = ['ctctycyc'];
+    // 👇 Worker 地址已帮你填好
+    const WORKER_URL = 'https://softlib-submit.dghkkppp.workers.dev';
     const API = 'https://api.github.com/repos/ctctycyc/softlib/issues';
     let allSoftwares = [];
     let adminToken = localStorage.getItem('adminToken');
@@ -265,10 +281,10 @@
       }
     }
 
-    function renderSoftwares(softwares) {
+   function renderSoftwares(softwares) {
       const listDiv = document.getElementById('list');
       if (softwares.length === 0) {
-        listDiv.innerHTML = '<div class="card" style="text-align:center;color:var(--text-secondary);">暂无软件，快去提交吧 ✨</div>';
+        listDiv.innerHTML = '<div class="card" style="text-align:center;color:var(--text-secondary);">暂无软件，快去上传吧</div>';
         return;
       }
       let html = '';
@@ -277,7 +293,7 @@
           <h3>${sw.title}</h3>
           <div class="desc">${sw.description || '暂无描述'}</div>
           ${sw.downloadUrl ? `<a class="download-link" href="${sw.downloadUrl}" target="_blank">下载</a>` : ''}
-          <div class="card-actions">
+        <div class="card-actions">
             <a href="#" onclick="toggleComments(${sw.id}); return false;">评论</a>
             <a href="${sw.htmlUrl}" target="_blank">详情</a>
           </div>
@@ -288,16 +304,17 @@
       });
       listDiv.innerHTML = html;
     }
-    function toggleComments(id) {
+
+  function toggleComments(id) {
       const commentsDiv = document.getElementById(`comments-${id}`);
       if (!commentsDiv) return;
       const toggleLink = window.event ? window.event.target : null;
       if (!commentsDiv.classList.contains('hidden')) {
         commentsDiv.classList.add('hidden');
-        if (toggleLink) toggleLink.textContent = '💬 评论';
+        if (toggleLink) toggleLink.textContent = '评论';
         return;
       }
-      if (toggleLink) toggleLink.textContent = '💬 收起评论';
+      if (toggleLink) toggleLink.textContent = '收起评论';
       commentsDiv.classList.remove('hidden');
       const pageId = `software-${id}`;
       const pageUrl = `https://ctctycyc.github.io/softlib/#!${pageId}`;
@@ -305,7 +322,7 @@
       loadCusdis(`cusdis-${id}`, pageId, pageUrl, pageTitle);
     }
 
-    function filterSoftwares() {
+  function filterSoftwares() {
       const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
       if (!keyword) { renderSoftwares(allSoftwares); return; }
       const filtered = allSoftwares.filter(sw => 
@@ -313,6 +330,40 @@
         (sw.description && sw.description.toLowerCase().includes(keyword))
       );
       renderSoftwares(filtered);
+    }
+
+    function openSubmitForm() {
+      document.getElementById('submitModal').classList.remove('hidden');
+    }
+    function closeSubmitForm() {
+      document.getElementById('submitModal').classList.add('hidden');
+    }
+    async function submitSoftware() {
+      const name = document.getElementById('swName').value.trim();
+      const desc = document.getElementById('swDesc').value.trim();
+      const url = document.getElementById('swUrl').value.trim();
+      if (!name || !url) return alert('软件名称和下载链接不能为空');
+
+      try {
+        const res = await fetch(WORKER_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title: name, description: desc, downloadUrl: url })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('提交成功，等待管理员审核！');
+          document.getElementById('swName').value = '';
+          document.getElementById('swDesc').value = '';
+          document.getElementById('swUrl').value = '';
+          closeSubmitForm();
+          loadSoftwares();
+        } else {
+          alert('提交失败：' + (data.error || '未知错误'));
+        }
+      } catch (e) {
+        alert('网络错误，请稍后再试');
+      }
     }
 
     function toggleAdmin() {
@@ -379,5 +430,3 @@
   </script>
 </body>
 </html>
-
-
