@@ -45,6 +45,10 @@
   .comment { border-bottom: 1px solid var(--border); padding: 8px 0; font-size: 14px; }
   .comment:last-child { border-bottom: none; }
   .comment strong { color: var(--link); }
+  .badge {
+    display: inline-block; background: #d73a4a; color: white; border-radius: 3px;
+    padding: 1px 6px; font-size: 12px; margin-left: 5px; vertical-align: middle;
+  }
   .toggle-btn {
     background: transparent; border: 1px solid var(--border); border-radius: 20px;
     padding: 5px 12px; cursor: pointer; font-size: 13px; color: var(--text);
@@ -55,7 +59,6 @@
     border: 2px dashed var(--border); padding: 10px; margin: 10px 0; border-radius: 8px;
     background: var(--card-bg);
   }
-  .token-setup { margin: 5px 0; }
 </style>
 </head>
 <body>
@@ -84,22 +87,23 @@
 <div class="footer">Powered by GitHub Issues</div>
 
 <script>
+// ============ 配置区 ============
+const ADMIN_USERNAMES = ['ctctycyc'];  // 把你的 GitHub 用户名填在这里，可添加多个
+// ===============================
+
 const API = 'https://api.github.com/repos/ctctycyc/softlib/issues';
 let allSoftwares = [];
 let adminToken = localStorage.getItem('adminToken');
 
-// 页面加载时，如果有 Token 就显示审核按钮
 function initTokenUI() {
   if (adminToken) {
     document.getElementById('adminArea').classList.remove('hidden');
-    // 隐藏设置Token按钮，或者保留也行
     document.getElementById('setTokenBtn').classList.add('hidden');
   } else {
     document.getElementById('setTokenBtn').classList.remove('hidden');
   }
 }
 
-// 手动设置 Token
 window.promptToken = function() {
   const input = prompt('请输入你的 GitHub Token：\n（可从 https://github.com/settings/tokens 生成，勾选 public_repo 权限）');
   if (input && input.trim()) {
@@ -107,7 +111,6 @@ window.promptToken = function() {
     localStorage.setItem('adminToken', adminToken);
     alert('Token 已保存！');
     initTokenUI();
-    // 如果审核面板打开，刷新待审核列表
     if (!document.getElementById('adminPanel').classList.contains('hidden')) {
       loadPendingIssues();
     }
@@ -116,7 +119,6 @@ window.promptToken = function() {
 
 initTokenUI();
 
-// 夜间模式
 function toggleDark() {
   document.documentElement.classList.toggle('dark');
   const isDark = document.documentElement.classList.contains('dark');
@@ -128,7 +130,6 @@ if (localStorage.getItem('darkMode') === 'true') {
   document.getElementById('darkToggle').textContent = '日间模式';
 }
 
-// 加载已通过软件
 async function loadSoftwares() {
   try {
     const res = await fetch(API + '?labels=approved&state=open&sort=created&direction=desc');
@@ -174,8 +175,8 @@ function renderSoftwares(softwares) {
 
 async function toggleComments(id, commentsUrl) {
   const commentsDiv = document.getElementById(`comments-${id}`);
-  const toggleLink = window.event ? window.event.target : null;
   if (!commentsDiv) return;
+  const toggleLink = window.event ? window.event.target : null;
   if (!commentsDiv.classList.contains('hidden')) {
     commentsDiv.classList.add('hidden');
     if (toggleLink) toggleLink.textContent = '查看评论';
@@ -196,7 +197,9 @@ async function toggleComments(id, commentsUrl) {
       html = '<p style="color:var(--text-secondary);">暂无评论</p>';
     } else {
       comments.forEach(c => {
-        html += `<div class="comment"><strong>${c.user.login}</strong>: ${c.body}</div>`;
+        const isAdmin = ADMIN_USERNAMES.includes(c.user.login);
+        const badge = isAdmin ? '<span class="badge">官方</span>' : '';
+        html += `<div class="comment"><strong>${c.user.login}</strong>${badge}: ${c.body}</div>`;
       });
     }
     commentsDiv.innerHTML = html;
@@ -205,6 +208,7 @@ async function toggleComments(id, commentsUrl) {
     commentsDiv.innerHTML = '<p class="error">加载评论失败</p>';
   }
 }
+
 
 function filterSoftwares() {
   const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -216,7 +220,6 @@ function filterSoftwares() {
   renderSoftwares(filtered);
 }
 
-// ========== 审核功能 ==========
 function toggleAdmin() {
   const panel = document.getElementById('adminPanel');
   panel.classList.toggle('hidden');
@@ -254,7 +257,6 @@ async function loadPendingIssues() {
 
 async function approve(number) {
   if (!adminToken) return alert('Token 未设置');
-  // 替换标签为 approved
   await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${number}/labels`, {
     method: 'PUT',
     headers: { 'Authorization': `token ${adminToken}`, 'Content-Type': 'application/json' },
