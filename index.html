@@ -178,24 +178,38 @@
 
  // ========== 评论系统 (自建) ==========
     async function loadComments(issueNumber) {
-      const listEl = document.getElementById(`comment-list-${issueNumber}`);
-      if (!listEl) return;
-      listEl.innerHTML = '加载中...';
-      try {
-        const res = await fetch(`${WORKER_URL}/comments?issue=${issueNumber}`);
-        const comments = await res.json();
-        if (comments.length === 0) {
-          listEl.innerHTML = '<p style="color:var(--text-secondary);">暂无评论</p>';
-          return;
-        }
-        let html = '';
-        comments.forEach(c => {
-          html += `<div class="comment-item"><strong>${c.user}</strong>: ${c.body}</div>`;
-        });
-        listEl.innerHTML = html;
-      } catch (e) {
-        listEl.innerHTML = '<p style="color:red;">加载失败</p>';
+  const listEl = document.getElementById(`comment-list-${issueNumber}`);
+  if (!listEl) return;
+  listEl.innerHTML = '加载中...';
+  try {
+    const res = await fetch(`${WORKER_URL}/comments?issue=${issueNumber}`);
+    const comments = await res.json();
+    if (comments.length === 0) {
+      listEl.innerHTML = '<p style="color:var(--text-secondary);">暂无评论</p>';
+      return;
+    }
+    let html = '';
+    comments.forEach(c => {
+      let displayName = c.user;   // 这里 c.user 是 ctctycyc，但我们用 body 里的昵称
+      let body = c.body;
+      let badge = '';
+      // 检查是否以【官方】开头
+      if (body.startsWith('【官方】')) {
+        badge = '<span style="background:#e74c3c;color:white;border-radius:4px;padding:1px 6px;font-size:12px;margin-left:4px;">官方</span>';
+        body = body.slice(4); // 去掉前缀
       }
+      // 分离昵称和内容（格式：昵称: 内容）
+      const colonIndex = body.indexOf(':');
+      if (colonIndex > 0) {
+        displayName = body.slice(0, colonIndex);
+        body = body.slice(colonIndex + 1).trim();
+      }
+      html += `<div class="comment-item"><strong>${displayName}</strong>${badge}: ${body}</div>`;
+    });
+    listEl.innerHTML = html;
+  } catch (e) {
+    listEl.innerHTML = '<p style="color:red;">加载失败</p>';
+  }
     }
 
     function toggleComments(id) {
@@ -213,25 +227,27 @@
     }
 
     async function postComment(issueNumber) {
-      const nickname = document.getElementById(`nickname-${issueNumber}`).value.trim();
-      const content = document.getElementById(`comment-input-${issueNumber}`).value.trim();
-      if (!nickname || !content) return alert('昵称和内容不能为空');
-      try {
-        const res = await fetch(`${WORKER_URL}/comments`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ issueNumber, nickname, content })
-        });
-        const data = await res.json();
-        if (data.success) {
-          document.getElementById(`comment-input-${issueNumber}`).value = '';
-          loadComments(issueNumber);
-        } else {
-          alert('评论失败: ' + (data.error || '未知错误'));
-        }
-      } catch (e) {
-        alert('网络错误');
-      }
+  const nickname = document.getElementById(`nickname-${issueNumber}`).value.trim();
+  const content = document.getElementById(`comment-input-${issueNumber}`).value.trim();
+  if (!nickname || !content) return alert('昵称和内容不能为空');
+  // 如果管理员已设置 Token，自动标记为官方
+  const isAdmin = !!adminToken;   // adminToken 存在即表示你是管理员
+  try {
+    const res = await fetch(`${WORKER_URL}/comments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ issueNumber, nickname, content, isAdmin })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById(`comment-input-${issueNumber}`).value = '';
+      loadComments(issueNumber);
+    } else {
+      alert('评论失败: ' + (data.error || '未知错误'));
+    }
+  } catch (e) {
+    alert('网络错误');
+  }
     }
 
     // ========== 搜索 ==========
