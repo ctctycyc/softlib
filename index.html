@@ -205,8 +205,6 @@
       .card { padding: 16px; }
     }
   </style>
-  <!-- Cusdis 官方 SDK，提前加载 -->
-  <script async src="https://cusdis.com/js/cusdis.es.js"></script>
 </head>
 <body>
   <div class="header">
@@ -242,6 +240,7 @@
       </div>
     </div>
 
+
     <div id="adminPanel" class="admin-panel hidden">
       <h3>待审核软件</h3>
       <div id="pendingList">加载中...</div>
@@ -253,19 +252,20 @@
 
   <script>
     const CUSDIS_APP_ID = 'bea65001-cdd3-483a-8b75-7749040db913';
-    function loadCusdis(targetId, pageId, pageUrl, pageTitle) {
-      const container = document.getElementById(targetId);
+    
+    // 稳定版评论加载：使用 iframe，避免 SDK 冲突
+    function loadCusdis(containerId, pageId, pageUrl, pageTitle) {
+      const container = document.getElementById(containerId);
       if (!container) return;
-      container.innerHTML = `<div id="cusdis-${pageId}" data-app-id="${CUSDIS_APP_ID}" data-page-id="${pageId}" data-page-url="${pageUrl}" data-page-title="${pageTitle}" data-theme="auto"></div>`;
-      // 重试直到 Cusdis SDK 加载完成
-      const tryRender = () => {
-        if (window.CUSDIS) {
-          window.CUSDIS.renderTo(document.getElementById(`cusdis-${pageId}`));
-        } else {
-          setTimeout(tryRender, 300);
-        }
-      };
-      tryRender();
+      // 如果已经加载过，直接显示（避免重复创建）
+      if (container.children.length > 0) return;
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://cusdis.com/widget?appId=${CUSDIS_APP_ID}&pageId=${pageId}&pageUrl=${encodeURIComponent(pageUrl)}&pageTitle=${encodeURIComponent(pageTitle)}&theme=auto`;
+      iframe.style.width = '100%';
+      iframe.style.border = 'none';
+      iframe.style.minHeight = '350px';
+      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups allow-forms');
+      container.appendChild(iframe);
     }
 
     const ADMIN_USERNAMES = ['ctctycyc'];
@@ -317,7 +317,7 @@
             if (line.trim().startsWith('http')) downloadUrl = line.trim();
             else if (line.trim() && !description) description = line.trim();
           }
-          return { id: issue.number, title: issue.title, description, downloadUrl, htmlUrl: issue.html_url };
+         return { id: issue.number, title: issue.title, description, downloadUrl, htmlUrl: issue.html_url };
         });
         renderSoftwares(allSoftwares);
       } catch(e) {
@@ -343,7 +343,7 @@
           </div>
           <div id="comments-${sw.id}" class="comments-section hidden">
             <div id="cusdis-container-${sw.id}"></div>
-          </div>
+        </div>
         </div>`;
       });
       listDiv.innerHTML = html;
@@ -361,9 +361,9 @@
       if (toggleLink) toggleLink.textContent = '收起评论';
       commentsDiv.classList.remove('hidden');
       const pageId = `software-${id}`;
-      loadCusdis(`cusdis-container-${id}`, pageId, `https://ctctycyc.github.io/softlib/#!${pageId}`, `软件 #${id}`);
+      const pageUrl = `https://ctctycyc.github.io/softlib/#!${pageId}`;
+      loadCusdis(`cusdis-container-${id}`, pageId, pageUrl, `软件 #${id}`);
     }
-
 
     function filterSoftwares() {
       const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
@@ -374,7 +374,7 @@
       ));
     }
 
-    function openSubmitForm() { document.getElementById('submitModal').classList.remove('hidden'); }
+  function openSubmitForm() { document.getElementById('submitModal').classList.remove('hidden'); }
     function closeSubmitForm() { document.getElementById('submitModal').classList.add('hidden'); }
     async function submitSoftware() {
       const name = document.getElementById('swName').value.trim();
@@ -436,8 +436,7 @@
             <button class="btn btn-danger" onclick="reject(${issue.number})">驳回</button>
           </div>
         </div>`;
-      });
-      div.innerHTML = html;
+      });    div.innerHTML = html;
     }
 
     async function approve(number) {
