@@ -275,22 +275,26 @@
     <div class="footer">由 GitHub Issues 驱动 · 评论系统 Cusdis</div>
   </div>
 
-  <!-- Cusdis 嵌入 -->
+  <!-- Cusdis 官方 SDK 方式，更稳定 -->
+  <script async src="https://cusdis.com/js/cusdis.es.js"></script>
   <script>
     const CUSDIS_APP_ID = 'bea65001-cdd3-483a-8b75-7749040db913';
-    window.CUSDIS_LOCALE = 'zh-cn';
     function loadCusdis(targetId, pageId, pageUrl, pageTitle) {
       const container = document.getElementById(targetId);
       if (!container) return;
-      container.innerHTML = '';
-      const iframe = document.createElement('iframe');
-      iframe.src = `https://cusdis.com/widget?appId=${CUSDIS_APP_ID}&pageId=${pageId}&pageUrl=${pageUrl}&pageTitle=${pageTitle}&requireNameEmail=1`;
-      iframe.style.width = '100%';
-      iframe.style.border = 'none';
-      iframe.style.minHeight = '350px';
-      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin allow-popups');
-      container.appendChild(iframe);
+      // 创建 Cusdis 需要的 div，使用官方属性
+      container.innerHTML = `<div id="cusdis-${pageId}" data-app-id="${CUSDIS_APP_ID}" data-page-id="${pageId}" data-page-url="${pageUrl}" data-page-title="${pageTitle}" data-theme="auto"></div>`;
+      // 如果 SDK 已加载，立即渲染；否则等待脚本加载完成自动渲染
+      if (window.CUSDIS) {
+        window.CUSDIS.renderTo(document.getElementById(`cusdis-${pageId}`));
+      }
     }
+    // 如果 SDK 已加载，重新渲染已存在的评论（切换时有用）
+    window.addEventListener('load', () => {
+      if (window.CUSDIS) {
+        // 可以预留
+      }
+    });
   </script>
 
   <script>
