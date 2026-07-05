@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>软件详情</title>
+<style>
+  body{font-family:sans-serif;padding:10px;max-width:600px;margin:0 auto;}
+  pre{white-space:pre-wrap;background:#f5f5f5;padding:10px;border-radius:5px;}
+  .comment{border-bottom:1px solid #eee;padding:8px 0;}
+  a{color:#1a73e8;}
+</style>
+</head>
+<body>
+<a href="index.html">← 返回列表</a>
+<div id="content"></div>
+<script>
+const REPO = 'ctctycyc/softlib';
+const params = new URLSearchParams(location.search);
+const id = params.get('id');
+if (!id) location.href = 'index.html';
+
+async function load() {
+  const issueRes = await fetch(`https://api.github.com/repos/${REPO}/issues/${id}`);
+  const issue = await issueRes.json();
+  document.getElementById('content').innerHTML = `
+    <h2>${issue.title}</h2>
+    <pre>${issue.body || '无描述'}</pre>
+    <p><a href="${issue.html_url}" target="_blank">在 GitHub 上查看和评论</a></p>
+  `;
+  const commentsRes = await fetch(issue.comments_url);
+  const comments = await commentsRes.json();
+  let html = '<h3>💬 评论</h3>';
+  comments.forEach(c => {
+    html += `<div class="comment"><strong>${c.user.login}</strong>: ${c.body}</div>`;
+  });
+  document.getElementById('content').innerHTML += html || '暂无评论';
+}
+load();
+</script>
+</body>
+</html>
