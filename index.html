@@ -6,115 +6,68 @@
 <title>软件库</title>
 <style>
   :root {
-    --bg: #fafafa;
-    --card-bg: #ffffff;
-    --text: #333;
-    --text-secondary: #555;
-    --border: #ddd;
-    --link: #1a73e8;
-    --btn-bg: #2ea44f;
-    --btn-hover: #22863a;
+    --bg: #fafafa; --card-bg: #ffffff; --text: #333; --text-secondary: #555;
+    --border: #ddd; --link: #1a73e8; --btn-bg: #2ea44f; --btn-hover: #22863a;
     --shadow: 0 1px 3px rgba(0,0,0,0.05);
   }
   .dark {
-    --bg: #1e1e1e;
-    --card-bg: #2a2a2a;
-    --text: #e0e0e0;
-    --text-secondary: #aaa;
-    --border: #444;
-    --link: #8ab4f8;
-    --btn-bg: #3fb950;
-    --btn-hover: #2ea043;
+    --bg: #1e1e1e; --card-bg: #2a2a2a; --text: #e0e0e0; --text-secondary: #aaa;
+    --border: #444; --link: #8ab4f8; --btn-bg: #3fb950; --btn-hover: #2ea043;
     --shadow: 0 1px 3px rgba(255,255,255,0.05);
   }
   body {
-    font-family: sans-serif;
-    padding: 10px;
-    max-width: 600px;
-    margin: 0 auto;
-    background: var(--bg);
-    color: var(--text);
-    transition: background 0.3s, color 0.3s;
+    font-family: sans-serif; padding: 10px; max-width: 600px; margin: 0 auto;
+    background: var(--bg); color: var(--text); transition: background 0.3s, color 0.3s;
   }
   a { color: var(--link); text-decoration: none; }
   .btn {
-    display: inline-block;
-    padding: 10px 20px;
-    background: var(--btn-bg);
-    color: white;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-    border: none;
-    font-size: 14px;
+    display: inline-block; padding: 8px 16px; background: var(--btn-bg);
+    color: white; border-radius: 5px; font-weight: bold; cursor: pointer;
+    border: none; font-size: 14px; margin: 2px;
   }
   .btn:hover { background: var(--btn-hover); }
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-  }
+  .btn-danger { background: #d73a4a; }
+  .btn-danger:hover { background: #b92534; }
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .header h1 { margin: 0; font-size: 24px; }
-  .header-actions { display: flex; gap: 10px; align-items: center; }
   .search-box {
-    width: 100%;
-    padding: 8px;
-    margin: 10px 0;
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    background: var(--card-bg);
-    color: var(--text);
-    box-sizing: border-box;
+    width: 100%; padding: 8px; margin: 10px 0; border: 1px solid var(--border);
+    border-radius: 5px; background: var(--card-bg); color: var(--text); box-sizing: border-box;
   }
   .card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    padding: 12px;
-    margin: 10px 0;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-    transition: background 0.3s, border 0.3s;
+    background: var(--card-bg); border: 1px solid var(--border); padding: 12px;
+    margin: 10px 0; border-radius: 8px; box-shadow: var(--shadow);
   }
   .card h3 { margin: 0 0 5px; font-size: 18px; }
   .desc { color: var(--text-secondary); font-size: 14px; margin: 5px 0; }
   .link { font-size: 14px; word-break: break-all; margin: 5px 0; }
-  .comments-section {
-    margin-top: 10px;
-    border-top: 1px solid var(--border);
-    padding-top: 10px;
-  }
-  .comment {
-    border-bottom: 1px solid var(--border);
-    padding: 8px 0;
-    font-size: 14px;
-  }
+  .comments-section { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+  .comment { border-bottom: 1px solid var(--border); padding: 8px 0; font-size: 14px; }
   .comment:last-child { border-bottom: none; }
   .comment strong { color: var(--link); }
   .toggle-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 5px 12px;
-    cursor: pointer;
-    font-size: 13px;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: 5px;
+    background: transparent; border: 1px solid var(--border); border-radius: 20px;
+    padding: 5px 12px; cursor: pointer; font-size: 13px; color: var(--text);
   }
   .footer { text-align: center; color: var(--text-secondary); font-size: 12px; margin-top: 20px; }
-  .loading { text-align: center; color: var(--text-secondary); }
-  .error { color: red; }
   .hidden { display: none; }
+  .admin-panel {
+    border: 2px dashed var(--border); padding: 10px; margin: 10px 0; border-radius: 8px;
+    background: var(--card-bg);
+  }
+  .token-setup { margin: 5px 0; }
 </style>
 </head>
 <body>
 <div class="header">
   <h1>软件库</h1>
-  <div class="header-actions">
+  <div style="display: flex; gap: 10px; align-items: center;">
     <button class="toggle-btn" onclick="toggleDark()" id="darkToggle">夜间模式</button>
-    <a href="https://github.com/ctctycyc/softlib/issues" target="_blank" style="font-size:14px;">管理后台</a>
+    <span id="adminArea" class="hidden">
+      <button class="toggle-btn" onclick="toggleAdmin()" id="adminToggle">审核模式</button>
+    </span>
+    <button class="toggle-btn" id="setTokenBtn" onclick="promptToken()">设置Token</button>
+    <a href="https://github.com/ctctycyc/softlib/issues" target="_blank" style="font-size:14px;">后台</a>
   </div>
 </div>
 
@@ -122,30 +75,60 @@
 
 <a class="btn" href="https://github.com/ctctycyc/softlib/issues/new?labels=pending" target="_blank" style="display:block;text-align:center;margin:10px 0;">提交新软件</a>
 
+<div id="adminPanel" class="admin-panel hidden">
+  <h3>审核面板</h3>
+  <div id="pendingList">加载中...</div>
+</div>
+
 <div id="list">加载中...</div>
 <div class="footer">Powered by GitHub Issues</div>
 
 <script>
 const API = 'https://api.github.com/repos/ctctycyc/softlib/issues';
 let allSoftwares = [];
+let adminToken = localStorage.getItem('adminToken');
 
-// 夜间模式切换
+// 页面加载时，如果有 Token 就显示审核按钮
+function initTokenUI() {
+  if (adminToken) {
+    document.getElementById('adminArea').classList.remove('hidden');
+    // 隐藏设置Token按钮，或者保留也行
+    document.getElementById('setTokenBtn').classList.add('hidden');
+  } else {
+    document.getElementById('setTokenBtn').classList.remove('hidden');
+  }
+}
+
+// 手动设置 Token
+window.promptToken = function() {
+  const input = prompt('请输入你的 GitHub Token：\n（可从 https://github.com/settings/tokens 生成，勾选 public_repo 权限）');
+  if (input && input.trim()) {
+    adminToken = input.trim();
+    localStorage.setItem('adminToken', adminToken);
+    alert('Token 已保存！');
+    initTokenUI();
+    // 如果审核面板打开，刷新待审核列表
+    if (!document.getElementById('adminPanel').classList.contains('hidden')) {
+      loadPendingIssues();
+    }
+  }
+};
+
+initTokenUI();
+
+// 夜间模式
 function toggleDark() {
   document.documentElement.classList.toggle('dark');
   const isDark = document.documentElement.classList.contains('dark');
   localStorage.setItem('darkMode', isDark);
   document.getElementById('darkToggle').textContent = isDark ? '日间模式' : '夜间模式';
 }
-
-// 初始化夜间模式
 if (localStorage.getItem('darkMode') === 'true') {
   document.documentElement.classList.add('dark');
   document.getElementById('darkToggle').textContent = '日间模式';
-} else {
-  document.getElementById('darkToggle').textContent = '夜间模式';
 }
 
-// 加载软件列表
+// 加载已通过软件
 async function loadSoftwares() {
   try {
     const res = await fetch(API + '?labels=approved&state=open&sort=created&direction=desc');
@@ -167,7 +150,6 @@ async function loadSoftwares() {
   }
 }
 
-// 渲染软件列表
 function renderSoftwares(softwares) {
   const listDiv = document.getElementById('list');
   if (softwares.length === 0) {
@@ -179,11 +161,9 @@ function renderSoftwares(softwares) {
     html += `<div class="card" id="card-${sw.id}">
       <h3>${sw.title}</h3>
       <div class="desc">${sw.description || '无描述'}</div>
-      <div class="link">
-        ${sw.downloadUrl ? `<a href="${sw.downloadUrl}" target="_blank">下载链接</a>` : ''}
-      </div>
+      <div class="link">${sw.downloadUrl ? `<a href="${sw.downloadUrl}" target="_blank">下载链接</a>` : ''}</div>
       <div style="margin-top:8px;">
-        <a href="#" onclick="toggleComments(${sw.id}, '${sw.commentsUrl}'); return false;" style="font-size:14px;" id="toggle-link-${sw.id}">查看评论</a>
+        <a href="#" onclick="toggleComments(${sw.id}, '${sw.commentsUrl}'); return false;">查看评论</a>
         <a href="${sw.htmlUrl}" target="_blank" style="font-size:13px;color:var(--text-secondary);margin-left:10px;">在 GitHub 上评论</a>
       </div>
       <div id="comments-${sw.id}" class="comments-section hidden"></div>
@@ -192,22 +172,20 @@ function renderSoftwares(softwares) {
   listDiv.innerHTML = html;
 }
 
-// 切换评论显示
 async function toggleComments(id, commentsUrl) {
   const commentsDiv = document.getElementById(`comments-${id}`);
-  const toggleLink = document.getElementById(`toggle-link-${id}`);
+  const toggleLink = window.event ? window.event.target : null;
+  if (!commentsDiv) return;
   if (!commentsDiv.classList.contains('hidden')) {
     commentsDiv.classList.add('hidden');
-    toggleLink.textContent = '查看评论';
+    if (toggleLink) toggleLink.textContent = '查看评论';
     return;
   }
-  // 显示评论
-  toggleLink.textContent = '隐藏评论';
+  if (toggleLink) toggleLink.textContent = '隐藏评论';
   if (commentsDiv.dataset.loaded === 'true') {
     commentsDiv.classList.remove('hidden');
     return;
   }
-  // 加载评论
   commentsDiv.innerHTML = '<p class="loading">加载评论中...</p>';
   commentsDiv.classList.remove('hidden');
   try {
@@ -228,13 +206,9 @@ async function toggleComments(id, commentsUrl) {
   }
 }
 
-// 搜索过滤
 function filterSoftwares() {
   const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
-  if (!keyword) {
-    renderSoftwares(allSoftwares);
-    return;
-  }
+  if (!keyword) { renderSoftwares(allSoftwares); return; }
   const filtered = allSoftwares.filter(sw => 
     sw.title.toLowerCase().includes(keyword) || 
     (sw.description && sw.description.toLowerCase().includes(keyword))
@@ -242,7 +216,66 @@ function filterSoftwares() {
   renderSoftwares(filtered);
 }
 
-// 初始加载
+// ========== 审核功能 ==========
+function toggleAdmin() {
+  const panel = document.getElementById('adminPanel');
+  panel.classList.toggle('hidden');
+  if (!panel.classList.contains('hidden')) {
+    loadPendingIssues();
+    document.getElementById('adminToggle').textContent = '关闭审核';
+  } else {
+    document.getElementById('adminToggle').textContent = '审核模式';
+  }
+}
+
+async function loadPendingIssues() {
+  if (!adminToken) {
+    document.getElementById('pendingList').innerHTML = '<p>请先点击右上角“设置Token”输入你的GitHub Token。</p>';
+    return;
+  }
+  const res = await fetch(API + '?labels=pending&state=open&sort=created&direction=desc');
+  const issues = await res.json();
+  const div = document.getElementById('pendingList');
+  if (issues.length === 0) {
+    div.innerHTML = '<p>暂无待审核软件</p>';
+    return;
+  }
+  let html = '';
+  issues.forEach(issue => {
+    html += `<div class="card">
+      <h3>${issue.title}</h3>
+      <p style="font-size:14px;color:var(--text-secondary);">${issue.body ? issue.body.substring(0,80) : ''}...</p>
+      <button class="btn" onclick="approve(${issue.number})">通过</button>
+      <button class="btn btn-danger" onclick="reject(${issue.number})">驳回</button>
+    </div>`;
+  });
+  div.innerHTML = html;
+}
+
+async function approve(number) {
+  if (!adminToken) return alert('Token 未设置');
+  // 替换标签为 approved
+  await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${number}/labels`, {
+    method: 'PUT',
+    headers: { 'Authorization': `token ${adminToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ labels: ['approved'] })
+  });
+  alert('已通过');
+  loadPendingIssues();
+  loadSoftwares();
+}
+
+async function reject(number) {
+  if (!adminToken) return alert('Token 未设置');
+  await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${number}`, {
+    method: 'PATCH',
+    headers: { 'Authorization': `token ${adminToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ state: 'closed', labels: ['rejected'] })
+  });
+  alert('已驳回');
+  loadPendingIssues();
+}
+
 loadSoftwares();
 </script>
 </body>
