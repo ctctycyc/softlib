@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>软件库</title>
+<style>
+  body{font-family:sans-serif;padding:10px;max-width:600px;margin:0 auto;}
+  .card{border:1px solid #ccc;padding:12px;margin:10px 0;border-radius:5px;}
+  a{color:#1a73e8;text-decoration:none;}
+  .btn{display:inline-block;padding:8px 16px;background:#2ea44f;color:white;border-radius:5px;margin:5px 0;}
+</style>
+</head>
+<body>
+<h1>📦 软件库</h1>
+<p>
+  <a class="btn" href="https://github.com/ctctycyc/softlib/issues/new?labels=pending" target="_blank">＋ 提交新软件</a>
+</p>
+<div id="list">加载中...</div>
+
+<script>
+const API = 'https://api.github.com/repos/ctctycyc/softlib/issues';
+async function load() {
+  try {
+    const res = await fetch(API + '?labels=approved&state=open&sort=created&direction=desc');
+    const issues = await res.json();
+    let html = '';
+    issues.forEach(issue => {
+      html += `<div class="card">
+        <h3>${issue.title}</h3>
+        <p>${issue.body ? issue.body.substring(0,100) : ''}...</p>
+        <a href="${issue.html_url}" target="_blank">💬 查看详情与评论</a>
+      </div>`;
+    });
+    document.getElementById('list').innerHTML = html || '<p>暂无软件</p>';
+  } catch(e) {
+    document.getElementById('list').innerHTML = '加载失败，请刷新重试';
+  }
+}
+load();
+</script>
+</body>
+</html>
