@@ -54,22 +54,20 @@
         <h1>软件库</h1>
         <div class="header-actions">
           <button class="icon-btn" onclick="toggleDark()" id="darkToggle">暗色模式</button>
-          <!-- 管理员按钮区域，默认隐藏，激活后显示 -->
           <span id="adminArea" class="hidden">
             <button class="icon-btn" onclick="toggleAdmin()" id="adminToggle">审核模式</button>
             <a href="https://github.com/ctctycyc/softlib/issues" target="_blank" class="icon-btn" style="text-decoration:none;">后台</a>
           </span>
         </div>
       </div>
-      <input type="text" class="search-box" id="searchInput" placeholder="搜索软件..." oninput="filterSoftwares()" />
-    </div>
+      <input type="text" class="search-box" id="searchInput" placeholder="搜索软件..." oninput="filterSoftwares()" />    </div>
   </div>
 
   <div class="container" style="margin-top:12px;">
-    <a class="btn btn-block" href="#" onclick="openSubmitForm(); return false;">上传新软件</a>
+    <a class="btn btn-block" href="#" onclick="openSubmitForm(); return false;">提交新软件</a>
     <div id="submitModal" class="modal hidden" onclick="closeSubmitForm()">
       <div class="modal-content" onclick="event.stopPropagation()">
-        <h3>上传新软件</h3>
+        <h3>提交新软件</h3>
         <input type="text" id="swName" placeholder="软件名称（必填）">
         <textarea id="swDesc" placeholder="描述（选填）" rows="3"></textarea>
         <input type="text" id="swUrl" placeholder="下载链接（必填）">
@@ -84,45 +82,34 @@
       <div id="pendingList">加载中...</div>
     </div>
     <div id="list"></div>
-    <div class="footer" id="secretTrigger"> RJK(✔zecir)</div>
+    <div class="footer" id="secretTrigger">✔zeci rjk</div>
   </div>
 
   <script>
-    // ========== 配置 ==========
     const WORKER_URL = 'https://softlib-submit.dghkkppp.workers.dev';
     const API = 'https://api.github.com/repos/ctctycyc/softlib/issues';
     let allSoftwares = [];
     let adminToken = localStorage.getItem('adminToken');
 
-    // ========== 隐藏的管理员激活 (点击底部文字5次) ==========
+    // 隐藏的管理员激活
     let clickCount = 0;
     document.getElementById('secretTrigger').addEventListener('click', () => {
       clickCount++;
       if (clickCount >= 5) {
         clickCount = 0;
-        if (!adminToken) {
-          const input = prompt('管理员登录：请输入 GitHub Token');
-          if (input && input.trim()) {
-            adminToken = input.trim();
-            localStorage.setItem('adminToken', adminToken);
-            alert('已激活管理功能！');
-            initTokenUI();
-            if (!document.getElementById('adminPanel').classList.contains('hidden')) loadPendingIssues();
-          }
-        } else {
-          alert('管理功能已激活');
+        const input = prompt('管理员登录：请输入 GitHub Token');
+        if (input && input.trim()) {
+          adminToken = input.trim();
+          localStorage.setItem('adminToken', adminToken);
+          alert('管理功能已激活！');
+          document.getElementById('adminArea').classList.remove('hidden');
         }
       }
       setTimeout(() => { clickCount = 0; }, 2000);
     });
+    document.getElementById('adminArea').classList.add('hidden');
 
-    function initTokenUI() {
-  // 始终隐藏管理按钮，必须手动激活
-  document.getElementById('adminArea').classList.add('hidden');
-    }
-    //initTokenUI();
-
-    // ========== 暗色模式 ==========
+    // 暗色模式
     function toggleDark() {
       document.documentElement.classList.toggle('dark');
       const isDark = document.documentElement.classList.contains('dark');
@@ -134,7 +121,7 @@
       document.getElementById('darkToggle').textContent = '亮色模式';
     }
 
-    // ========== 加载软件 ==========
+    // 加载软件列表
     async function loadSoftwares() {
       try {
         const res = await fetch(API + '?labels=approved&state=open&sort=created&direction=desc');
@@ -155,10 +142,10 @@
       }
     }
 
-   function renderSoftwares(softwares) {
+    function renderSoftwares(softwares) {
       const listDiv = document.getElementById('list');
       if (softwares.length === 0) {
-        listDiv.innerHTML = '<div class="card" style="text-align:center;color:var(--text-secondary);">暂无软件，快去上传吧</div>';
+        listDiv.innerHTML = '<div class="card" style="text-align:center;color:var(--text-secondary);">暂无软件，快去提交吧</div>';
         return;
       }
       let html = '';
@@ -183,41 +170,40 @@
       listDiv.innerHTML = html;
     }
 
-    // ========== 评论系统 ==========
+    // 评论加载（直接 GitHub API）
     async function loadComments(issueNumber) {
-    async function loadComments(issueNumber) {
-  const listEl = document.getElementById(`comment-list-${issueNumber}`);
-  if (!listEl) return;
-  listEl.innerHTML = '加载中...';
-  try {
-    // 直接使用 GitHub API 获取评论（公开，无需 Token）
-    const res = await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${issueNumber}/comments`);
-    const comments = await res.json();
-    if (!Array.isArray(comments) || comments.length === 0) {
-      listEl.innerHTML = '<p style="color:var(--text-secondary);">暂无评论</p>';
-      return;
-    }
-    let html = '';
-    comments.forEach(c => {
-      let body = c.body || '';
-      let displayName = c.user ? c.user.login : '匿名';
-      let badge = '';
-      if (body.startsWith('【官方】')) {
-        badge = '<span style="background:#e74c3c;color:white;border-radius:4px;padding:1px 6px;font-size:12px;margin-left:4px;">官方</span>';
-        body = body.slice(4);
+      const listEl = document.getElementById(`comment-list-${issueNumber}`);
+      if (!listEl) return;
+      listEl.innerHTML = '加载中...';
+      try {
+        const res = await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${issueNumber}/comments`);
+        const comments = await res.json();
+        if (!Array.isArray(comments) || comments.length === 0) {
+          listEl.innerHTML = '<p style="color:var(--text-secondary);">暂无评论</p>';
+          return;
+        }
+        let html = '';
+        comments.forEach(c => {
+          let body = c.body || '';
+          let displayName = c.user ? c.user.login : '匿名';
+          let badge = '';
+          if (body.startsWith('【官方】')) {
+            badge = '<span style="background:#e74c3c;color:white;border-radius:4px;padding:1px 6px;font-size:12px;margin-left:4px;">官方</span>';
+            body = body.slice(4);
+          }
+          const colonIndex = body.indexOf(':');
+          if (colonIndex > 0) {
+            displayName = body.slice(0, colonIndex);
+            body = body.slice(colonIndex + 1).trim();
+          }
+          html += `<div class="comment-item"><strong>${displayName}</strong>${badge}: ${body}</div>`;
+        });
+        listEl.innerHTML = html;
+      } catch (e) {
+        listEl.innerHTML = '<p style="color:red;">加载失败</p>';
       }
-      const colonIndex = body.indexOf(':');
-      if (colonIndex > 0) {
-        displayName = body.slice(0, colonIndex);
-        body = body.slice(colonIndex + 1).trim();
-      }
-      html += `<div class="comment-item"><strong>${displayName}</strong>${badge}: ${body}</div>`;
-    });
-    listEl.innerHTML = html;
-  } catch (e) {
-    listEl.innerHTML = '<p style="color:red;">加载失败</p>';
-  }
     }
+
     function toggleComments(id) {
       const commentsDiv = document.getElementById(`comments-${id}`);
       if (!commentsDiv) return;
@@ -255,7 +241,7 @@
       }
     }
 
-    // ========== 搜索 ==========
+    // 搜索
     function filterSoftwares() {
       const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
       if (!keyword) { renderSoftwares(allSoftwares); return; }
@@ -265,7 +251,7 @@
       ));
     }
 
-    // ========== 站内提交 ==========
+    // 提交新软件
     function openSubmitForm() { document.getElementById('submitModal').classList.remove('hidden'); }
     function closeSubmitForm() { document.getElementById('submitModal').classList.add('hidden'); }
     async function submitSoftware() {
@@ -295,7 +281,7 @@
       }
     }
 
-    // ========== 审核面板（激活后可用） ==========
+    // 审核面板
     function toggleAdmin() {
       const panel = document.getElementById('adminPanel');
       panel.classList.toggle('hidden');
