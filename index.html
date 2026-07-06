@@ -1,4 +1,4 @@
-<!-- v20260706-final-fix-undefined -->
+<!-- v20260706-notice-pin -->
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -11,12 +11,14 @@
       --border: #e2e8f0; --link: #3b82f6; --btn-bg: #10b981; --btn-hover: #059669;
       --shadow: 0 4px 12px rgba(0,0,0,0.06); --radius: 16px; --header-bg: rgba(255,255,255,0.72);
       --announce-bg: #e8f0fe; --announce-text: #1e40af;
+      --notice-bg: #fff9e6; --notice-border: #ffd43b; --notice-text: #8a6d3b;
     }
     .dark {
       --bg: #0f172a; --card-bg: #1e293b; --text: #f1f5f9; --text-secondary: #94a3b8;
       --border: #334155; --link: #60a5fa; --btn-bg: #22c55e; --btn-hover: #16a34a;
       --shadow: 0 4px 12px rgba(255,255,255,0.03); --header-bg: rgba(15,23,42,0.75);
       --announce-bg: #1e293b; --announce-text: #93c5fd;
+      --notice-bg: #2d2416; --notice-border: #f0b400; --notice-text: #f7e7a0;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); transition: 0.3s; padding-bottom: 40px; }
@@ -33,6 +35,8 @@
     .btn:hover { background: var(--btn-hover); transform: translateY(-2px); }
     .btn-sm { padding: 6px 16px; font-size: 13px; }
     .card { background: var(--card-bg); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+    .card.notice { background: var(--notice-bg); border-color: var(--notice-border); color: var(--notice-text); }
+    .card.notice .desc { color: var(--notice-text); }
     .card h3 { font-size: 20px; margin-bottom: 8px; }
     .desc { color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; }
     .download-link { display: inline-flex; background: var(--link); color: white; padding: 6px 16px; border-radius: 20px; font-size: 13px; text-decoration: none; }
@@ -59,6 +63,25 @@
       border: 1px solid transparent;
       box-shadow: var(--shadow);
     }
+    .badge {
+      display: inline-block;
+      background: #e74c3c;
+      color: white;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 12px;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+    .notice-badge {
+      display: inline-block;
+      background: #f0ad4e;
+      color: #fff;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-size: 12px;
+      margin-right: 5px;
+    }
   </style>
 </head>
 <body>
@@ -69,7 +92,7 @@
         <div class="header-actions">
           <button class="icon-btn" onclick="toggleDark()" id="darkToggle">暗色模式</button>
           <span id="adminArea" class="hidden">
-                   <button class="icon-btn" onclick="toggleAdmin()" id="adminToggle">审核模式</button>
+            <button class="icon-btn" onclick="toggleAdmin()" id="adminToggle">审核模式</button>
             <a href="https://github.com/ctctycyc/softlib/issues" target="_blank" class="icon-btn" style="text-decoration:none;">后台</a>
           </span>
         </div>
@@ -78,19 +101,16 @@
     </div>
   </div>
 
-  <div class="container" style="margin-top:12px;">
-    <!-- 公告栏（管理员在这里修改文字） -->
+ <div class="container" style="margin-top:12px;">
     <div class="announcement" id="announcement">
       欢迎来到软件库！这里收集了一些实用软件，仅供学习交流。如有任何问题，请在相应软件下方评论。
     </div>
 
-    <!-- 审核面板（管理员激活后可见） -->
     <div id="adminPanel" class="admin-panel hidden">
       <h3>待审核软件</h3>
       <div id="pendingList">加载中...</div>
     </div>
 
-    <!-- 软件列表 -->
     <div id="list"></div>
 
     <div class="footer" id="secretTrigger">✔zeci rjk</div>
@@ -141,10 +161,8 @@
       }
     }
 
-    // 初始化时强制隐藏管理按钮
-    document.getElementById('adminArea').classList.add('hidden');
+ document.getElementById('adminArea').classList.add('hidden');
 
-    // ========== 暗色模式 ==========
     function toggleDark() {
       document.documentElement.classList.toggle('dark');
       const isDark = document.documentElement.classList.contains('dark');
@@ -156,7 +174,7 @@
       document.getElementById('darkToggle').textContent = '亮色模式';
     }
 
-    // ========== 加载软件列表 ==========
+    // 加载软件和通知
     async function loadSoftwares() {
       try {
         const res = await fetch(API + '?labels=approved&state=open&sort=created&direction=desc');
@@ -169,15 +187,25 @@
             if (line.trim().startsWith('http')) downloadUrl = line.trim();
             else if (line.trim() && !description) description = line.trim();
           }
-          return { id: issue.number, title: issue.title, description, downloadUrl, htmlUrl: issue.html_url };
+          const labels = issue.labels.map(l => l.name);
+          const isNotice = labels.includes('notice');
+          return { 
+            id: issue.number, 
+            title: issue.title, 
+            description, 
+            downloadUrl, 
+            htmlUrl: issue.html_url,
+            isNotice 
+          };
         });
-        // 置顶通知
-allSoftwares.sort((a, b) => {
-  if (a.isNotice && !b.isNotice) return -1;
-  if (!a.isNotice && b.isNotice) return 1;
-  return 0;
-});
-renderSoftwares(allSoftwares);
+
+      // ✅ 置顶通知
+        allSoftwares.sort((a, b) => {
+          if (a.isNotice && !b.isNotice) return -1;
+          if (!a.isNotice && b.isNotice) return 1;
+          return 0;
+        });
+
         renderSoftwares(allSoftwares);
       } catch(e) {
         document.getElementById('list').innerHTML = '<p style="color:red;">加载失败，请刷新重试</p>';
@@ -187,15 +215,18 @@ renderSoftwares(allSoftwares);
     function renderSoftwares(softwares) {
       const listDiv = document.getElementById('list');
       if (softwares.length === 0) {
-        listDiv.innerHTML = '<div class="card" style="text-align:center;color:var(--text-secondary);">暂无软件</div>';
+        listDiv.innerHTML = '<div class="card" style="text-align:center;color:var(--text-secondary);">暂无软件或通知</div>';
         return;
       }
       let html = '';
       softwares.forEach(sw => {
-        html += `<div class="card">
-          <h3>${sw.title}</h3>
+        const noticeClass = sw.isNotice ? ' notice' : '';
+        const noticeBadge = sw.isNotice ? '<span class="notice-badge">通知</span>' : '';
+        const downloadButton = sw.isNotice ? '' : (sw.downloadUrl ? `<a class="download-link" href="${sw.downloadUrl}" target="_blank">下载</a>` : '');
+        html += `<div class="card${noticeClass}">
+          <h3>${noticeBadge}${sw.title}</h3>
           <div class="desc">${sw.description || '暂无描述'}</div>
-          ${sw.downloadUrl ? `<a class="download-link" href="${sw.downloadUrl}" target="_blank">下载</a>` : ''}
+          ${downloadButton}
           <div class="card-actions">
             <a href="#" onclick="toggleComments(${sw.id}); return false;">查看评论</a>
             <a href="https://github.com/ctctycyc/softlib/issues/${sw.id}" target="_blank">发表评论</a>
@@ -208,7 +239,6 @@ renderSoftwares(allSoftwares);
       listDiv.innerHTML = html;
     }
 
-    // ========== 评论加载（直接 GitHub API） ==========
     async function loadComments(issueNumber) {
       const listEl = document.getElementById(`comment-list-${issueNumber}`);
       if (!listEl) return;
@@ -226,7 +256,7 @@ renderSoftwares(allSoftwares);
           let displayName = c.user ? c.user.login : '匿名';
           let badge = '';
           if (body.startsWith('【官方】') || ADMIN_USERNAMES.includes(c.user?.login)) {
-            badge = '<span style="background:#e74c3c;color:white;border-radius:4px;padding:1px 6px;font-size:12px;margin-left:4px;">官方</span>';
+            badge = '<span class="badge">官方</span>';
             if (body.startsWith('【官方】')) body = body.slice(4);
           }
           const colonIndex = body.indexOf(':');
@@ -256,7 +286,6 @@ renderSoftwares(allSoftwares);
       loadComments(id);
     }
 
-    // ========== 搜索 ==========
     function filterSoftwares() {
       const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
       if (!keyword) { renderSoftwares(allSoftwares); return; }
@@ -266,7 +295,6 @@ renderSoftwares(allSoftwares);
       ));
     }
 
-    // ========== 审核面板 ==========
     function toggleAdmin() {
       const panel = document.getElementById('adminPanel');
       panel.classList.toggle('hidden');
@@ -289,7 +317,8 @@ renderSoftwares(allSoftwares);
       if (issues.length === 0) {
         div.innerHTML = '<p>暂无待审核软件</p>';
         return;
-      }     let html = '';
+      }
+      let html = '';
       issues.forEach(issue => {
         html += `<div class="card" style="padding:14px;">
           <h3 style="font-size:18px;">${issue.title}</h3>
@@ -299,8 +328,7 @@ renderSoftwares(allSoftwares);
             <button class="btn btn-danger" onclick="reject(${issue.number})">驳回</button>
           </div>
         </div>`;
-      });
-      div.innerHTML = html;
+      });  div.innerHTML = html;
     }
 
     async function approve(number) {
@@ -326,7 +354,6 @@ renderSoftwares(allSoftwares);
       loadPendingIssues();
     }
 
-    // ========== 初始加载 ==========
     loadSoftwares();
   </script>
 </body>
