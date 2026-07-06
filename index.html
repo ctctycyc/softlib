@@ -185,38 +185,39 @@
 
     // ========== 评论系统 ==========
     async function loadComments(issueNumber) {
-      const listEl = document.getElementById(`comment-list-${issueNumber}`);
-      if (!listEl) return;
-      listEl.innerHTML = '加载中...';
-      try {
-        const res = await fetch(`${WORKER_URL}/comments?issue=${issueNumber}`);
-        const comments = await res.json();
-        if (comments.length === 0) {
-          listEl.innerHTML = '<p style="color:var(--text-secondary);">暂无评论</p>';
-          return;
-        }
-        let html = '';
-        comments.forEach(c => {
-          let body = c.body;
-          let displayName = c.user;
-          let badge = '';
-          if (body.startsWith('【官方】')) {
-            badge = '<span style="background:#e74c3c;color:white;border-radius:4px;padding:1px 6px;font-size:12px;margin-left:4px;">官方</span>';
-            body = body.slice(4);
-          }
-          const colonIndex = body.indexOf(':');
-          if (colonIndex > 0) {
-            displayName = body.slice(0, colonIndex);
-            body = body.slice(colonIndex + 1).trim();
-          }
-          html += `<div class="comment-item"><strong>${displayName}</strong>${badge}: ${body}</div>`;
-        });
-        listEl.innerHTML = html;
-      } catch (e) {
-        listEl.innerHTML = '<p style="color:red;">加载失败</p>';
-      }
+    async function loadComments(issueNumber) {
+  const listEl = document.getElementById(`comment-list-${issueNumber}`);
+  if (!listEl) return;
+  listEl.innerHTML = '加载中...';
+  try {
+    // 直接使用 GitHub API 获取评论（公开，无需 Token）
+    const res = await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${issueNumber}/comments`);
+    const comments = await res.json();
+    if (!Array.isArray(comments) || comments.length === 0) {
+      listEl.innerHTML = '<p style="color:var(--text-secondary);">暂无评论</p>';
+      return;
     }
-
+    let html = '';
+    comments.forEach(c => {
+      let body = c.body || '';
+      let displayName = c.user ? c.user.login : '匿名';
+      let badge = '';
+      if (body.startsWith('【官方】')) {
+        badge = '<span style="background:#e74c3c;color:white;border-radius:4px;padding:1px 6px;font-size:12px;margin-left:4px;">官方</span>';
+        body = body.slice(4);
+      }
+      const colonIndex = body.indexOf(':');
+      if (colonIndex > 0) {
+        displayName = body.slice(0, colonIndex);
+        body = body.slice(colonIndex + 1).trim();
+      }
+      html += `<div class="comment-item"><strong>${displayName}</strong>${badge}: ${body}</div>`;
+    });
+    listEl.innerHTML = html;
+  } catch (e) {
+    listEl.innerHTML = '<p style="color:red;">加载失败</p>';
+  }
+    }
     function toggleComments(id) {
       const commentsDiv = document.getElementById(`comments-${id}`);
       if (!commentsDiv) return;
