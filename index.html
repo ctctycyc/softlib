@@ -171,6 +171,13 @@
           }
           return { id: issue.number, title: issue.title, description, downloadUrl, htmlUrl: issue.html_url };
         });
+        // 置顶通知：将 notice 标签的 Issue 排在数组最前面
+allSoftwares.sort((a, b) => {
+  if (a.isNotice && !b.isNotice) return -1;
+  if (!a.isNotice && b.isNotice) return 1;
+  return 0; // 都是通知或都不是，保持原有顺序（按创建时间倒序）
+});
+renderSoftwares(allSoftwares);
         renderSoftwares(allSoftwares);
       } catch(e) {
         document.getElementById('list').innerHTML = '<p style="color:red;">加载失败，请刷新重试</p>';
