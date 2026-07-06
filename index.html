@@ -91,24 +91,45 @@
     let allSoftwares = [];
     let adminToken = localStorage.getItem('adminToken');
 
-    // 隐藏的管理员激活
-    let clickCount = 0;
-    document.getElementById('secretTrigger').addEventListener('click', () => {
-      clickCount++;
-      if (clickCount >= 5) {
-        clickCount = 0;
-        const input = prompt('管理员登录：请输入 GitHub Token');
-        if (input && input.trim()) {
-          adminToken = input.trim();
-          localStorage.setItem('adminToken', adminToken);
-          alert('管理功能已激活！');
-          document.getElementById('adminArea').classList.remove('hidden');
-        }
-      }
-      setTimeout(() => { clickCount = 0; }, 2000);
-    });
-    document.getElementById('adminArea').classList.add('hidden');
+    // ========== 隐藏的管理员激活（安全版） ==========
+let clickCount = 0;
+document.getElementById('secretTrigger').addEventListener('click', () => {
+  clickCount++;
+  if (clickCount >= 5) {
+    clickCount = 0;
+    const input = prompt('管理员登录：请输入 GitHub Token');
+    if (input && input.trim()) {
+      // 验证 Token 是否有效（调用 GitHub API 检查权限）
+      verifyAdminToken(input.trim());
+    }
+  }
+  setTimeout(() => { clickCount = 0; }, 2000);
+});
 
+async function verifyAdminToken(token) {
+  try {
+    // 尝试用该 Token 请求用户信息，如果成功且 scope 包含 public_repo，则 Token 有效
+    const res = await fetch('https://api.github.com/user', {
+      headers: { 'Authorization': `token ${token}` }
+    });
+    if (res.ok) {
+      // 进一步检查权限（可选）
+      const scopes = res.headers.get('X-OAuth-Scopes') || '';
+      if (scopes.includes('public_repo') || scopes.includes('repo')) {
+        adminToken = token;
+        localStorage.setItem('adminToken', adminToken);
+        alert('管理功能已激活！');
+        document.getElementById('adminArea').classList.remove('hidden');
+      } else {
+        alert('Token 缺少 public_repo 权限，请重新生成。');
+      }
+    } else {
+      alert('Token 无效，激活失败。');
+    }
+  } catch (e) {
+    alert('网络错误，无法验证 Token，请检查网络后重试。');
+  }
+}
     // 暗色模式
     function toggleDark() {
       document.documentElement.classList.toggle('dark');
