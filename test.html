@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Worker POST 测试</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
+    input, textarea { width: 100%; padding: 8px; margin: 6px 0; }
+    button { padding: 10px 20px; }
+    pre { background: #f0f0f0; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h2>Worker 评论发表测试</h2>
+  <label>Issue 编号:</label>
+  <input type="number" id="issue" placeholder="例如 1" value="1">
+  <label>昵称:</label>
+  <input type="text" id="nickname" placeholder="你的昵称">
+  <label>评论内容:</label>
+  <textarea id="content" rows="3" placeholder="评论内容"></textarea>
+  <label>管理员标识 (isAdmin):</label>
+  <select id="isAdmin">
+    <option value="false">普通用户</option>
+    <option value="true">管理员</option>
+  </select>
+  <br><br>
+  <button onclick="testPost()">发送测试评论</button>
+  <h3>响应结果:</h3>
+  <pre id="result">等待测试...</pre>
+
+  <script>
+    async function testPost() {
+      const issue = document.getElementById('issue').value;
+      const nickname = document.getElementById('nickname').value.trim();
+      const content = document.getElementById('content').value.trim();
+      const isAdmin = document.getElementById('isAdmin').value === 'true';
+      if (!issue || !nickname || !content) {
+        document.getElementById('result').textContent = '请填写所有字段';
+        return;
+      }
+      document.getElementById('result').textContent = '发送中...';
+      try {
+        const res = await fetch('https://softlib-submit.dghkkppp.workers.dev/comments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ issueNumber: parseInt(issue), nickname, content, isAdmin })
+        });
+        const data = await res.json();
+        document.getElementById('result').textContent = JSON.stringify(data, null, 2) + '\n\n状态码: ' + res.status;
+      } catch (e) {
+        document.getElementById('result').textContent = '网络错误: ' + e.message;
+      }
+    }
+  </script>
+</body>
+</html>
