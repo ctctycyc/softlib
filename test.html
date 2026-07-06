@@ -6,30 +6,67 @@
   <title>Worker POST 测试</title>
   <style>
     body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
-    input, textarea { width: 100%; padding: 8px; margin: 6px 0; }
-    button { padding: 10px 20px; }
-    pre { background: #f0f0f0; padding: 10px; border-radius: 5px; }
+    input, textarea, select { width: 100%; padding: 8px; margin: 6px 0; box-sizing: border-box; }
+    button { padding: 10px 20px; cursor: pointer; }
+    pre { background: #f0f0f0; padding: 10px; border-radius: 5px; white-space: pre-wrap; word-wrap: break-word; }
+    .hidden { display: none; }
+    .error { color: red; font-size: 14px; margin-top: 5px; }
   </style>
 </head>
 <body>
   <h2>Worker 评论发表测试</h2>
-  <label>Issue 编号:</label>
-  <input type="number" id="issue" placeholder="例如 1" value="1">
-  <label>昵称:</label>
-  <input type="text" id="nickname" placeholder="你的昵称">
-  <label>评论内容:</label>
-  <textarea id="content" rows="3" placeholder="评论内容"></textarea>
-  <label>管理员标识 (isAdmin):</label>
-  <select id="isAdmin">
-    <option value="false">普通用户</option>
-    <option value="true">管理员</option>
-  </select>
-  <br><br>
-  <button onclick="testPost()">发送测试评论</button>
-  <h3>响应结果:</h3>
-  <pre id="result">等待测试...</pre>
+
+  <!-- 密码验证区域 -->
+  <div id="lockScreen">
+    <label>请输入访问密码:</label>
+    <input type="password" id="passwordInput" placeholder="输入密码">
+    <button onclick="checkPassword()">验证</button>
+    <p id="passwordError" class="error hidden">密码错误，请重试。</p>
+  </div>
+
+  <!-- 测试功能区域（初始隐藏） -->
+  <div id="testArea" class="hidden">
+    <label>Issue 编号:</label>
+    <input type="number" id="issue" placeholder="例如 1" value="1">
+    <label>昵称:</label>
+    <input type="text" id="nickname" placeholder="你的昵称">
+    <label>评论内容:</label>
+    <textarea id="content" rows="3" placeholder="评论内容"></textarea>
+    <label>管理员标识 (isAdmin):</label>
+    <select id="isAdmin">
+      <option value="false">普通用户</option>
+      <option value="true">管理员</option>
+    </select>
+    <br><br>
+    <button onclick="testPost()">发送测试评论</button>
+    <h3>响应结果:</h3>
+    <pre id="result">等待测试...</pre>
+  </div>
 
   <script>
+    // 预设密码（可修改）
+    const ACCESS_PASSWORD = 'r1786589';
+
+    function checkPassword() {
+      const input = document.getElementById('passwordInput').value;
+      const errorEl = document.getElementById('passwordError');
+      if (input === ACCESS_PASSWORD) {
+        document.getElementById('lockScreen').classList.add('hidden');
+        document.getElementById('testArea').classList.remove('hidden');
+        errorEl.classList.add('hidden');
+      } else {
+        errorEl.classList.remove('hidden');
+        document.getElementById('passwordInput').value = '';
+      }
+    }
+
+    // 允许回车键提交密码
+    document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        checkPassword();
+      }
+    });
+
     async function testPost() {
       const issue = document.getElementById('issue').value;
       const nickname = document.getElementById('nickname').value.trim();
