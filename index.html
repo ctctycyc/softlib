@@ -219,28 +219,27 @@
     }
 
     async function postComment(issueNumber) {
-      const nickname = document.getElementById(`nickname-${issueNumber}`).value.trim();
-      const content = document.getElementById(`comment-input-${issueNumber}`).value.trim();
-      if (!nickname || !content) return alert('昵称和内容不能为空');
-      const isAdmin = !!adminToken;
-      try {
-        const res = await fetch(`${WORKER_URL}/comments`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ issueNumber, nickname, content, isAdmin })
-        });
-        const data = await res.json();
-        if (data.success) {
-          document.getElementById(`comment-input-${issueNumber}`).value = '';
-          loadComments(issueNumber);
-        } else {
-          alert('评论失败: ' + (data.error || '未知错误'));
-        }
-      } catch (e) {
-        alert('网络错误');
-      }
+  const nickname = document.getElementById(`nickname-${issueNumber}`).value.trim();
+  const content = document.getElementById(`comment-input-${issueNumber}`).value.trim();
+  if (!nickname || !content) return alert('昵称和内容不能为空');
+  const isAdmin = !!adminToken;
+  try {
+    const res = await fetch(`${WORKER_URL}/comments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ issueNumber, nickname, content, isAdmin })
+    });
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById(`comment-input-${issueNumber}`).value = '';
+      loadComments(issueNumber);
+    } else {
+      alert('评论失败: ' + (data.error || '未知错误') + '\n\n状态码: ' + res.status);
     }
-
+  } catch (e) {
+    alert('网络错误: ' + e.message + '\n\n请检查网络或 Worker 地址是否正确');
+  }
+    }
     // 搜索
     function filterSoftwares() {
       const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
