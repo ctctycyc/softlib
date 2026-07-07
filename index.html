@@ -93,11 +93,24 @@
       <div id="pendingList">加载中...</div>
     </div>
     <div id="list"></div>
+    <!-- 关于弹窗 -->
+<div id="aboutModal" class="modal hidden" onclick="hideAbout()">
+  <div class="modal-content" onclick="event.stopPropagation()" style="text-align:center;">
+    <h3 style="font-size:24px; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">软件库</h3>
+    <p style="font-size:16px; margin-top:8px; color: var(--text-secondary);">测试版</p>
+    <div style="margin: 20px 0; padding: 16px; background: var(--card-bg); border-radius: 12px; box-shadow: var(--shadow);">
+      <p style="margin: 10px 0;"><strong>版本</strong><br>1.1</p>
+      <p style="margin: 10px 0;"><strong>管理员</strong><br>zeruan</p>
+      <p style="margin: 10px 0;"><strong>联系邮箱</strong><br><a href="mailto:dghkkppp@qq.com" style="color: var(--link);">dghkkppp@qq.com</a></p>
+    </div>
+    <button class="btn" onclick="hideAbout()">关闭</button>
+  </div>
+</div>
     <div class="footer" id="secretTrigger">✔zeci rjk</div>
   </div>  <script>
     const WORKER_URL = 'https://softlib-submit.dghkkppp.workers.dev';
     const API = 'https://api.github.com/repos/ctctycyc/softlib/issues';
-    const ADMIN_USERNAMES = ['ctctycyc'];
+    const ADMIN_USERNAMES = ['zeruan'];
     let allSoftwares = [];
     let currentCategory = 'all';
     let adminToken = localStorage.getItem('adminToken');
@@ -147,6 +160,13 @@
         renderFilteredSoftwares();
       }
     });
+    function showAbout() {
+  document.getElementById('aboutModal').classList.remove('hidden');
+}
+
+function hideAbout() {
+  document.getElementById('aboutModal').classList.add('hidden');
+}
 
     function toggleDark() {
       document.documentElement.classList.toggle('dark');
@@ -222,12 +242,14 @@
       let filtered = allSoftwares;
       if (currentCategory === 'software') filtered = allSoftwares.filter(sw => sw.isSoftware && !sw.isNotice);
       else if (currentCategory === 'tool') filtered = allSoftwares.filter(sw => sw.isTool);
-         else if (currentCategory === 'personal') {document.getElementById('list').innerHTML = `
-  <div class="card" style="text-align:center;">
-    <h3>测试版</h3>
-    <p style="color:var(--text-secondary);">如有问题请联系：dghkkppp@qq.com</p>
-  </div>`;
-           return;
+         else if (currentCategory === 'personal') {
+  document.getElementById('list').innerHTML = `
+    <div class="card" style="text-align:center;">
+      <h3>关于软件库</h3>
+      <p style="color:var(--text-secondary);">查看版本与联系信息</p>
+      <button class="btn" onclick="showAbout()">查看详情</button>
+    </div>`;
+  return;
          }
          renderSoftwares(filtered);
        }
