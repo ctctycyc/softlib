@@ -264,8 +264,9 @@ function hideAbout() {
          softwares.forEach(sw => {
            const noticeClass = sw.isNotice ? ' notice' : '';
            let iconHtml = sw.iconUrl ? `<img class="card-icon" src="${sw.iconUrl}" alt="icon" onerror="this.style.display='none'">` : getDefaultIcon(sw);
-           const downloadButton = (sw.downloadUrl && !sw.isNotice) ? 
-  (sw.title.includes('听歌') ? 
+           const isMusicTool = sw.downloadUrl && (sw.downloadUrl.includes('music.html') || sw.title.includes('听歌'));
+const downloadButton = (sw.downloadUrl && !sw.isNotice) ? 
+  (isMusicTool ? 
     `<a class="download-link" href="#" onclick="document.getElementById('player-${sw.id}').style.display='block'; return false;">展开播放器</a>` : 
     `<a class="download-link" href="${sw.downloadUrl}" target="_blank">下载</a>`) : '';
            // 检查是否为音乐工具（标题包含“听歌”或链接包含 music.html）
