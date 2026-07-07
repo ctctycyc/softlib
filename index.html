@@ -280,7 +280,7 @@ function renderSoftwares(softwares) {
     // 处理下载/播放按钮
     let downloadButton = '';
     if (sw.downloadUrl && !sw.isNotice) {
-      const isMusic = sw.downloadUrl.includes('music.html') || sw.title.includes('听歌');
+      const isMusic = sw.downloadUrl && /music\d*\.html/.test(sw.downloadUrl);
       if (isMusic) {
         downloadButton = `<a class="download-link" href="#" onclick="document.getElementById('player-${sw.id}').style.display='block'; return false;">展开播放器</a>`;
       } else {
@@ -292,7 +292,7 @@ function renderSoftwares(softwares) {
       <h3>${iconHtml}${sw.title}</h3>
       <div class="desc">${sw.description || '暂无描述'}</div>
       ${downloadButton}
-      ${sw.downloadUrl && sw.downloadUrl.includes('music.html') ? `<div class="music-player" id="player-${sw.id}" style="margin-top:12px; display:none;"><iframe src="${sw.downloadUrl}" width="100%" height="500" frameborder="0" style="border-radius:12px;"></iframe></div>` : ''}
+      ${sw.downloadUrl &&/music\d*\.html/.test(sw.downloadUrl) ? `<div class="music-player" id="player-${sw.id}" style="margin-top:12px; display:none;"><iframe src="${sw.downloadUrl}" width="100%" height="500" frameborder="0" style="border-radius:12px;"></iframe></div>` : ''}
       <div class="card-actions">
         <a href="#" onclick="toggleComments(${sw.id}); return false;">查看评论</a>
         <a href="https://github.com/ctctycyc/softlib/issues/${sw.id}" target="_blank">发表评论</a>
