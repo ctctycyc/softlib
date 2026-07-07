@@ -160,15 +160,20 @@
     }
 
     function extractIconUrl(body) {
-      if (!body) return null;
-      const lines = body.split('\n');
-      for (let line of lines) {
-        const trimmed = line.trim();
-        if (/^https?:\/\/.+\.(png|jpg|jpeg|gif|svg|ico)(\?.*)?$/i.test(trimmed)) {
-          return trimmed;
-        }
-      }
-      return null;
+  if (!body) return null;
+  const lines = body.split('\n');
+  for (let line of lines) {
+    const trimmed = line.trim();
+    // 常规图片链接
+    if (/^https?:\/\/.+\.(png|jpg|jpeg|gif|svg|ico)(\?.*)?$/i.test(trimmed)) {
+      return trimmed;
+    }
+    // 支持 GitHub 附件链接
+    if (trimmed.startsWith('https://github.com/user-attachments/assets/')) {
+      return trimmed;
+    }
+  }
+  return null;
     }
 
     function getDefaultIcon(sw) {
