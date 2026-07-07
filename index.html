@@ -264,8 +264,18 @@ function hideAbout() {
          softwares.forEach(sw => {
            const noticeClass = sw.isNotice ? ' notice' : '';
            let iconHtml = sw.iconUrl ? `<img class="card-icon" src="${sw.iconUrl}" alt="icon" onerror="this.style.display='none'">` : getDefaultIcon(sw);
-           const downloadButton = (sw.downloadUrl && !sw.isNotice) ? `<a class="download-link" href="${sw.downloadUrl}" target="_blank">下载</a>` : '';
-           html += `<div class="card${noticeClass}"><h3>${iconHtml}${sw.title}</h3><div class="desc">${sw.description || '暂无描述'}</div>${downloadButton}<div class="card-actions"><a href="#" onclick="toggleComments(${sw.id}); return false;">查看评论</a><a href="https://github.com/ctctycyc/softlib/issues/${sw.id}" target="_blank">发表评论</a></div><div id="comments-${sw.id}" class="comments-section hidden"><div id="comment-list-${sw.id}"></div></div></div>`;
+           const downloadButton = (sw.downloadUrl && !sw.isNotice) ? 
+  (sw.title.includes('听歌') ? 
+    `<a class="download-link" href="#" onclick="document.getElementById('player-${sw.id}').style.display='block'; return false;">展开播放器</a>` : 
+    `<a class="download-link" href="${sw.downloadUrl}" target="_blank">下载</a>`) : '';
+           // 检查是否为音乐工具（标题包含“听歌”或链接包含 music.html）
+const isMusicTool = sw.title.includes('听歌') || (sw.downloadUrl && sw.downloadUrl.includes('music.html'));
+const musicPlayerHtml = isMusicTool ? `
+  <div class="music-player" id="player-${sw.id}" style="margin-top:12px; display:none;">
+    <iframe src="${sw.downloadUrl}" width="100%" height="500" frameborder="0" style="border-radius:12px;"></iframe>
+  </div>
+` : '';
+           html += `<div class="card${noticeClass}"><h3>${iconHtml}${sw.title}</h3><div class="desc">${sw.description || '暂无描述'}</div>${downloadButton}${musicPlayerHtml}<div class="card-actions"><a href="#" onclick="toggleComments(${sw.id}); return false;">查看评论</a><a href="https://github.com/ctctycyc/softlib/issues/${sw.id}" target="_blank">发表评论</a></div><div id="comments-${sw.id}" class="comments-section hidden"><div id="comment-list-${sw.id}"></div></div></div>`;
          });
          listDiv.innerHTML = html;
        }
