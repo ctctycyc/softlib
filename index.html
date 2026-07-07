@@ -107,7 +107,7 @@
       clickCount++;
       if (clickCount >= 5) {
         clickCount = 0;
-        const input = prompt('管理员登录：请输入 GitHub Token');
+        const input = prompt('登录：请输入 密码验证');
         if (input && input.trim()) verifyAdminToken(input.trim());
       }
       setTimeout(() => { clickCount = 0; }, 2000);
@@ -222,8 +222,11 @@
       let filtered = allSoftwares;
       if (currentCategory === 'software') filtered = allSoftwares.filter(sw => sw.isSoftware && !sw.isNotice);
       else if (currentCategory === 'tool') filtered = allSoftwares.filter(sw => sw.isTool);
-         else if (currentCategory === 'personal') {
-           document.getElementById('list').innerHTML = '<div class="card" style="text-align:center;"><h3>个人中心</h3><p style="color:var(--text-secondary);">功能开发中，敬请期待。</p><p style="font-size:12px;margin-top:12px;">管理员：ctctycyc</p></div>';
+         else if (currentCategory === 'personal') {document.getElementById('list').innerHTML = `
+  <div class="card" style="text-align:center;">
+    <h3>测试版</h3>
+    <p style="color:var(--text-secondary);">如有问题请联系：dghkkppp@qq.com</p>
+  </div>`;
            return;
          }
          renderSoftwares(filtered);
