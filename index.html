@@ -240,6 +240,10 @@ function hideAbout() {
 
     function renderFilteredSoftwares() {
       let filtered = allSoftwares;
+      let filtered = allSoftwares;
+if (currentCategory === 'all') {
+  filtered = allSoftwares.filter(sw => !sw.isTool);
+}
       if (currentCategory === 'software') filtered = allSoftwares.filter(sw => sw.isSoftware && !sw.isNotice);
       else if (currentCategory === 'tool') filtered = allSoftwares.filter(sw => sw.isTool);
          else if (currentCategory === 'personal') {
