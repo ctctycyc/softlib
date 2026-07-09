@@ -1,4 +1,4 @@
-<!-- v20260709-maintenance -->
+<!-- v20260709-stats-update -->
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -240,6 +240,24 @@ body {
     .badge-tool { background: #8b6e5c; }
     .badge-notice { background: #c98e4e; }
     .card-icon { width: 28px; height: 28px; border-radius: 6px; object-fit: contain; flex-shrink: 0; }
+    .update-badge {
+      display: inline-block;
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 11px;
+      margin-left: 8px;
+      font-weight: 500;
+    }
+    .visitor-counter {
+      text-align: center;
+      margin-top: 8px;
+    }
+    .visitor-counter img {
+      height: 20px;
+      opacity: 0.8;
+    }
   </style>
 </head><body>
   <div class="header">
@@ -273,6 +291,9 @@ body {
     </div>
     <div id="list"></div>
     <div class="footer" id="secretTrigger">✔zeci rjk</div>
+    <div class="visitor-counter">
+      <img src="https://visitor-badge.laobi.icu/badge?page_id=ctctycyc.softlib" alt="访客统计">
+    </div>
   </div>
 
   <div id="aboutModal" class="modal hidden" onclick="hideAbout()">
@@ -294,13 +315,11 @@ body {
   let adminToken = localStorage.getItem('adminToken');
   let maintenanceMode = localStorage.getItem('maintenanceMode') === 'true';
 
-  // 初始化维护按钮状态
   if (maintenanceMode) {
     document.getElementById('maintenanceBtn').classList.add('maintenance-active');
     document.getElementById('maintenanceBtn').textContent = '维护中...';
   }
 
-  // 管理员激活
   let clickCount = 0;
   document.getElementById('secretTrigger').addEventListener('click', () => {
     clickCount++;
@@ -327,8 +346,7 @@ body {
       } else alert('Token 无效');
     } catch (e) { alert('网络错误'); }
   }
-  document.getElementById('adminArea').classList.add('hidden');// 维护模式切换
-function toggleMaintenance() {
+  document.getElementById('adminArea').classList.add('hidden');function toggleMaintenance() {
   maintenanceMode = !maintenanceMode;
   localStorage.setItem('maintenanceMode', maintenanceMode);
   const btn = document.getElementById('maintenanceBtn');
@@ -341,7 +359,6 @@ function toggleMaintenance() {
   }
 }
 
-// 导航
 document.getElementById('navBar').addEventListener('click', e => {
   if (e.target.classList.contains('nav-btn')) {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -378,7 +395,7 @@ function getDefaultIcon(sw) {
   if (sw.isTool) return '<span class="type-badge badge-tool">工具</span>';
   if (sw.isSoftware) return '<span class="type-badge badge-software">软件</span>';
   return '';
-    }async function loadSoftwares() {
+}async function loadSoftwares() {
   try {
     const res = await fetch(API + '?labels=approved&state=open&sort=created&direction=desc&per_page=100');
     const issues = await res.json();
@@ -420,6 +437,14 @@ function renderFilteredSoftwares() {
   softwares.forEach(sw => {
     const iconHtml = sw.iconUrl ? `<img class="card-icon" src="${sw.iconUrl}" onerror="this.style.display='none'">` : getDefaultIcon(sw);
     const isMusic = sw.downloadUrl && /music\d*\.html/.test(sw.downloadUrl);
+    
+    // 解析更新日期
+    let updateDate = '';
+    if (sw.description) {
+      const updateMatch = sw.description.match(/更新[:：]\s*(\d{4}-\d{2}-\d{2})/);
+      if (updateMatch) updateDate = updateMatch[1];
+    }
+
     let downloadBtn = '';
     if (sw.downloadUrl && !sw.isNotice) {
       if (maintenanceMode) {
@@ -431,8 +456,11 @@ function renderFilteredSoftwares() {
       }
     }
     const musicPlayer = (isMusic && !maintenanceMode) ? `<div class="music-player" id="player-${sw.id}" style="margin-top:12px; display:none;"><iframe src="${sw.downloadUrl}" width="100%" height="500" frameborder="0" style="border-radius:12px;"></iframe></div>` : '';
+    
+    const updateBadge = updateDate ? `<span class="update-badge">更新于 ${updateDate}</span>` : '';
+    
     html += `<div class="card${sw.isNotice ? ' notice' : ''}">
-      <h3>${iconHtml}${sw.title}</h3>
+      <h3>${iconHtml}${sw.title}${updateBadge}</h3>
       <div class="desc">${sw.description || ''}</div>
       ${downloadBtn}
       ${musicPlayer}
