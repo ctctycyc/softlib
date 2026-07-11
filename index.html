@@ -194,7 +194,16 @@
       let html = '';
       softwares.forEach(sw => {
         const iconHtml = getDefaultIcon(sw);
-        const downloadBtn = sw.downloadUrl && !sw.isNotice ? `<a class="download-link" href="${sw.downloadUrl}" target="_blank">下载</a>` : '';
+        let downloadBtn = '';
+if (sw.downloadUrl && !sw.isNotice) {
+  if (localStorage.getItem('authToken')) {
+    // 已登录，正常下载
+    downloadBtn = `<a class="download-link" href="${sw.downloadUrl}" target="_blank">下载</a>`;
+  } else {
+    // 未登录，弹出提示
+    downloadBtn = `<a class="download-link" href="javascript:void(0)" onclick="alert('请先登录后再下载'); location.href='./login.html';" style="background:#aaa;">登录后下载</a>`;
+  }
+    }
         html += `<div class="card${sw.isNotice ? ' notice' : ''}"><h3>${iconHtml}${sw.title}</h3><div class="desc">${sw.description || ''}</div>${downloadBtn}<div class="card-actions"><a href="#" onclick="toggleComments(${sw.id}); return false;">查看评论</a><a href="https://github.com/ctctycyc/softlib/issues/${sw.id}" target="_blank">发表评论</a></div><div id="comments-${sw.id}" class="comments-section hidden"><div id="comment-list-${sw.id}"></div></div></div>`;
       });
       listDiv.innerHTML = html;
