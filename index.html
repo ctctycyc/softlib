@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>软件库 - 测试版</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -67,15 +66,13 @@
         <h1>软件库</h1>
         <div class="header-actions">
           <button class="icon-btn" onclick="toggleDark()" id="darkToggle">暗色模式</button>
-         <button class="icon-btn" id="loginBtn" onclick="showLoginModal()">登录</button>
-<span id="userInfo" class="hidden" style="font-size:14px; margin-right:8px;"></span>
-<button class="icon-btn hidden" id="logoutBtn" onclick="logout()">退出</button>
           <span id="adminArea" class="hidden">
             <button class="icon-btn" onclick="toggleAdmin()">审核模式</button>
             <a href="https://github.com/ctctycyc/softlib/issues" target="_blank" class="icon-btn" style="text-decoration:none;">后台</a>
           </span>
         </div>
-      </div><div class="nav-bar" id="navBar">
+      </div>
+      <div class="nav-bar" id="navBar">
         <button class="nav-btn active" data-category="all">全部</button>
         <button class="nav-btn" data-category="software">软件</button>
         <button class="nav-btn" data-category="tool">工具</button>
@@ -87,7 +84,7 @@
 
   <div class="container" style="margin-top:10px;">
     <div class="announcement">欢迎来到软件库！这里收集了一些实用软件和工具，仅供学习交流。</div>
-    <div id="adminPanel" class="admin-panel hidden">
+ <div id="adminPanel" class="admin-panel hidden">
       <h3>待审核内容</h3>
       <div id="pendingList">加载中...</div>
     </div>
@@ -108,7 +105,8 @@
     </div>
   </div>
 
-  <script>   const API = 'https://api.github.com/repos/ctctycyc/softlib/issues';
+  <script>
+    const API = 'https://api.github.com/repos/ctctycyc/softlib/issues';
     const ADMIN_USERNAMES = ['zeruan'];
     let allSoftwares = [], currentCategory = 'all', adminToken = localStorage.getItem('adminToken');
 
@@ -160,7 +158,6 @@
       return '<span class="type-badge badge-software">软件</span>';
     }
 
-
     async function loadSoftwares() {
       try {
         const res = await fetch(API + '?labels=approved&state=open&sort=created&direction=desc&per_page=100');
@@ -181,7 +178,7 @@
       } catch(e) { document.getElementById('list').innerHTML = '<p>加载失败</p>'; }
     }
 
-    function renderFilteredSoftwares() {
+   function renderFilteredSoftwares() {
       let filtered = allSoftwares;
       if (currentCategory === 'all') filtered = allSoftwares.filter(sw => !sw.isTool);
       else if (currentCategory === 'software') filtered = allSoftwares.filter(sw => sw.isSoftware && !sw.isNotice);
@@ -202,7 +199,7 @@
       listDiv.innerHTML = html;
     }
 
-     async function loadComments(issueNumber) {
+    async function loadComments(issueNumber) {
       const listEl = document.getElementById(`comment-list-${issueNumber}`);
       if (!listEl) return;
       listEl.innerHTML = '加载中...';
@@ -258,18 +255,6 @@
     }
 
     loadSoftwares();
-  <div id="authModal" class="modal hidden" onclick="closeAuthModal()">
-  <div class="modal-content" onclick="event.stopPropagation()">
-    <h3 id="authTitle">登录</h3>
-    <input type="email" id="authEmail" placeholder="邮箱">
-    <input type="password" id="authPassword" placeholder="密码">
-    <p id="authError" style="color:red; font-size:13px; margin-top:8px;"></p>
-    <div style="margin-top:10px; display:flex; gap:8px; justify-content:space-between;">
-      <button class="btn" onclick="handleAuth()" id="authSubmitBtn">登录</button>
-      <button class="btn" style="background:#aaa;" onclick="switchAuthMode()" id="switchModeBtn">没有账号？去注册</button>
-    </div>
-  </div>
-</div>
   </script>
 </body>
 </html>
