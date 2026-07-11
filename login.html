@@ -11,6 +11,7 @@
     button { width: 100%; padding: 12px; background: #8b5e3c; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 8px; }
     .switch { background: #aaa; }
     .error { color: red; font-size: 13px; margin-top: 8px; }
+    .success { color: green; font-size: 13px; margin-top: 8px; }
     .back { position: fixed; top: 20px; left: 20px; background: #8b5e3c; color: white; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 14px; }
   </style>
 </head>
@@ -23,6 +24,7 @@
     <button id="submitBtn" onclick="handle()">登录</button>
     <button class="switch" onclick="toggle()" id="switchBtn">没有账号？去注册</button>
     <div class="error" id="error"></div>
+    <div class="success" id="success"></div>
   </div>
 
   <script>
@@ -35,13 +37,19 @@
       document.getElementById('title').textContent = isRegister ? '注册' : '登录';
       document.getElementById('submitBtn').textContent = isRegister ? '注册' : '登录';
       document.getElementById('switchBtn').textContent = isRegister ? '已有账号？去登录' : '没有账号？去注册';
+      document.getElementById('error').textContent = '';
+      document.getElementById('success').textContent = '';
     }
 
     async function handle() {
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
       document.getElementById('error').textContent = '';
-      if (!email || !password) { document.getElementById('error').textContent = '请输入邮箱和密码'; return; }
+      document.getElementById('success').textContent = '';
+      if (!email || !password) {
+        document.getElementById('error').textContent = '请输入邮箱和密码';
+        return;
+      }
       const url = isRegister
         ? `${SUPABASE_URL}/auth/v1/signup`
         : `${SUPABASE_URL}/auth/v1/token?grant_type=password`;
@@ -53,11 +61,16 @@
         });
         const data = await res.json();
         if (data.access_token) {
+          // 登录成功 或 注册后无需验证直接返回token
           localStorage.setItem('authToken', data.access_token);
           localStorage.setItem('authEmail', email);
           location.href = './';
+        } else if (isRegister && data.id) {
+          // 注册成功但需要邮箱验证，没有access_token
+          document.getElementById('success').textContent = '注册成功！请检查邮箱并点击确认链接，然后返回登录。';
         } else {
-          document.getElementById('error').textContent = data.error_description || data.msg || '操作失败';
+          const msg = data.error_description || data.msg || '操作失败';
+          document.getElementById('error').textContent = msg;
         }
       } catch (e) {
         document.getElementById('error').textContent = '网络错误';
