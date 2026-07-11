@@ -3,39 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>注册测试</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>注册测试 (fetch)</title>
 </head>
 <body>
-  <h2>独立注册测试</h2>
+  <h2>注册测试 (fetch)</h2>
   <input type="email" id="email" placeholder="邮箱"><br>
   <input type="password" id="pw" placeholder="密码"><br>
   <button onclick="reg()">注册</button>
-  <button onclick="login()">登录</button>
-  <button onclick="logout()">退出</button>
   <pre id="log"></pre>
   <script>
-    const supabase = window.supabase.createClient(
-      'https://rgekpmuujozhkkctpdup.supabase.co',
-      'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr'
-    );
-    async function reg(){
-      const { data, error } = await supabase.auth.signUp({
-        email: document.getElementById('email').value,
-        password: document.getElementById('pw').value
-      });
-      document.getElementById('log').textContent = JSON.stringify({data, error}, null, 2);
-    }
-    async function login(){
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: document.getElementById('email').value,
-        password: document.getElementById('pw').value
-      });
-      document.getElementById('log').textContent = JSON.stringify({data, error}, null, 2);
-    }
-    async function logout(){
-      const { error } = await supabase.auth.signOut();
-      document.getElementById('log').textContent = error ? error.message : '已退出';
+    const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
+
+    async function reg() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('pw').value.trim();
+      if (!email || !password) {
+        document.getElementById('log').textContent = '请输入邮箱和密码';
+        return;
+      }
+      document.getElementById('log').textContent = '注册中...';
+      try {
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`
+          },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        document.getElementById('log').textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        document.getElementById('log').textContent = '网络错误: ' + error.message;
+      }
     }
   </script>
 </body>
