@@ -265,12 +265,17 @@ body {
       <div class="header-top">
         <h1>软件库</h1>
         <div class="header-actions">
-          <button class="icon-btn" onclick="toggleDark()" id="darkToggle">暗色模式</button>
-          <span id="adminArea" class="hidden">
-            <button class="icon-btn" onclick="toggleAdmin()">审核模式</button>
-            <button class="icon-btn" id="maintenanceBtn" onclick="toggleMaintenance()">维护模式</button>
-            <a href="https://github.com/ctctycyc/softlib/issues" target="_blank" class="icon-btn" style="text-decoration:none;">后台</a>
-          </span>
+  <button class="icon-btn" onclick="toggleDark()" id="darkToggle">暗色模式</button>
+  <!-- 登录相关按钮 -->
+  <button class="icon-btn" id="loginBtn" onclick="showLoginModal()">登录</button>
+  <span id="userInfo" class="hidden" style="font-size:14px; margin-right:8px;"></span>
+  <button class="icon-btn hidden" id="logoutBtn" onclick="logout()">退出</button>
+  <!-- 管理员区域 -->
+  <span id="adminArea" class="hidden">
+    <button class="icon-btn" onclick="toggleAdmin()">审核模式</button>
+    <button class="icon-btn" id="maintenanceBtn" onclick="toggleMaintenance()">维护模式</button>
+    <a href="https://github.com/ctctycyc/softlib/issues" target="_blank" class="icon-btn" style="text-decoration:none;">后台</a>
+  </span>
         </div>
       </div>
       <div class="nav-bar" id="navBar">
@@ -290,7 +295,25 @@ body {
       <div id="pendingList">加载中...</div>
     </div>
     <div id="list"></div>
-    <div class="footer" id="secretTrigger">✔zeci rjk</div>
+     <div class="footer" id="secretTrigger">✔zeci rjk</div>
+  <!-- 登录弹窗 -->
+  <div id="authModal" class="modal hidden" onclick="closeAuthModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <h3 id="authTitle">登录</h3>
+      <input type="email" id="authEmail" placeholder="邮箱">
+      <input type="password" id="authPassword" placeholder="密码">
+      <p id="authError" style="color:red; font-size:13px; margin-top:8px;"></p>
+      <div style="margin-top:10px; display:flex; gap:8px; justify-content:space-between;">
+        <button class="btn" onclick="handleAuth()" id="authSubmitBtn">登录</button>
+        <button class="btn" style="background:#aaa;" onclick="switchAuthMode()" id="switchModeBtn">没有账号？去注册</button>
+      </div>
+    </div>
+  </div>
+  <!-- 访客统计 -->
+  <div class="visitor-counter">
+    <img src="https://hits.sh/ctctycyc.github.io/softlib.svg?label=访问次数&color=8b5e3c" alt="访问次数">
+  </div>
+  </div>
     <div class="visitor-counter">
       <img src="https://hits.sh/ctctycyc.github.io/softlib.svg?label=访问次数&color=8b5e3c" alt="访问次数">
     </div>
@@ -549,7 +572,82 @@ function filterSoftwares() {
       alert('已驳回');
       loadPendingIssues();
     }
+// ========== Supabase 配置 ==========
+const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// ========== 邮箱登录系统 ==========
+let isRegisterMode = false;
+
+function updateAuthUI() {
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    if (session && session.user) {
+      document.getElementById('loginBtn').classList.add('hidden');
+      document.getElementById('userInfo').classList.remove('hidden');
+      document.getElementById('logoutBtn').classList.remove('hidden');
+      document.getElementById('userInfo').textContent = session.user.email;
+    } else {
+      document.getElementById('loginBtn').classList.remove('hidden');
+      document.getElementById('userInfo').classList.add('hidden');
+      document.getElementById('logoutBtn').classList.add('hidden');
+    }
+  });
+}
+updateAuthUI();
+
+supabase.auth.onAuthStateChange((event, session) => {
+  updateAuthUI();
+});
+
+function showLoginModal() {
+  document.getElementById('authModal').classList.remove('hidden');
+  document.getElementById('authError').textContent = '';
+}
+
+function closeAuthModal() {
+  document.getElementById('authModal').classList.add('hidden');
+}
+
+function switchAuthMode() {
+  isRegisterMode = !isRegisterMode;
+  document.getElementById('authTitle').textContent = isRegisterMode ? '注册' : '登录';
+  document.getElementById('authSubmitBtn').textContent = isRegisterMode ? '注册' : '登录';
+  document.getElementById('switchModeBtn').textContent = isRegisterMode ? '已有账号？去登录' : '没有账号？去注册';
+}
+
+async function handleAuth() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value.trim();
+  if (!email || !password) {
+    document.getElementById('authError').textContent = '请输入邮箱和密码';
+    return;
+  }
+  if (isRegisterMode) {
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+      document.getElementById('authError').textContent = error.message;
+    } else {
+      alert('注册成功！');
+      closeAuthModal();
+      updateAuthUI();
+    }
+  } else {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      document.getElementById('authError').textContent = error.message;
+    } else {
+      closeAuthModal();
+      updateAuthUI();
+    }
+  }
+}
+
+async function logout() {
+  await supabase.auth.signOut();
+  updateAuthUI();
+}
+   
     loadSoftwares();
   </script>
 </body>
