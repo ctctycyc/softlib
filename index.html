@@ -265,8 +265,42 @@ if (sw.downloadUrl && !sw.isNotice) {
     }
 
       loadSoftwares();
-
-  // ========== 登录状态显示 ==========
+// ========== 邮箱验证成功后自动登录并提示 ==========
+(function() {
+  const hash = window.location.hash;
+  if (hash && hash.includes('access_token') && hash.includes('type=signup')) {
+    const params = new URLSearchParams(hash.substring(1));
+    const token = params.get('access_token');
+    if (token) {
+      // 保存登录信息
+      localStorage.setItem('authToken', token);
+      // 通过 Supabase API 获取用户邮箱
+      fetch('https://rgekpmuujozhkkctpdup.supabase.co/auth/v1/user', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'apikey': 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr'
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.email) {
+          localStorage.setItem('authEmail', data.email);
+          // 清除 URL 中的 hash，让页面恢复正常
+          window.location.hash = '';
+          // 显示验证成功提示
+          alert('邮箱验证成功！欢迎加入软件库。');
+          // 刷新页面以更新登录状态
+          location.reload();
+        }
+      })
+      .catch(() => {
+        window.location.hash = '';
+      });
+    }
+  }
+})();
+ 
+    // ========== 登录状态显示 ==========
   (function() {
     const email = localStorage.getItem('authEmail');
     const token = localStorage.getItem('authToken');
