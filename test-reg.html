@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>注册测试</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <h2>独立注册测试</h2>
+  <input type="email" id="email" placeholder="邮箱"><br>
+  <input type="password" id="pw" placeholder="密码"><br>
+  <button onclick="reg()">注册</button>
+  <button onclick="login()">登录</button>
+  <button onclick="logout()">退出</button>
+  <pre id="log"></pre>
+  <script>
+    const supabase = window.supabase.createClient(
+      'https://rgekpmuujozhkkctpdup.supabase.co',
+      'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr'
+    );
+    async function reg(){
+      const { data, error } = await supabase.auth.signUp({
+        email: document.getElementById('email').value,
+        password: document.getElementById('pw').value
+      });
+      document.getElementById('log').textContent = JSON.stringify({data, error}, null, 2);
+    }
+    async function login(){
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: document.getElementById('email').value,
+        password: document.getElementById('pw').value
+      });
+      document.getElementById('log').textContent = JSON.stringify({data, error}, null, 2);
+    }
+    async function logout(){
+      const { error } = await supabase.auth.signOut();
+      document.getElementById('log').textContent = error ? error.message : '已退出';
+    }
+  </script>
+</body>
+</html>
