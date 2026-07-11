@@ -46,10 +46,15 @@
       const password = document.getElementById('password').value.trim();
       document.getElementById('error').textContent = '';
       document.getElementById('success').textContent = '';
-      if (!email || !password) {
-        document.getElementById('error').textContent = '请输入邮箱和密码';
-        return;
-      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+if (!email || !password) {
+  document.getElementById('error').textContent = '请输入邮箱和密码';
+  return;
+}
+if (!emailRegex.test(email)) {
+  document.getElementById('error').textContent = '请输入有效的邮箱地址';
+  return;
+}
       const url = isRegister
         ? `${SUPABASE_URL}/auth/v1/signup`
         : `${SUPABASE_URL}/auth/v1/token?grant_type=password`;
