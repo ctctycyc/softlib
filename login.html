@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 - 软件库</title>
+  <style>
+    body { font-family: sans-serif; background: #f5f0e8; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .box { background: #fffdf7; padding: 24px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 90%; max-width: 400px; }
+    input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #d4c9b5; border-radius: 8px; background: #f5f0e8; font-size: 14px; }
+    button { width: 100%; padding: 12px; background: #8b5e3c; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+    .switch { background: #aaa; }
+    .error { color: red; font-size: 13px; margin-top: 8px; }
+    .back { position: fixed; top: 20px; left: 20px; background: #8b5e3c; color: white; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <a href="./" class="back">← 返回</a>
+  <div class="box">
+    <h2 id="title">登录</h2>
+    <input type="email" id="email" placeholder="邮箱">
+    <input type="password" id="password" placeholder="密码">
+    <button id="submitBtn" onclick="handle()">登录</button>
+    <button class="switch" onclick="toggle()" id="switchBtn">没有账号？去注册</button>
+    <div class="error" id="error"></div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
+    let isRegister = false;
+
+    function toggle() {
+      isRegister = !isRegister;
+      document.getElementById('title').textContent = isRegister ? '注册' : '登录';
+      document.getElementById('submitBtn').textContent = isRegister ? '注册' : '登录';
+      document.getElementById('switchBtn').textContent = isRegister ? '已有账号？去登录' : '没有账号？去注册';
+    }
+
+    async function handle() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      document.getElementById('error').textContent = '';
+      if (!email || !password) { document.getElementById('error').textContent = '请输入邮箱和密码'; return; }
+      const url = isRegister
+        ? `${SUPABASE_URL}/auth/v1/signup`
+        : `${SUPABASE_URL}/auth/v1/token?grant_type=password`;
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (data.access_token) {
+          localStorage.setItem('authToken', data.access_token);
+          localStorage.setItem('authEmail', email);
+          location.href = './';
+        } else {
+          document.getElementById('error').textContent = data.error_description || data.msg || '操作失败';
+        }
+      } catch (e) {
+        document.getElementById('error').textContent = '网络错误';
+      }
+    }
+  </script>
+</body>
+</html>
