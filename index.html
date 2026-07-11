@@ -66,8 +66,9 @@
         <h1>软件库</h1>
         <div class="header-actions">
           <button class="icon-btn" onclick="toggleDark()" id="darkToggle">暗色模式</button>
-          <a href="./login.html" class="icon-btn" style="text-decoration:none;">登录</a>
-          <span id="adminArea" class="hidden">
+<a href="./login.html" class="icon-btn" style="text-decoration:none;" id="loginLink">登录</a>
+<span id="userDisplay" class="hidden" style="font-size:14px; margin-right:8px; color: var(--text-secondary);"></span>
+<a href="#" class="icon-btn hidden" id="logoutLink" style="text-decoration:none;">退出</a>          <span id="adminArea" class="hidden">
             <button class="icon-btn" onclick="toggleAdmin()">审核模式</button>
             <a href="https://github.com/ctctycyc/softlib/issues" target="_blank" class="icon-btn" style="text-decoration:none;">后台</a>
           </span>
@@ -254,7 +255,30 @@
       alert('已驳回'); loadPendingIssues();
     }
 
-    loadSoftwares();
+      loadSoftwares();
+
+  // ========== 登录状态显示 ==========
+  (function() {
+    const email = localStorage.getItem('authEmail');
+    const token = localStorage.getItem('authToken');
+    const loginLink = document.getElementById('loginLink');
+    const userDisplay = document.getElementById('userDisplay');
+    const logoutLink = document.getElementById('logoutLink');
+
+    if (email && token) {
+      loginLink.classList.add('hidden');
+      userDisplay.classList.remove('hidden');
+      logoutLink.classList.remove('hidden');
+      userDisplay.textContent = email;
+    }
+
+    logoutLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      localStorage.removeItem('authEmail');
+      localStorage.removeItem('authToken');
+      location.reload();
+    });
+  })();
   </script>
 </body>
 </html>
