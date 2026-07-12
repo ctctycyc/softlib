@@ -81,6 +81,10 @@
 
   <div class="container" style="margin-top:10px;">
     <div class="announcement">欢迎来到软件库！这里收集了一些实用软件和工具，仅供学习交流。</div>
+    <div style="text-align:right; margin-bottom:10px;">
+  <button class="icon-btn" onclick="toggleNotice()" id="noticeToggleBtn">查看通知</button>
+</div>
+<div id="noticeList" class="hidden" style="margin-bottom:14px;"></div>
     <div id="adminPanel" class="admin-panel hidden">
       <h3>待审核内容</h3>
       <div id="pendingList">加载中...</div>
@@ -283,6 +287,42 @@ function renderSoftwares(softwares) {
     }
 
     loadSoftwares();
+    async function loadNotices() {
+  try {
+    const res = await fetch(API + '?labels=notice&state=open&sort=created&direction=desc&per_page=10');
+    const issues = await res.json();
+    const list = document.getElementById('noticeList');
+    if (issues.length === 0) {
+      list.innerHTML = '<div class="card" style="text-align:center; color:var(--text-secondary);">暂无通知</div>';
+      return;
+    }
+    let html = '';
+    issues.forEach(issue => {
+      const date = new Date(issue.created_at).toLocaleDateString('zh-CN');
+      html += `<div class="card notice" style="margin-bottom:8px;">
+        <h3 style="font-size:16px;">${issue.title}</h3>
+        <div class="desc">${issue.body ? issue.body.substring(0,200) : ''}</div>
+        <div style="font-size:12px; color:var(--text-secondary);">${date}</div>
+      </div>`;
+    });
+    list.innerHTML = html;
+  } catch(e) {
+    document.getElementById('noticeList').innerHTML = '<p style="color:red;">加载通知失败</p>';
+  }
+}
+
+function toggleNotice() {
+  const list = document.getElementById('noticeList');
+  const btn = document.getElementById('noticeToggleBtn');
+  if (list.classList.contains('hidden')) {
+    loadNotices();
+    list.classList.remove('hidden');
+    btn.textContent = '收起通知';
+  } else {
+    list.classList.add('hidden');
+    btn.textContent = '查看通知';
+  }
+}
   </script>
 </body>
 </html>
