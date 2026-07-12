@@ -43,37 +43,33 @@
     .card h3 { font-size: 18px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; font-weight: 600; }
     .desc { color: var(--text-secondary); font-size: 14px; margin-bottom: 12px; }
     .download-link { display: inline-flex; background: var(--link); color: white; padding: 6px 16px; border-radius: var(--radius-sm); font-size: 13px; text-decoration: none; font-weight: 500; }
-    .card-actions { display: flex; gap: 18px; margin-top: 14px; font-size: 14px; flex-wrap: wrap; }
-    .card-actions a { color: var(--link); font-weight: 500; }
-    .comments-section { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 14px; }
-    .comment-item { border-bottom: 1px solid var(--border); padding: 10px 0; font-size: 14px; }
     .admin-panel { background: var(--card-bg); border: 2px dashed var(--border); border-radius: var(--radius); padding: 20px; margin: 16px 0; }
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 200; }
     .modal-content { background: var(--card-bg); border-radius: var(--radius); padding: 24px; width: 90%; max-width: 420px; }
     .footer { text-align: center; color: var(--text-secondary); font-size: 12px; margin-top: 30px; opacity: 0.6; }
     .hidden { display: none !important; }
-    .announcement { background: var(--announce-bg); color: var(--announce-text); padding: 14px 18px; border-radius: 4px 12px 12px 4px; margin: 14px 0; font-size: 14px; border-left: 4px solid #d4a76a; }
-    .badge { display: inline-block; background: #c0392b; color: white; border-radius: 4px; padding: 1px 6px; font-size: 11px; margin-left: 4px; }
+    .announcement { background: var(--announce-bg); color: var(--announce-text); padding: 14px 18px; border-radius: 4px 12px 12px 4px; margin: 14px 0; font-size: 14px; border-left: 4px; }
     .type-badge { display: inline-block; border-radius: 4px; padding: 2px 8px; font-size: 11px; margin-right: 6px; color: white; }
     .badge-software { background: #6d8c6d; } .badge-tool { background: #8b6e5c; } .badge-notice { background: #c98e4e; }
-    .card-icon { width: 28px; height: 28px; border-radius: 6px; object-fit: contain; }
   </style>
-</head>
-<body>
+</head><body>
   <div class="header">
     <div class="header-inner">
       <div class="header-top">
         <h1>软件库</h1>
         <div class="header-actions">
           <button class="icon-btn" onclick="toggleDark()" id="darkToggle">暗色模式</button>
-<a href="./login.html" class="icon-btn" style="text-decoration:none;" id="loginLink">登录</a>
-<span id="userDisplay" class="hidden" style="font-size:14px; margin-right:8px; color: var(--text-secondary);"></span>
-<a href="#" class="icon-btn hidden" id="logoutLink" style="text-decoration:none;">退出</a>          <span id="adminArea" class="hidden">
+          <a href="mailto:dghkkppp@qq.com" class="icon-btn" id="messageBtn" style="text-decoration:none;">私信</a>
+          <a href="./login.html" class="icon-btn" style="text-decoration:none;" id="loginLink">登录</a>
+          <span id="userDisplay" class="hidden" style="font-size:14px; margin-right:8px; color: var(--text-secondary);"></span>
+          <a href="#" class="icon-btn hidden" id="logoutLink" style="text-decoration:none;">退出</a>
+          <span id="adminArea" class="hidden">
             <button class="icon-btn" onclick="toggleAdmin()">审核模式</button>
             <a href="https://github.com/ctctycyc/softlib/issues" target="_blank" class="icon-btn" style="text-decoration:none;">后台</a>
           </span>
         </div>
-      </div><div class="nav-bar" id="navBar">
+      </div>
+      <div class="nav-bar" id="navBar">
         <button class="nav-btn active" data-category="all">全部</button>
         <button class="nav-btn" data-category="software">软件</button>
         <button class="nav-btn" data-category="tool">工具</button>
@@ -104,133 +100,158 @@
       </div>
       <button class="btn" onclick="hideAbout()">关闭</button>
     </div>
-  </div>
+  </div><script>
+  const API = 'https://api.github.com/repos/ctctycyc/softlib/issues';
+  const ADMIN_USERNAMES = ['zeruan'];
+  let allSoftwares = [], currentCategory = 'all', adminToken = localStorage.getItem('adminToken');
 
-
-  <script>
-    const API = 'https://api.github.com/repos/ctctycyc/softlib/issues';
-    const ADMIN_USERNAMES = ['zeruan'];
-    let allSoftwares = [], currentCategory = 'all', adminToken = localStorage.getItem('adminToken');
-
-    // 管理员激活
-    let clickCount = 0;
-    document.getElementById('secretTrigger').addEventListener('click', () => {
-      clickCount++;
-      if (clickCount >= 5) {
-        clickCount = 0;
-        const input = prompt('管理员登录：请输入 GitHub Token');
-        if (input && input.trim()) verifyAdminToken(input.trim());
-      }
-      setTimeout(() => clickCount = 0, 2000);
-    });
-
-    async function verifyAdminToken(token) {
-      try {
-        const res = await fetch('https://api.github.com/user', { headers: { Authorization: `token ${token}` } });
-        if (res.ok) {
-          adminToken = token; localStorage.setItem('adminToken', adminToken);
-          alert('管理功能已激活！'); document.getElementById('adminArea').classList.remove('hidden');
-          if (!document.getElementById('adminPanel').classList.contains('hidden')) loadPendingIssues();
-        } else alert('Token 无效');
-      } catch (e) { alert('网络错误'); }
+  // ========== 管理员激活 ==========
+  let clickCount = 0;
+  document.getElementById('secretTrigger').addEventListener('click', () => {
+    clickCount++;
+    if (clickCount >= 5) {
+      clickCount = 0;
+      const input = prompt('管理员登录：请输入 GitHub Token');
+      if (input && input.trim()) verifyAdminToken(input.trim());
     }
-    document.getElementById('adminArea').classList.add('hidden');
+    setTimeout(() => clickCount = 0, 2000);
+  });
+  async function verifyAdminToken(token) {
+    try {
+      const res = await fetch('https://api.github.com/user', { headers: { Authorization: `token ${token}` } });
+      if (res.ok) {
+        adminToken = token; localStorage.setItem('adminToken', adminToken);
+        alert('管理功能已激活！'); document.getElementById('adminArea').classList.remove('hidden');
+      } else alert('Token 无效');
+    } catch (e) { alert('网络错误'); }
+  }
+  document.getElementById('adminArea').classList.add('hidden');
 
-    // 导航
-    document.getElementById('navBar').addEventListener('click', e => {
-      if (e.target.classList.contains('nav-btn')) {
-        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-        currentCategory = e.target.dataset.category;
-        renderFilteredSoftwares();
-      }
-    });
+  // ========== 导航 ==========
+  document.getElementById('navBar').addEventListener('click', e => {
+    if (e.target.classList.contains('nav-btn')) {
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      currentCategory = e.target.dataset.category;
+      renderFilteredSoftwares();
+    }
+  });
 
   function toggleDark() {
-      document.documentElement.classList.toggle('dark');
-      const isDark = document.documentElement.classList.contains('dark');
-      localStorage.setItem('darkMode', isDark);
-      document.getElementById('darkToggle').textContent = isDark ? '亮色模式' : '暗色模式';
-    }
-    if (localStorage.getItem('darkMode') === 'true') { document.documentElement.classList.add('dark'); document.getElementById('darkToggle').textContent = '亮色模式'; }
-
-    function getDefaultIcon(sw) {
-      if (sw.isNotice) return '<span class="type-badge badge-notice">公告</span>';
-      if (sw.isTool) return '<span class="type-badge badge-tool">工具</span>';
-      return '<span class="type-badge badge-software">软件</span>';
-    }
-
-    async function loadSoftwares() {
-      try {
-        const res = await fetch(API + '?labels=approved&state=open&sort=created&direction=desc&per_page=100');
-        const issues = await res.json();
-        allSoftwares = issues.map(issue => {
-          let body = issue.body || '', downloadUrl = '', description = '';
-          const lines = body.split('\n');
-          for (let line of lines) {
-            if (line.trim().startsWith('http')) { if (!/\.(png|jpg|jpeg|gif|svg|ico)(\?.*)?$/.test(line.trim())) downloadUrl = line.trim(); }
-            else if (line.trim() && !description) description = line.trim();
-          }
-          const labels = issue.labels.map(l => l.name);
-          const isNotice = labels.includes('notice'), isTool = labels.includes('tool');
-          return { id: issue.number, title: issue.title, description, downloadUrl: isNotice ? '' : downloadUrl, htmlUrl: issue.html_url, isNotice, isTool, isSoftware: !isNotice && !isTool };
-        });
-        allSoftwares.sort((a, b) => a.isNotice ? -1 : 1);
-        renderFilteredSoftwares();
-      } catch(e) { document.getElementById('list').innerHTML = '<p>加载失败</p>'; }
-    }
-   function renderFilteredSoftwares() {
-      let filtered = allSoftwares;
-      if (currentCategory === 'all') filtered = allSoftwares.filter(sw => !sw.isTool);
-      else if (currentCategory === 'software') filtered = allSoftwares.filter(sw => sw.isSoftware && !sw.isNotice);
-      else if (currentCategory === 'tool') filtered = allSoftwares.filter(sw => sw.isTool);
-      else if (currentCategory === 'personal') { document.getElementById('list').innerHTML = `<div class="card" style="text-align:center;"><h3>关于软件库</h3><p>查看版本与联系信息</p><button class="btn" onclick="showAbout()">查看详情</button></div>`; return; }
-      renderSoftwares(filtered);
-    }
-
-    function renderSoftwares(softwares) {
-      const listDiv = document.getElementById('list');
-      if (softwares.length === 0) { listDiv.innerHTML = '<div class="card">暂无内容</div>'; return; }
-      let html = '';
-      softwares.forEach(sw => {
-        const iconHtml = getDefaultIcon(sw);
-        let downloadBtn = '';
-if (sw.downloadUrl && !sw.isNotice) {
-  if (localStorage.getItem('authToken')) {
-    // 已登录，正常下载
-    downloadBtn = `<a class="download-link" href="${sw.downloadUrl}" target="_blank">下载</a>`;
-  } else {
-    // 未登录，弹出提示
-    downloadBtn = `<a class="download-link" href="javascript:void(0)" onclick="alert('请先登录后再下载'); location.href='./login.html';" style="background:#aaa;">登录后下载</a>`;
+    document.documentElement.classList.toggle('dark');
+    const isDark = document.documentElement.classList.contains('dark');
+    localStorage.setItem('darkMode', isDark);
+    document.getElementById('darkToggle').textContent = isDark ? '亮色模式' : '暗色模式';
   }
-    }
-        html += `<div class="card${sw.isNotice ? ' notice' : ''}"><h3>${iconHtml}${sw.title}</h3><div class="desc">${sw.description || ''}</div>${downloadBtn}<div class="card-actions"><a href="#" onclick="toggleComments(${sw.id}); return false;">查看评论</a><a href="https://github.com/ctctycyc/softlib/issues/${sw.id}" target="_blank">发表评论</a></div><div id="comments-${sw.id}" class="comments-section hidden"><div id="comment-list-${sw.id}"></div></div></div>`;
-      });
-      listDiv.innerHTML = html;
-    }
+  if (localStorage.getItem('darkMode') === 'true') { document.documentElement.classList.add('dark'); document.getElementById('darkToggle').textContent = '亮色模式'; }
+function getDefaultIcon(sw) {
+  if (sw.isNotice) return '<span class="type-badge badge-notice">公告</span>';
+  if (sw.isTool) return '<span class="type-badge badge-tool">工具</span>';
+  return '<span class="type-badge badge-software">软件</span>';
+}
 
-    async function loadComments(issueNumber) {
-      const listEl = document.getElementById(`comment-list-${issueNumber}`);
-      if (!listEl) return;
-      listEl.innerHTML = '加载中...';
-      try {
-        const res = await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${issueNumber}/comments`);
-        const comments = await res.json();
-        if (!comments.length) { listEl.innerHTML = '<p>暂无评论</p>'; return; }
-        let html = '';
-        comments.forEach(c => {
-          let body = c.body || '', displayName = c.user ? c.user.login : '匿名', badge = '';
-          if (body.startsWith('【官方】') || ADMIN_USERNAMES.includes(c.user?.login)) { badge = '<span class="badge">官方</span>'; if (body.startsWith('【官方】')) body = body.slice(4); }
-          const idx = body.indexOf(':'); if (idx > 0) { displayName = body.slice(0, idx); body = body.slice(idx+1).trim(); }
-          html += `<div class="comment-item"><strong>${displayName}</strong>${badge}: ${body}</div>`;
-        });
-        listEl.innerHTML = html;
-      } catch(e) { listEl.innerHTML = '<p>加载失败</p>'; }
-    }
+async function loadSoftwares() {
+  try {
+    const res = await fetch(API + '?labels=approved&state=open&sort=created&direction=desc&per_page=100');
+    const issues = await res.json();
+    allSoftwares = issues.map(issue => {
+      let body = issue.body || '', downloadUrl = '', description = '';
+      const lines = body.split('\n');
+      for (let line of lines) {
+        if (line.trim().startsWith('http')) { if (!/\.(png|jpg|jpeg|gif|svg|ico)(\?.*)?$/.test(line.trim())) downloadUrl = line.trim(); }
+        else if (line.trim() && !description) description = line.trim();
+      }
+      const labels = issue.labels.map(l => l.name);
+      const isNotice = labels.includes('notice'), isTool = labels.includes('tool');
+      return { id: issue.number, title: issue.title, description, downloadUrl: isNotice ? '' : downloadUrl, htmlUrl: issue.html_url, isNotice, isTool, isSoftware: !isNotice && !isTool };
+    });
+    allSoftwares.sort((a, b) => a.isNotice ? -1 : 1);
+    renderFilteredSoftwares();
+  } catch(e) { document.getElementById('list').innerHTML = '<p>加载失败</p>'; }
+}
 
-    function toggleComments(id) { const div = document.getElementById(`comments-${id}`); if (!div) return; div.classList.toggle('hidden'); if (!div.classList.contains('hidden')) loadComments(id); }
+function renderFilteredSoftwares() {
+  let filtered = allSoftwares;
+  if (currentCategory === 'all') filtered = allSoftwares.filter(sw => !sw.isTool);
+  else if (currentCategory === 'software') filtered = allSoftwares.filter(sw => sw.isSoftware && !sw.isNotice);
+  else if (currentCategory === 'tool') filtered = allSoftwares.filter(sw => sw.isTool);
+  else if (currentCategory === 'personal') {
+    document.getElementById('list').innerHTML = `
+      <div class="card" style="text-align:center;">
+        <h3>关于软件库</h3>
+        <p>如有问题或建议，请联系：</p>
+        <p style="font-size:16px; margin:10px 0;">
+          <a href="mailto:dghkkppp@qq.com" style="color: var(--link);">dghkkppp@qq.com</a>
+        </p>
+        <button class="btn" onclick="showAbout()">查看详情</button>
+      </div>`;
+    return;
+  }
+  renderSoftwares(filtered);
+}
+
+function renderSoftwares(softwares) {
+  const listDiv = document.getElementById('list');
+  if (softwares.length === 0) { listDiv.innerHTML = '<div class="card">暂无内容</div>'; return; }
+  let html = '';
+  softwares.forEach(sw => {
+    const iconHtml = getDefaultIcon(sw);
+    let downloadBtn = '';
+    if (sw.downloadUrl && !sw.isNotice) {
+      if (localStorage.getItem('authToken')) {
+        downloadBtn = `<a class="download-link" href="${sw.downloadUrl}" target="_blank">下载</a>`;
+      } else {
+        downloadBtn = `<a class="download-link" href="javascript:void(0)" onclick="alert('请先登录后再下载'); location.href='./login.html';" style="background:#aaa;">登录后下载</a>`;
+      }
+    }
+    html += `<div class="card${sw.isNotice ? ' notice' : ''}"><h3>${iconHtml}${sw.title}</h3><div class="desc">${sw.description || ''}</div>${downloadBtn}</div>`;
+  });
+  listDiv.innerHTML = html;
+  }    // ========== 登录状态显示 ==========
+    function updateAuthUI() {
+      const email = localStorage.getItem('authEmail');
+      const token = localStorage.getItem('authToken');
+      const loginLink = document.getElementById('loginLink');
+      const userDisplay = document.getElementById('userDisplay');
+      const logoutLink = document.getElementById('logoutLink');
+
+      if (email && token) {
+        loginLink.classList.add('hidden');
+        userDisplay.classList.remove('hidden');
+        logoutLink.classList.remove('hidden');
+        userDisplay.textContent = email;
+      } else {
+        loginLink.classList.remove('hidden');
+        userDisplay.classList.add('hidden');
+        logoutLink.classList.add('hidden');
+      }
+    }
+    updateAuthUI();
+
+    document.getElementById('logoutLink').addEventListener('click', function(e) {
+      e.preventDefault();
+      localStorage.removeItem('authEmail');
+      localStorage.removeItem('authToken');
+      location.reload();
+    });
+
+    // ========== 私信按钮：已登录自动附带邮箱 ==========
+    document.getElementById('messageBtn').addEventListener('click', function(e) {
+      const email = localStorage.getItem('authEmail');
+      if (email) {
+        e.preventDefault();
+        window.location.href = `mailto:dghkkppp@qq.com?subject=来自软件库的私信&body=我的邮箱：${email}`;
+      } else {
+        e.preventDefault();
+        alert('请先登录后再发送私信');
+        location.href = './login.html';
+      }
+    });
+
+    // ========== 搜索 ==========
     function filterSoftwares() {
-      let base = allSoftwares; if (currentCategory === 'all') base = base.filter(sw => !sw.isTool);
+      let base = allSoftwares;
+      if (currentCategory === 'all') base = base.filter(sw => !sw.isTool);
       else if (currentCategory === 'software') base = base.filter(sw => sw.isSoftware && !sw.isNotice);
       else if (currentCategory === 'tool') base = base.filter(sw => sw.isTool);
       else if (currentCategory === 'personal') return;
@@ -251,77 +272,18 @@ if (sw.downloadUrl && !sw.isNotice) {
       let html = ''; issues.forEach(issue => { html += `<div class="card"><h3>${issue.title}</h3><p>${issue.body ? issue.body.substring(0,80) : ''}...</p><div style="margin-top:10px;"><button class="btn" onclick="approve(${issue.number})">通过</button><button class="btn" style="background:#e74c3c;margin-left:5px;" onclick="reject(${issue.number})">驳回</button></div></div>`; });
       div.innerHTML = html;
     }
-
     async function approve(number) {
       if (!adminToken) return;
       await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${number}/labels`, { method: 'PUT', headers: { Authorization: `token ${adminToken}` }, body: JSON.stringify({ labels: ['approved'] }) });
       alert('已通过'); loadPendingIssues(); loadSoftwares();
     }
-
-  async function reject(number) {
+    async function reject(number) {
       if (!adminToken) return;
       await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${number}`, { method: 'PATCH', headers: { Authorization: `token ${adminToken}` }, body: JSON.stringify({ state: 'closed', labels: ['rejected'] }) });
       alert('已驳回'); loadPendingIssues();
     }
 
-      loadSoftwares();
-// ========== 邮箱验证成功后自动登录并提示 ==========
-(function() {
-  const hash = window.location.hash;
-  if (hash && hash.includes('access_token') && hash.includes('type=signup')) {
-    const params = new URLSearchParams(hash.substring(1));
-    const token = params.get('access_token');
-    if (token) {
-      // 保存登录信息
-      localStorage.setItem('authToken', token);
-      // 通过 Supabase API 获取用户邮箱
-      fetch('https://rgekpmuujozhkkctpdup.supabase.co/auth/v1/user', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'apikey': 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr'
-        }
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.email) {
-          localStorage.setItem('authEmail', data.email);
-          // 清除 URL 中的 hash，让页面恢复正常
-          window.location.hash = '';
-          // 显示验证成功提示
-          alert('邮箱验证成功！欢迎加入软件库。');
-          // 刷新页面以更新登录状态
-          location.reload();
-        }
-      })
-      .catch(() => {
-        window.location.hash = '';
-      });
-    }
-  }
-})();
- 
-    // ========== 登录状态显示 ==========
-  (function() {
-    const email = localStorage.getItem('authEmail');
-    const token = localStorage.getItem('authToken');
-    const loginLink = document.getElementById('loginLink');
-    const userDisplay = document.getElementById('userDisplay');
-    const logoutLink = document.getElementById('logoutLink');
-
-    if (email && token) {
-      loginLink.classList.add('hidden');
-      userDisplay.classList.remove('hidden');
-      logoutLink.classList.remove('hidden');
-      userDisplay.textContent = email;
-    }
-
-    logoutLink.addEventListener('click', function(e) {
-      e.preventDefault();
-      localStorage.removeItem('authEmail');
-      localStorage.removeItem('authToken');
-      location.reload();
-    });
-  })();
+    loadSoftwares();
   </script>
 </body>
 </html>
