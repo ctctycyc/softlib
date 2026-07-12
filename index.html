@@ -143,8 +143,7 @@
     localStorage.setItem('darkMode', isDark);
     document.getElementById('darkToggle').textContent = isDark ? '亮色模式' : '暗色模式';
   }
-  if (localStorage.getItem('darkMode') === 'true') { document.documentElement.classList.add('dark'); document.getElementById('darkToggle').textContent = '亮色模式'; }
-function getDefaultIcon(sw) {
+  if (localStorage.getItem('darkMode') === 'true') { document.documentElement.classList.add('dark'); document.getElementById('darkToggle').textContent = '亮色模式'; }function getDefaultIcon(sw) {
   if (sw.isNotice) return '<span class="type-badge badge-notice">公告</span>';
   if (sw.isTool) return '<span class="type-badge badge-tool">工具</span>';
   return '<span class="type-badge badge-software">软件</span>';
@@ -207,7 +206,7 @@ function renderSoftwares(softwares) {
     html += `<div class="card${sw.isNotice ? ' notice' : ''}"><h3>${iconHtml}${sw.title}</h3><div class="desc">${sw.description || ''}</div>${downloadBtn}</div>`;
   });
   listDiv.innerHTML = html;
-  }    // ========== 登录状态显示 ==========
+    }    // ========== 登录状态显示 ==========
     function updateAuthUI() {
       const email = localStorage.getItem('authEmail');
       const token = localStorage.getItem('authToken');
