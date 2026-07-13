@@ -27,7 +27,8 @@
   <input id="msg" placeholder="输入消息..."><button id="send">发送</button>
   <div id="error"></div>
 
-  <button id="toggle-admin-btn" style="margin-top:10px; background:#aaa;">管理头衔</button>
+  <!-- 管理按钮（默认隐藏） -->
+  <button id="toggle-admin-btn" style="margin-top:10px; background:#aaa; display:none;">管理头衔</button>
   <div id="admin-panel" class="admin-panel" style="display:none;">
     <h3>管理头衔</h3>
     <p>管理员密钥：<input id="admin-key-input" type="password" placeholder="输入密钥"></p>
@@ -66,7 +67,7 @@
     var sendBtn = document.getElementById('send');
     var errorDiv = document.getElementById('error');
     var titleCache = {};
-    var isAdmin = false; // 管理员状态（控制删除按钮显示）
+    var isAdmin = false;
 
     // 加载头衔
     async function loadTitles() {
@@ -108,7 +109,6 @@
       if (res.error) {
         errorDiv.textContent = '删除失败：' + res.error.message;
       } else {
-        // 移除该消息元素
         var msgDiv = document.querySelector('.msg[data-id="' + id + '"]');
         if (msgDiv) msgDiv.remove();
       }
@@ -119,8 +119,7 @@
       var msg = input.value.trim();
       if (!msg) return;
 
-      // 检查是否被禁言
-      var muteCheck = await supabase.from('mutes').select('email').eq('email', email).maybeSingle();
+      var muteCheck = await supabase.from('mutes').select('email').eq('email', email', email).maybeSingle();
       if (muteCheck.data) {
         errorDiv.textContent = '你已被禁言，无法发送消息';
         return;
@@ -168,22 +167,25 @@
       var key = document.getElementById('admin-key-input').value;
       if (key === adminKey) {
         adminVerified = true;
-        isAdmin = true; // 管理员可删消息
+        isAdmin = true;
         adminContent.style.display = 'block';
         adminError.textContent = '';
+        // 显示管理头衔按钮
+        toggleAdminBtn.style.display = 'inline-block';
         loadTitleList();
-        // 刷新消息列表以显示删除按钮
         loadHistory();
       } else {
         adminVerified = false;
         isAdmin = false;
         adminError.textContent = '密钥错误';
         adminContent.style.display = 'none';
-        loadHistory(); // 隐藏删除按钮
+        // 验证失败时隐藏按钮
+        toggleAdminBtn.style.display = 'none';
+        loadHistory();
       }
     };
 
-  // 设置头衔
+    // 设置头衔
     setTitleBtn.onclick = async function() {
       if (!adminVerified) { alert('请先验证管理员密钥'); return; }
       var tEmail = targetEmail.value.trim();
