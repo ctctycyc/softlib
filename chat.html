@@ -20,13 +20,13 @@
     #admin-key-input { width: calc(100% - 20px); }
   </style>
 </head><body>
-  <h2>聊天室</h2>
+  <h2 id="chat-title">聊天室</h2>
   <a href="./">← 返回软件库</a>
   <div id="chat-box"></div>
   <input id="msg" placeholder="输入消息..."><button id="send">发送</button>
   <div id="error"></div>
 
-  <!-- 管理按钮（默认完全隐藏） -->
+  <!-- 管理按钮（默认隐藏） -->
   <button id="toggle-admin-btn" style="margin-top:10px; background:#aaa; display:none;">管理头衔</button><div id="admin-panel" class="admin-panel">
   <h3>管理头衔</h3>
   <p>管理员密钥：<input id="admin-key-input" type="password" placeholder="输入密钥"></p>
@@ -63,7 +63,7 @@
   var sendBtn = document.getElementById('send');
   var errorDiv = document.getElementById('error');
   var titleCache = {};
-  var isAdmin = false;  // 管理员状态
+  var isAdmin = false;
 
   // 加载头衔
   async function loadTitles() {
@@ -110,7 +110,7 @@
     }
   };
 
-  // 发送消息（含禁言检查）
+  // 发送消息
   sendBtn.onclick = async function() {
     var msg = input.value.trim();
     if (!msg) return;
@@ -133,31 +133,42 @@
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, function(payload) {
       addMessage(payload.new.id, payload.new.email, payload.new.message);
     })
-    .subscribe();    // ====== 管理功能 ======
-    var adminKey = 'zeruan2026';
-    var toggleAdminBtn = document.getElementById('toggle-admin-btn');
-    var adminPanel = document.getElementById('admin-panel');
-    var verifyBtn = document.getElementById('verify-admin-btn');
-    var adminContent = document.getElementById('admin-content');
-    var adminError = document.getElementById('admin-error');
-    var adminVerified = false;
+    .subscribe();
 
-    // 显示管理按钮的函数（供外部调用）
-    window.showAdminBtn = function() {
-      toggleAdminBtn.style.display = 'inline-block';
-    };
+  // ====== 管理功能 ======
+  var adminKey = 'zeruan2026';
+  var toggleAdminBtn = document.getElementById('toggle-admin-btn');
+  var adminPanel = document.getElementById('admin-panel');
+  var verifyBtn = document.getElementById('verify-admin-btn');
+  var adminContent = document.getElementById('admin-content');
+  var adminError = document.getElementById('admin-error');
+  var adminVerified = false;
 
-    // 切换面板显示
-    toggleAdminBtn.onclick = function() {
-      if (adminPanel.style.display === 'none' || adminPanel.style.display === '') {
-        adminPanel.style.display = 'block';
-      } else {
-        adminPanel.style.display = 'none';
-        adminContent.style.display = 'none';
-      }
-    };
+  // 显示管理按钮的函数
+  function showAdminBtn() {
+    toggleAdminBtn.style.display = 'inline-block';
+  }
 
-    // 验证密钥
+  // 点击标题 5 次显示管理按钮
+  var titleClickCount = 0;
+  document.getElementById('chat-title').onclick = function() {
+    titleClickCount++;
+    if (titleClickCount >= 5) {
+      showAdminBtn();
+      titleClickCount = 0;
+    }
+    setTimeout(function() { titleClickCount = 0; }, 2000);
+  };
+
+  // 切换面板显示
+  toggleAdminBtn.onclick = function() {
+    if (adminPanel.style.display === 'none' || adminPanel.style.display === '') {
+      adminPanel.style.display = 'block';
+    } else {
+      adminPanel.style.display = 'none';
+      adminContent.style.display = 'none';
+    }
+  };    // 验证密钥
     verifyBtn.onclick = function() {
       var key = document.getElementById('admin-key-input').value;
       if (key === adminKey) {
