@@ -1,64 +1,50 @@
 <!DOCTYPE html>
 <html lang="zh">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <title>软件库</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #f4f6f9;
-      --card-bg: #ffffff;
-      --text: #2c3e50;
-      --text-secondary: #5a6d80;
-      --border: #e1e8ed;
-      --link: #3b6ff5;
-      --btn-bg: #3b6ff5;
-      --btn-hover: #2b5cd4;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
-      --shadow: 0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
-      --shadow-lg: 0 8px 24px rgba(0,0,0,0.06);
-      --radius: 14px;
-      --radius-sm: 10px;
-      --header-bg: rgba(255,255,255,0.85);
-      --announce-bg: #eef3ff;
-      --announce-text: #1e3a8a;
-      --notice-bg: #fff8f0;
-      --notice-border: #f0b878;
-      --notice-text: #6d4c00;
-      --nav-active-bg: #3b6ff5;
-      --nav-active-text: white;
-      --banner-bg: linear-gradient(135deg, #3b6ff5, #8b5cf6);
-    }.dark {
+<head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>软件库</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>:root {
+  --bg: #f4f6f9;
+  --card-bg: #ffffff;
+  --text: #2c3e50;--text-secondary: #5a6d80;
+--border: #e1e8ed;
+--link: #3b6ff5;--btn-bg: #3b6ff5;
+--btn-hover: #2b5cd4;
+--shadow-sm: 0 1px 3px rgba(0,0,0,0.04);--shadow: 0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+--shadow-lg: 0 8px 24px rgba(0,0,0,0.06);
+--radius: 14px;--radius-sm: 10px;
+--header-bg: rgba(255,255,255,0.85);
+--announce-bg: #eef3ff;
+--announce-text: #1e3a8a;  --notice-bg: #fff8f0;
+  --notice-border: #f0b878;
+  --notice-text: #6d4c00;
+  --nav-active-bg: #3b6ff5;
+  --nav-active-text: white;
+  --banner-bg: linear-gradient(135deg, #3b6ff5, #8b5cf6);
+}.dark {
   --bg: #181c26;
   --card-bg: #212636;
   --text: #e0e4ec;
   --text-secondary: #a0a8b8;
   --border: #2e3440;
-  --link: #6ea8fe;
-  --btn-bg: #3b6ff5;
-  --btn-hover: #2b5cd4;
-  --shadow-sm: 0 1px 3px rgba(255,255,255,0.03);
-  --shadow: 0 2px 8px rgba(255,255,255,0.03), 0 1px 2px rgba(255,255,255,0.04);
-  --shadow-lg: 0 8px 24px rgba(255,255,255,0.04);
-  --header-bg: rgba(24,28,38,0.85);
-  --announce-bg: #1e2332;
-  --announce-text: #93b4f5;
-  --notice-bg: #2b2416;
+  --link: #6ea8fe;--btn-bg: #3b6ff5;
+--btn-hover: #2b5cd4;
+--shadow-sm: 0 1px 3px rgba(255,255,255,0.03);
+--shadow: 0 2px 8px rgba(255,255,255,0.03), 0 1px 2px rgba(255,255,255,0.04);--shadow-lg: 0 8px 24px rgba(255,255,255,0.04);
+--header-bg: rgba(24,28,38,0.85);
+--announce-bg: #1e2332;
+--announce-text: #93b4f5;  --notice-bg: #2b2416;
   --notice-border: #f0b400;
   --notice-text: #f7e7a0;
   --nav-active-bg: #3b6ff5;
   --nav-active-text: white;
   --banner-bg: linear-gradient(135deg, #2b3b6b, #5b3e8c);
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
+}* { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg);
   color: var(--text);
-  line-height: 1.6;
-  transition: background 0.3s, color 0.3s;
+  line-height: 1.6;  transition: background 0.3s, color 0.3s;
   -webkit-font-smoothing: antialiased;
 }.header {
   background: var(--header-bg);
@@ -69,15 +55,12 @@ body {
   top: 0;
   z-index: 100;
   box-shadow: var(--shadow-sm);
-}
-.header-inner { max-width: 1000px; margin: auto; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; }
-.header h1 { font-size: 22px; font-weight: 700; color: var(--text); }
-.header-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+}.header-inner { max-width: 1000px; margin: auto; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; }
+.header h1 { font-size: 22px; font-weight: 700; color: var(--text); }.header-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .icon-btn {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  color: var(--text-secondary);
-  border-radius: 20px;
+  color: var(--text-secondary);  border-radius: 20px;
   padding: 5px 14px;
   font-size: 13px;
   cursor: pointer;
@@ -86,10 +69,8 @@ body {
   font-weight: 500;
   text-decoration: none;
   box-shadow: var(--shadow-sm);
-}
-.icon-btn:hover { background: var(--border); color: var(--text); transform: translateY(-1px); }
-.nav-bar { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0; }
-.nav-btn {
+}.icon-btn:hover { background: var(--border); color: var(--text); transform: translateY(-1px); }
+.nav-bar { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0; }.nav-btn {
   background: var(--card-bg);
   border: 1px solid var(--border);
   color: var(--text-secondary);
@@ -101,8 +82,7 @@ body {
   transition: 0.2s;
   font-weight: 500;
   box-shadow: var(--shadow-sm);
-}
-.nav-btn.active { background: var(--nav-active-bg); color: var(--nav-active-text); border-color: var(--nav-active-bg); }
+}.nav-btn.active { background: var(--nav-active-bg); color: var(--nav-active-text); border-color: var(--nav-active-bg); }
 .search-box {
   width: 100%;
   padding: 10px 16px;
@@ -113,9 +93,8 @@ body {
   color: var(--text);
   font-size: 15px;
   transition: 0.2s;
-}
-.search-box:focus { outline: none; border-color: var(--link); }
-    .btn {
+}.search-box:focus { outline: none; border-color: var(--link); }
+.btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -130,8 +109,7 @@ body {
   text-decoration: none;
   transition: 0.2s;
   box-shadow: 0 2px 8px rgba(59,111,245,0.25);
-}
-.btn:hover { background: var(--btn-hover); transform: translateY(-1px); }
+}.btn:hover { background: var(--btn-hover); transform: translateY(-1px); }
 .card {
   background: var(--card-bg);
   border-radius: var(--radius);
@@ -140,12 +118,10 @@ body {
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
   transition: transform 0.15s;
-}
-.card:hover { transform: translateY(-2px); }
+}.card:hover { transform: translateY(-2px); }
 .card.notice { background: var(--notice-bg); border-color: var(--notice-border); }
 .card h3 { font-size: 17px; margin-bottom: 4px; font-weight: 600; }
-.desc { color: var(--text-secondary); font-size: 14px; margin-bottom: 8px; }
-.download-link {
+.desc { color: var(--text-secondary); font-size: 14px; margin-bottom: 8px; }.download-link {
   display: inline-flex;
   background: var(--link);
   color: white;
@@ -155,8 +131,7 @@ body {
   text-decoration: none;
   font-weight: 500;
 }
-.meta { font-size: 12px; color: var(--text-secondary); margin-top: 8px; display: flex; gap: 15px; flex-wrap: wrap; }
-.announcement {
+.meta { font-size: 12px; color: var(--text-secondary); margin-top: 8px; display: flex; gap: 15px; flex-wrap: wrap; }.announcement {
   background: var(--announce-bg);
   border-radius: 12px;
   padding: 14px 18px;
@@ -164,47 +139,40 @@ body {
   border-left: 4px solid var(--link);
   color: var(--text);
   font-size: 14px;
-}    .sidebar-card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-bottom: 15px;
-      box-shadow: var(--shadow);
-      border: 1px solid var(--border);
-    }
-    .sidebar-card h3 { font-size: 15px; margin-bottom: 10px; font-weight: 600; }
-    .banner {
-      background: var(--banner-bg);
-      color: white;
-      padding: 20px;
-      border-radius: var(--radius);
-      margin-bottom: 20px;
-      box-shadow: var(--shadow);
-    }
-    .banner h2 { font-size: 22px; margin-bottom: 5px; }
-    .banner p { opacity: 0.9; font-size: 14px; }
-    .hidden { display: none !important; }
-    .badge { display: inline-block; background: #e74c3c; color: white; border-radius: 4px; padding: 1px 6px; font-size: 11px; margin-left: 4px; }
-    .type-badge { display: inline-block; border-radius: 4px; padding: 2px 8px; font-size: 11px; margin-right: 6px; color: white; }
-    .badge-software { background: #4caf93; }
-    .badge-tool { background: #7386d5; }
-    .badge-notice { background: #f0a86e; }
-    .modal {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.4); backdrop-filter: blur(6px);
-      display: flex; align-items: center; justify-content: center; z-index: 200;
-    }
-    .modal-content { background: var(--card-bg); border-radius: var(--radius); padding: 24px; width: 90%; max-width: 400px; }
-    
-    /* 侧边栏抽屉 */
-    .main-content { max-width: 800px; margin: 0 auto; padding: 0 16px; }
-    .sidebar-drawer {
-      position: fixed; left: -300px; top: 0; width: 280px; height: 100%;
-      background: var(--card-bg); z-index: 250; transition: left 0.3s ease;
-      box-shadow: var(--shadow); padding: 20px; overflow-y: auto;
-    }
-    .sidebar-drawer.open { left: 0; }
-    .overlay {
+}.sidebar-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 15px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+.sidebar-card h3 { font-size: 15px; margin-bottom: 10px; font-weight: 600; }.banner {
+  background: var(--banner-bg);
+  color: white;
+  padding: 20px;
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+.banner h2 { font-size: 22px; margin-bottom: 5px; }
+.banner p { opacity: 0.9; font-size: 14px; }.hidden { display: none !important; }
+.badge { display: inline-block; background: #e74c3c; color: white; border-radius: 4px; padding: 1px 6px; font-size: 11px; margin-left: 4px; }
+.type-badge { display: inline-block; border-radius: 4px; padding: 2px 8px; font-size: 11px; margin-right: 6px; color: white; }
+.badge-software { background: #4caf93; }
+.badge-tool { background: #7386d5; }
+.badge-notice { background: #f0a86e; }.modal {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center; z-index: 200;
+}
+.modal-content { background: var(--card-bg); border-radius: var(--radius); padding: 24px; width: 90%; max-width: 400px; }.main-content { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+.sidebar-drawer {
+  position: fixed; left: -300px; top: 0; width: 280px; height: 100%;
+  background: var(--card-bg); z-index: 250; transition: left 0.3s ease;
+  box-shadow: var(--shadow); padding: 20px; overflow-y: auto;
+}
+.sidebar-drawer.open { left: 0; }    .overlay {
       display: none; position: fixed; top: 0; left: 0;
       width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 200;
     }
@@ -215,139 +183,111 @@ body {
     <div class="header-inner">
       <h1>软件库</h1>
       <div class="header-actions">
-        <button class="icon-btn" onclick="openSidebar()" style="font-size:18px;">☰</button>
-        <button class="icon-btn" onclick="toggleDark()" id="darkToggle">暗色模式</button>
-        <a href="mailto:dghkkppp@qq.com" class="icon-btn" id="messageBtn">私信</a>
-        <a href="./login.html" class="icon-btn" id="loginLink">登录</a>
-        <span id="userDisplay" class="hidden" style="font-size:14px;"></span>
-        <a href="#" class="icon-btn hidden" id="logoutLink">退出</a>
-        <span id="adminArea" class="hidden">
-          <button class="icon-btn" onclick="toggleAdmin()">审核</button>
-          <a href="https://github.com/ctctycyc/softlib/issues" target="_blank" class="icon-btn">后台</a>
-        </span>
-      </div>
+        <button class="icon-btn" onclick="openSidebar()" style="font-size:18px;">☰</button><button class="icon-btn" onclick="toggleDark()" id="darkToggle">暗色模式</button>
+<a href="mailto:dghkkppp@qq.com" class="icon-btn" id="messageBtn">私信</a>
+<a href="./login.html" class="icon-btn" id="loginLink">登录</a>
+<span id="userDisplay" class="hidden" style="font-size:14px;"></span>
+<a href="#" class="icon-btn hidden" id="logoutLink">退出</a>      <span id="adminArea" class="hidden">
+        <button class="icon-btn" onclick="toggleAdmin()">审核</button>
+        <a href="https://github.com/ctctycyc/softlib/issues" target="_blank" class="icon-btn">后台</a>
+      </span>
     </div>
   </div>
-
-  <!-- 主内容 -->
-  <div class="main-content">
-    <div class="banner">
-      <h2>欢迎来到软件库</h2>
-      <p>发现实用软件，分享你的工具，和朋友们一起构建更好用的数字生活。</p>
-    </div>
-    <div class="nav-bar" id="navBar">
-      <button class="nav-btn active" data-category="all">全部</button>
-      <button class="nav-btn" data-category="software">软件</button>
-      <button class="nav-btn" data-category="tool">工具</button>
-      <button class="nav-btn" data-category="personal">个人</button>
-    </div>
-    <input type="text" class="search-box" id="searchInput" placeholder="搜索软件或工具..." oninput="filterSoftwares()">
-    <div class="announcement">
-      公告：欢迎来到软件库！这里可以浏览软件，登录后即可下载。遇到问题请私信管理员。
-    </div>
-    <div style="text-align:right; margin-bottom:10px;">
-      <button class="icon-btn" onclick="toggleNotice()" id="noticeToggleBtn">查看通知</button>
-    </div>
-    <div id="noticeList" class="hidden" style="margin-bottom:14px;"></div>
-    <div id="adminPanel" class="hidden" style="margin-bottom:14px;"></div>
-    <div id="list"></div>
+  </div><div class="main-content">
+  <div class="banner">
+    <h2>欢迎来到软件库社区</h2>
+    <p>发现实用软件，分享你的工具，和朋友们一起构建更好用的数字生活。</p>
   </div>
-
-  <!-- 左侧滑出侧边栏 -->
-  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
-  <div class="sidebar-drawer" id="sidebarDrawer">
-    <h3 style="margin-bottom:15px;">菜单</h3>
-    <div class="sidebar-card">
-      <h3>统计</h3>
-      <div id="statsContent">加载中...</div>
-    </div>
-    <div class="sidebar-card">
-      <h3>最新通知</h3>
-      <div id="sidebarNotices">暂无通知</div>
-    </div>
-    <div class="sidebar-card">
-      <h3>联系管理员</h3>
-      <p style="font-size:13px;">如有问题，请发送邮件至：<br><a href="mailto:dghkkppp@qq.com">dghkkppp@qq.com</a></p>
-    </div>
+  <div class="nav-bar" id="navBar">
+    <button class="nav-btn active" data-category="all">全部</button>
+    <button class="nav-btn" data-category="software">软件</button>
+    <button class="nav-btn" data-category="tool">工具</button>
+    <button class="nav-btn" data-category="personal">个人</button>
+  </div>  <input type="text" class="search-box" id="searchInput" placeholder="搜索软件或工具..." oninput="filterSoftwares()">
+  <div class="announcement">
+    公告：欢迎来到社区！这里可以浏览软件，登录后即可下载。遇到问题请私信管理员。
+  </div>
+  <div style="text-align:right; margin-bottom:10px;">
+    <button class="icon-btn" onclick="toggleNotice()" id="noticeToggleBtn">查看通知</button>
+  </div>
+  <div id="noticeList" class="hidden" style="margin-bottom:14px;"></div>
+  <div id="adminPanel" class="hidden" style="margin-bottom:14px;"></div>
+  <div id="list"></div>
+  </div><div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<div class="sidebar-drawer" id="sidebarDrawer">
+  <h3 style="margin-bottom:15px;">菜单</h3>
   <div class="sidebar-card">
-  <h3>聊天室</h3>
-  <div id="chat-messages" style="max-height:200px; overflow-y:auto; margin-bottom:10px; font-size:13px;"></div>
-  <input type="text" id="chat-input" placeholder="说点什么..." style="width:100%; padding:6px; border:1px solid var(--border); border-radius:6px;">
-  <button class="btn" onclick="sendChat()" style="margin-top:5px; width:100%;">发送</button>
+    <h3>社区统计</h3>
+    <div id="statsContent">加载中...</div>
   </div>
- 
+  <div class="sidebar-card">
+    <h3>最新通知</h3>
+    <div id="sidebarNotices">暂无通知</div>
   </div>
-
-  <div id="aboutModal" class="modal hidden" onclick="hideAbout()">
-    <div class="modal-content" onclick="event.stopPropagation()" style="text-align:center;">
-      <h3>软件库</h3><p>正式版 1.2</p>
-      <p>管理员: zeruan</p>
-      <button class="btn" onclick="hideAbout()">关闭</button>
-    </div>
+  <div class="sidebar-card">
+    <h3>联系管理员</h3>
+    <p style="font-size:13px;">如有问题，请发送邮件至：<br><a href="mailto:dghkkppp@qq.com">dghkkppp@qq.com</a></p>
+  </div>  <div class="sidebar-card">
+    <h3>聊天室</h3>
+    <div id="chat-messages" style="max-height:200px; overflow-y:auto; margin-bottom:10px; font-size:13px;"></div>
+    <input type="text" id="chat-input" placeholder="说点什么..." style="width:100%; padding:6px; border:1px solid var(--border); border-radius:6px;">
+    <button class="btn" onclick="sendChat()" style="margin-top:5px; width:100%;">发送</button>
   </div>
-  <div class="footer" id="secretTrigger" style="text-align:center; padding:20px; color:var(--text-secondary); font-size:12px;">✔zeci rjk</div>
-  <script>
-  function openSidebar() {
-    document.getElementById('sidebarDrawer').classList.add('open');
-    document.getElementById('overlay').classList.add('show');
-  }
-  function closeSidebar() {
-    document.getElementById('sidebarDrawer').classList.remove('open');
-    document.getElementById('overlay').classList.remove('show');
-  }
-
+</div><div id="aboutModal" class="modal hidden" onclick="hideAbout()">
+  <div class="modal-content" onclick="event.stopPropagation()" style="text-align:center;">
+    <h3>软件库</h3><p>测试版 1.1</p>
+    <p>管理员: zeruan</p>
+    <button class="btn" onclick="hideAbout()">关闭</button>
+  </div>
+</div>
+<div class="footer" id="secretTrigger" style="text-align:center; padding:20px; color:var(--text-secondary); font-size:12px;">✔zeci rjk</div><script>
   const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    const API = 'https://api.github.com/repos/ctctycyc/softlib/issues';
-  const ADMIN_USERNAMES = ['zeruan'];
-  let allSoftwares = [], currentCategory = 'all', adminToken = localStorage.getItem('adminToken');
-
-  // 管理员激活
-  let clickCount = 0;
-  document.getElementById('secretTrigger').addEventListener('click', () => {
-    clickCount++;
-    if (clickCount >= 5) {
-      clickCount = 0;
-      const input = prompt('管理员登录：请输入 GitHub Token');
-      if (input && input.trim()) verifyAdminToken(input.trim());
-    }
-    setTimeout(() => clickCount = 0, 2000);
-  });
-  async function verifyAdminToken(token) {
-    try {
-      const res = await fetch('https://api.github.com/user', { headers: { Authorization: `token ${token}` } });
-      if (res.ok) {
-        adminToken = token; localStorage.setItem('adminToken', adminToken);
-        alert('管理功能已激活！'); document.getElementById('adminArea').classList.remove('hidden');
-      } else alert('Token 无效');
-    } catch (e) { alert('网络错误'); }
+  const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);function openSidebar() {
+  document.getElementById('sidebarDrawer').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebarDrawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}const API = 'https://api.github.com/repos/ctctycyc/softlib/issues';
+const ADMIN_USERNAMES = ['zeruan'];
+let allSoftwares = [], currentCategory = 'all', adminToken = localStorage.getItem('adminToken');let clickCount = 0;
+document.getElementById('secretTrigger').addEventListener('click', () => {
+  clickCount++;
+  if (clickCount >= 5) {
+    clickCount = 0;
+    const input = prompt('管理员登录：请输入 GitHub Token');
+    if (input && input.trim()) verifyAdminToken(input.trim());
   }
-  document.getElementById('adminArea').classList.add('hidden');
-
-  // 导航
-  document.getElementById('navBar').addEventListener('click', e => {
-    if (e.target.classList.contains('nav-btn')) {
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      e.target.classList.add('active');
-      currentCategory = e.target.dataset.category;
-      renderFilteredSoftwares();
-    }
-  });
-
-  function toggleDark() {
-    document.documentElement.classList.toggle('dark');
-    const isDark = document.documentElement.classList.contains('dark');
-    localStorage.setItem('darkMode', isDark);
-    document.getElementById('darkToggle').textContent = isDark ? '亮色模式' : '暗色模式';
+  setTimeout(() => clickCount = 0, 2000);
+});async function verifyAdminToken(token) {
+  try {
+    const res = await fetch('https://api.github.com/user', { headers: { Authorization: `token ${token}` } });
+    if (res.ok) {
+      adminToken = token; localStorage.setItem('adminToken', adminToken);
+      alert('管理功能已激活！'); document.getElementById('adminArea').classList.remove('hidden');
+    } else alert('Token 无效');
+  } catch (e) { alert('网络错误'); }
+}
+document.getElementById('adminArea').classList.add('hidden');document.getElementById('navBar').addEventListener('click', e => {
+  if (e.target.classList.contains('nav-btn')) {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    currentCategory = e.target.dataset.category;
+    renderFilteredSoftwares();
   }
-  if (localStorage.getItem('darkMode') === 'true') { document.documentElement.classList.add('dark'); document.getElementById('darkToggle').textContent = '亮色模式'; }
-
-  function getDefaultIcon(sw) {
-    if (sw.isNotice) return '<span class="type-badge badge-notice">公告</span>';
-    if (sw.isTool) return '<span class="type-badge badge-tool">工具</span>';
-    return '<span class="type-badge badge-software">软件</span>';
-  }async function loadSoftwares() {
+});function toggleDark() {
+  document.documentElement.classList.toggle('dark');
+  const isDark = document.documentElement.classList.contains('dark');
+  localStorage.setItem('darkMode', isDark);
+  document.getElementById('darkToggle').textContent = isDark ? '亮色模式' : '暗色模式';
+}
+if (localStorage.getItem('darkMode') === 'true') { document.documentElement.classList.add('dark'); document.getElementById('darkToggle').textContent = '亮色模式'; }function getDefaultIcon(sw) {
+  if (sw.isNotice) return '<span class="type-badge badge-notice">公告</span>';
+  if (sw.isTool) return '<span class="type-badge badge-tool">工具</span>';
+  return '<span class="type-badge badge-software">软件</span>';
+}async function loadSoftwares() {
   try {
     const res = await fetch(API + '?labels=approved&state=open&sort=created&direction=desc&per_page=100');
     const issues = await res.json();
@@ -366,18 +306,14 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     updateStats();
     renderFilteredSoftwares();
   } catch(e) { document.getElementById('list').innerHTML = '<p>加载失败</p>'; }
-}
-
-function updateStats() {
+}function updateStats() {
   const softwareCount = allSoftwares.filter(s => s.isSoftware && !s.isNotice).length;
   const toolCount = allSoftwares.filter(s => s.isTool).length;
   const noticeCount = allSoftwares.filter(s => s.isNotice).length;
   document.getElementById('statsContent').innerHTML = `
     <p>软件: ${softwareCount}</p><p>工具: ${toolCount}</p><p>公告: ${noticeCount}</p>
   `;
-}
-
-function renderFilteredSoftwares() {
+}function renderFilteredSoftwares() {
   let filtered = allSoftwares;
   if (currentCategory === 'all') filtered = allSoftwares.filter(sw => !sw.isTool);
   else if (currentCategory === 'software') filtered = allSoftwares.filter(sw => sw.isSoftware && !sw.isNotice);
@@ -392,9 +328,7 @@ function renderFilteredSoftwares() {
     return;
   }
   renderSoftwares(filtered);
-}
-
-function renderSoftwares(softwares) {
+}function renderSoftwares(softwares) {
   const listDiv = document.getElementById('list');
   if (softwares.length === 0) { listDiv.innerHTML = '<div class="card">暂无内容</div>'; return; }
   let html = '';
@@ -417,45 +351,26 @@ function renderSoftwares(softwares) {
     </div>`;
   });
   listDiv.innerHTML = html;
-    }// 通知列表（主区域）
-async function loadNotices() {
+}async function loadNotices() {
   try {
     const res = await fetch(API + '?labels=notice&state=open&sort=created&direction=desc&per_page=10');
     const issues = await res.json();
     const list = document.getElementById('noticeList');
-    if (issues.length === 0) {
-      list.innerHTML = '<div class="card">暂无通知</div>';
-      return;
-    }
+    if (issues.length === 0) { list.innerHTML = '<div class="card">暂无通知</div>'; return; }
     let html = '';
     issues.forEach(issue => {
       const date = new Date(issue.created_at).toLocaleDateString('zh-CN');
-      html += `<div class="card notice">
-        <h3>${issue.title}</h3>
-        <div class="desc">${issue.body ? issue.body.substring(0,200) : ''}</div>
-        <div class="meta"><span>${date}</span></div>
-      </div>`;
+      html += `<div class="card notice"><h3>${issue.title}</h3><div class="desc">${issue.body ? issue.body.substring(0,200) : ''}</div><div class="meta"><span>${date}</span></div></div>`;
     });
     list.innerHTML = html;
-  } catch(e) {
-    document.getElementById('noticeList').innerHTML = '<p>加载通知失败</p>';
-  }
+  } catch(e) { document.getElementById('noticeList').innerHTML = '<p>加载通知失败</p>'; }
 }
 function toggleNotice() {
   const list = document.getElementById('noticeList');
   const btn = document.getElementById('noticeToggleBtn');
-  if (list.classList.contains('hidden')) {
-    loadNotices();
-    list.classList.remove('hidden');
-    btn.textContent = '收起通知';
-  } else {
-    list.classList.add('hidden');
-    btn.textContent = '查看通知';
-  }
-}
-
-// 侧边栏最新通知
-async function loadSidebarNotices() {
+  if (list.classList.contains('hidden')) { loadNotices(); list.classList.remove('hidden'); btn.textContent = '收起通知'; }
+  else { list.classList.add('hidden'); btn.textContent = '查看通知'; }
+}async function loadSidebarNotices() {
   try {
     const res = await fetch(API + '?labels=notice&state=open&sort=created&direction=desc&per_page=3');
     const issues = await res.json();
@@ -467,25 +382,14 @@ async function loadSidebarNotices() {
     div.innerHTML = html;
   } catch(e) { document.getElementById('sidebarNotices').innerHTML = '<p>加载失败</p>'; }
 }
-loadSidebarNotices();
-
-// 登录状态显示
-function updateAuthUI() {
+loadSidebarNotices();function updateAuthUI() {
   const email = localStorage.getItem('authEmail');
   const token = localStorage.getItem('authToken');
   const loginLink = document.getElementById('loginLink');
   const userDisplay = document.getElementById('userDisplay');
   const logoutLink = document.getElementById('logoutLink');
-  if (email && token) {
-    loginLink.classList.add('hidden');
-    userDisplay.classList.remove('hidden');
-    logoutLink.classList.remove('hidden');
-    userDisplay.textContent = email;
-  } else {
-    loginLink.classList.remove('hidden');
-    userDisplay.classList.add('hidden');
-    logoutLink.classList.add('hidden');
-  }
+  if (email && token) { loginLink.classList.add('hidden'); userDisplay.classList.remove('hidden'); logoutLink.classList.remove('hidden'); userDisplay.textContent = email; }
+  else { loginLink.classList.remove('hidden'); userDisplay.classList.add('hidden'); logoutLink.classList.add('hidden'); }
 }
 updateAuthUI();
 document.getElementById('logoutLink').addEventListener('click', function(e) {
@@ -493,121 +397,82 @@ document.getElementById('logoutLink').addEventListener('click', function(e) {
   localStorage.removeItem('authEmail');
   localStorage.removeItem('authToken');
   location.reload();
-});    // 私信按钮
-    document.getElementById('messageBtn').addEventListener('click', function(e) {
-      const email = localStorage.getItem('authEmail');
-      if (email) {
-        e.preventDefault();
-        window.location.href = `mailto:dghkkppp@qq.com?subject=来自软件库社区的私信&body=我的邮箱：${email}`;
-      } else {
-        e.preventDefault();
-        alert('请先登录后再发送私信');
-        location.href = './login.html';
-      }
-    });
+});document.getElementById('messageBtn').addEventListener('click', function(e) {
+  const email = localStorage.getItem('authEmail');
+  if (email) { e.preventDefault(); window.location.href = `mailto:dghkkppp@qq.com?subject=来自软件库社区的私信&body=我的邮箱：${email}`; }
+  else { e.preventDefault(); alert('请先登录后再发送私信'); location.href = './login.html'; }
+});function filterSoftwares() {
+  let base = allSoftwares;
+  if (currentCategory === 'all') base = base.filter(sw => !sw.isTool);
+  else if (currentCategory === 'software') base = base.filter(sw => sw.isSoftware && !sw.isNotice);
+  else if (currentCategory === 'tool') base = base.filter(sw => sw.isTool);
+  else if (currentCategory === 'personal') return;
+  const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+  if (!keyword) renderSoftwares(base);
+  else renderSoftwares(base.filter(sw => sw.title.toLowerCase().includes(keyword) || (sw.description&&sw.description.toLowerCase().includes(keyword))));
+}function showAbout() { document.getElementById('aboutModal').classList.remove('hidden'); }
+function hideAbout() { document.getElementById('aboutModal').classList.add('hidden'); }
+function toggleAdmin() { document.getElementById('adminPanel').classList.toggle('hidden'); if (!document.getElementById('adminPanel').classList.contains('hidden')) loadPendingIssues(); }
 
-    function filterSoftwares() {
-      let base = allSoftwares;
-      if (currentCategory === 'all') base = base.filter(sw => !sw.isTool);
-      else if (currentCategory === 'software') base = base.filter(sw => sw.isSoftware && !sw.isNotice);
-      else if (currentCategory === 'tool') base = base.filter(sw => sw.isTool);
-      else if (currentCategory === 'personal') return;
-      const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
-      if (!keyword) renderSoftwares(base);
-      else renderSoftwares(base.filter(sw => sw.title.toLowerCase().includes(keyword) || (sw.description&&sw.description.toLowerCase().includes(keyword))));
-    }
-
-    function showAbout() { document.getElementById('aboutModal').classList.remove('hidden'); }
-    function hideAbout() { document.getElementById('aboutModal').classList.add('hidden'); }
-    function toggleAdmin() { document.getElementById('adminPanel').classList.toggle('hidden'); if (!document.getElementById('adminPanel').classList.contains('hidden')) loadPendingIssues(); }
-
-    async function loadPendingIssues() {
-      if (!adminToken) return;
-      const res = await fetch(API + '?labels=pending&state=open&sort=created&direction=desc');
-      const issues = await res.json(); const div = document.getElementById('pendingList');
-      if (!issues.length) { div.innerHTML = '<p>暂无待审核</p>'; return; }
-      let html = ''; issues.forEach(issue => { html += `<div class="card"><h3>${issue.title}</h3><p>${issue.body ? issue.body.substring(0,80) : ''}...</p><div style="margin-top:10px;"><button class="btn" onclick="approve(${issue.number})">通过</button><button class="btn" style="background:#e74c3c;margin-left:5px;" onclick="reject(${issue.number})">驳回</button></div></div>`; });
-      div.innerHTML = html;
-    }
-    async function approve(number) {
-      if (!adminToken) return;
-      await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${number}/labels`, { method: 'PUT', headers: { Authorization: `token ${adminToken}` }, body: JSON.stringify({ labels: ['approved'] }) });
-      alert('已通过'); loadPendingIssues(); loadSoftwares();
-    }
-    async function reject(number) {
-      if (!adminToken) return;
-      await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${number}`, { method: 'PATCH', headers: { Authorization: `token ${adminToken}` }, body: JSON.stringify({ state: 'closed', labels: ['rejected'] }) });
-      alert('已驳回'); loadPendingIssues();
-    }
-
+async function loadPendingIssues() {
+  if (!adminToken) return;
+  const res = await fetch(API + '?labels=pending&state=open&sort=created&direction=desc');
+  const issues = await res.json(); const div = document.getElementById('pendingList');
+  if (!issues.length) { div.innerHTML = '<p>暂无待审核</p>'; return; }
+  let html = ''; issues.forEach(issue => { html += `<div class="card"><h3>${issue.title}</h3><p>${issue.body ? issue.body.substring(0,80) : ''}...</p><div style="margin-top:10px;"><button class="btn" onclick="approve(${issue.number})">通过</button><button class="btn" style="background:#e74c3c;margin-left:5px;" onclick="reject(${issue.number})">驳回</button></div></div>`; });
+  div.innerHTML = html;
+}
+async function approve(number) {
+  if (!adminToken) return;
+  await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${number}/labels`, { method: 'PUT', headers: { Authorization: `token ${adminToken}` }, body: JSON.stringify({ labels: ['approved'] }) });
+  alert('已通过'); loadPendingIssues(); loadSoftwares();
+}
+async function reject(number) {
+  if (!adminToken) return;
+  await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${number}`, { method: 'PATCH', headers: { Authorization: `token ${adminToken}` }, body: JSON.stringify({ state: 'closed', labels: ['rejected'] }) });
+  alert('已驳回'); loadPendingIssues();
+}    (function() {
+      try {
+        if (typeof supabase === 'undefined') throw new Error('Supabase 未加载');
+        async function loadChatHistory() {
+          const { data, error } = await supabase
+            .from('chat_messages')
+            .select('*')
+            .order('created_at', { ascending: true })
+            .limit(50);
+          if (data) {
+            const box = document.getElementById('chat-messages');
+            if (!box) return;
+            box.innerHTML = '';
+            data.forEach(m => addMessageToChat(m.email, m.message));
+          }
+        }
+        function addMessageToChat(email, msg) {
+          const box = document.getElementById('chat-messages');
+          if (!box) return;
+          const div = document.createElement('div');
+          div.innerHTML = `<strong>${email}:</strong> ${msg}`;
+          box.appendChild(div);
+          box.scrollTop = box.scrollHeight;
+        }
+        window.sendChat = async function() {
+          const email = localStorage.getItem('authEmail');
+          if (!email) { alert('请先登录后再发言'); location.href = './login.html'; return; }
+          const input = document.getElementById('chat-input');
+          const msg = input ? input.value.trim() : '';
+          if (!msg) return;
+          const { error } = await supabase.from('chat_messages').insert({ email: email, message: msg });
+          if (error) { alert('发送失败: ' + error.message); } else { input.value = ''; }
+        };
+        supabase.channel('chat-room')
+          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
+            addMessageToChat(payload.new.email, payload.new.message);
+          })
+          .subscribe();
+        window.addEventListener('load', () => { setTimeout(loadChatHistory, 500); });
+      } catch (e) { console.error('聊天功能初始化失败：', e); }
+    })();
     loadSoftwares();
-// ========== 聊天功能（安全模式） ==========
-(function() {
-  try {
-    if (typeof supabase === 'undefined') throw new Error('Supabase 未加载');
-
-    async function loadChatHistory() {
-      const { data, error } = await supabase
-        .from('chat_messages')
-        .select('*')
-        .order('created_at', { ascending: true })
-        .limit(50);
-      if (data) {
-        const box = document.getElementById('chat-messages');
-        if (!box) return;
-        box.innerHTML = '';
-        data.forEach(m => addMessageToChat(m.email, m.message));
-      }
-    }
-
-    function addMessageToChat(email, msg) {
-      const box = document.getElementById('chat-messages');
-      if (!box) return;
-      const div = document.createElement('div');
-      div.innerHTML = `<strong>${email}:</strong> ${msg}`;
-      box.appendChild(div);
-      box.scrollTop = box.scrollHeight;
-    }
-
-    window.sendChat = async function() {
-      const email = localStorage.getItem('authEmail');
-      if (!email) {
-        alert('请先登录后再发言');
-        location.href = './login.html';
-        return;
-      }
-      const input = document.getElementById('chat-input');
-      const msg = input ? input.value.trim() : '';
-      if (!msg) return;
-      const { error } = await supabase
-        .from('chat_messages')
-        .insert({ email: email, message: msg });
-      if (error) {
-        alert('发送失败: ' + error.message);
-      } else {
-        input.value = '';
-      }
-    };
-
-    // 订阅实时消息
-    supabase
-      .channel('chat-room')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
-        addMessageToChat(payload.new.email, payload.new.message);
-      })
-      .subscribe();
-
-    // 延迟加载历史消息，确保 DOM 已就绪
-    window.addEventListener('load', () => {
-      setTimeout(loadChatHistory, 500);
-    });
-
-  } catch (e) {
-    console.error('聊天功能初始化失败：', e);
-  }
-})();
-
   </script>
 </body>
-</html>
 </html>
