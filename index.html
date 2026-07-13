@@ -259,7 +259,7 @@ body {
     <p style="font-size:13px;">如有问题，请发送邮件至：<br><a href="mailto:dghkkppp@qq.com">dghkkppp@qq.com</a></p>
   </div>
   <div class="sidebar-card" style="text-align:center;">
-<a href="#" id="chat-link" class="btn" style="width:100%;">进入聊天室</a>
+<a href="#" id="chat-link" class="btn" style="width:100%;" onclick="openChatExternal(); return false;">进入聊天室</a>
   </div>
 </div><div id="aboutModal" class="modal hidden" onclick="hideAbout()">
   <div class="modal-content" onclick="event.stopPropagation()" style="text-align:center;">
@@ -501,6 +501,42 @@ document.getElementById('messageBtn').addEventListener('click', function(e) {
       .then(() => console.log('SW registered'))
       .catch(() => console.log('SW registration failed'));
   }
+function openChatExternal() {
+  var chatUrl = 'https://ctctycyc.github.io/softlib/chat.html';
+  var email = localStorage.getItem('authEmail');
+  if (email) {
+    chatUrl += '?email=' + encodeURIComponent(email);
+  }
+
+  // 尝试多种方式跳出 WebView 到系统浏览器
+  var opened = false;
+
+  // 方法1：Android Intent（最有效）
+  var intentUrl = 'intent://' + chatUrl.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end';
+  try {
+    window.location.href = intentUrl;
+    opened = true;
+  } catch(e) {}
+
+  // 方法2：iOS / 通用 window.open
+  if (!opened) {
+    var win = window.open(chatUrl, '_system');
+    if (win) {
+      win.focus();
+      opened = true;
+    }
+  }
+
+  // 方法3：直接修改当前窗口跳转（可能仍在 WebView 内）
+  if (!opened) {
+    window.location.href = chatUrl;
+  }
+
+  // 如果上面都没成功，弹出提示让用户手动复制链接
+  setTimeout(function() {
+    alert('如未自动跳转，请手动复制链接在浏览器打开：\n' + chatUrl);
+  }, 800);
+}
 </script>
 </body>
 </html>
