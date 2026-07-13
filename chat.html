@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>聊天室</title>
+  <title>聊天室 - 软件库</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { font-family: sans-serif; background: #f4f6f9; margin: 0; padding: 16px; }
@@ -26,18 +26,20 @@
   </div>
 
   <script>
-    // 初始化 Supabase 客户端
     const supabase = window.supabase.createClient(
       'https://rgekpmuujozhkkctpdup.supabase.co',
       'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr'
     );
 
-    // 检查登录状态
     const email = localStorage.getItem('authEmail');
     if (!email) {
       alert('请先登录后再进入聊天室');
       location.href = './login.html';
     }
+
+    const chatBox = document.getElementById('chat-box');
+    const msgInput = document.getElementById('msg-input');
+    const sendBtn = document.getElementById('send-btn');
 
     // 加载历史消息
     async function loadHistory() {
@@ -47,42 +49,38 @@
         .order('created_at', { ascending: true })
         .limit(50);
       if (error) {
-        alert('加载历史消息失败：' + error.message);
+        chatBox.innerHTML = '<p style="color:red;">加载失败：' + error.message + '</p>';
         return;
       }
-      const box = document.getElementById('chat-box');
-      box.innerHTML = '';
+      chatBox.innerHTML = '';
       if (data) data.forEach(m => addMsg(m.email, m.message));
     }
 
     function addMsg(email, msg) {
-      const box = document.getElementById('chat-box');
       const div = document.createElement('div');
       div.className = 'msg';
       div.innerHTML = `<strong>${email}:</strong> ${msg}`;
-      box.appendChild(div);
-      box.scrollTop = box.scrollHeight;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // 发送消息（错误直接弹窗）
-    async function sendMsg() {
-      const input = document.getElementById('msg-input');
-      const msg = input.value.trim();
+    // 发送消息
+    sendBtn.addEventListener('click', async function() {
+      const msg = msgInput.value.trim();
       if (!msg) return;
-
+      sendBtn.disabled = true;
+      sendBtn.textContent = '发送中...';
       const { error } = await supabase
         .from('chat_messages')
         .insert({ email: email, message: msg });
-
       if (error) {
-        alert('发送失败：' + error.message + ' (代码: ' + error.code + ')');
+        alert('发送失败：' + error.message);
       } else {
-        input.value = '';
+        msgInput.value = '';
       }
-    }
-
-    // 确保按钮点击绑定成功
-    document.getElementById('send-btn').addEventListener('click', sendMsg);
+      sendBtn.disabled = false;
+      sendBtn.textContent = '发送';
+    });
 
     // 实时接收新消息
     supabase
@@ -92,7 +90,6 @@
       })
       .subscribe();
 
-    // 初始加载
     loadHistory();
   </script>
 </body>
