@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>软件库 · 社区</title>
+  <title>软件库</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -15,86 +15,170 @@
       --link: #3b6ff5;
       --btn-bg: #3b6ff5;
       --btn-hover: #2b5cd4;
-      --shadow: 0 2px 8px rgba(0,0,0,0.04),0 1px 2px rgba(0,0,0,0.06);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+      --shadow: 0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.06);
       --radius: 14px;
-      --header-bg: rgba(255,255,255,0.9);
+      --radius-sm: 10px;
+      --header-bg: rgba(255,255,255,0.85);
+      --announce-bg: #eef3ff;
+      --announce-text: #1e3a8a;
+      --notice-bg: #fff8f0;
+      --notice-border: #f0b878;
+      --notice-text: #6d4c00;
       --nav-active-bg: #3b6ff5;
       --nav-active-text: white;
       --banner-bg: linear-gradient(135deg, #3b6ff5, #8b5cf6);
-      --notice-bg: #fff8f0;
-      --notice-border: #f0b878;
-      --announce-bg: #eef3ff;
-    }
-    .dark {
-      --bg: #181c26; --card-bg: #212636; --text: #e0e4ec; --text-secondary: #a0a8b8;
-      --border: #2e3440; --link: #6ea8fe; --btn-bg: #3b6ff5; --btn-hover: #2b5cd4;
-      --shadow: 0 2px 8px rgba(255,255,255,0.03);
-      --header-bg: rgba(24,28,38,0.9); --nav-active-bg: #3b6ff5; --nav-active-text: white;
-      --banner-bg: linear-gradient(135deg, #2b3b6b, #5b3e8c);
-      --notice-bg: #2b2416; --notice-border: #f0b400; --announce-bg: #1e2332;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; transition: 0.3s; }
-    .layout { max-width: 1000px; margin: auto; display: flex; gap: 20px; padding: 20px 16px; }
-    .main-content { flex: 1; min-width: 0; }
-    .sidebar { width: 280px; flex-shrink: 0; }
-    @media (max-width: 800px) { .layout { flex-direction: column; } .sidebar { width: 100%; } }.header {
-  background: var(--header-bg); backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border); padding: 12px 0;
-  position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow);
+    }.dark {
+  --bg: #181c26;
+  --card-bg: #212636;
+  --text: #e0e4ec;
+  --text-secondary: #a0a8b8;
+  --border: #2e3440;
+  --link: #6ea8fe;
+  --btn-bg: #3b6ff5;
+  --btn-hover: #2b5cd4;
+  --shadow-sm: 0 1px 3px rgba(255,255,255,0.03);
+  --shadow: 0 2px 8px rgba(255,255,255,0.03), 0 1px 2px rgba(255,255,255,0.04);
+  --shadow-lg: 0 8px 24px rgba(255,255,255,0.04);
+  --header-bg: rgba(24,28,38,0.85);
+  --announce-bg: #1e2332;
+  --announce-text: #93b4f5;
+  --notice-bg: #2b2416;
+  --notice-border: #f0b400;
+  --notice-text: #f7e7a0;
+  --nav-active-bg: #3b6ff5;
+  --nav-active-text: white;
+  --banner-bg: linear-gradient(135deg, #2b3b6b, #5b3e8c);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  transition: background 0.3s, color 0.3s;
+  -webkit-font-smoothing: antialiased;
+}.header {
+  background: var(--header-bg);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
 }
 .header-inner { max-width: 1000px; margin: auto; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; }
 .header h1 { font-size: 22px; font-weight: 700; color: var(--text); }
 .header-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .icon-btn {
-  background: var(--card-bg); border: 1px solid var(--border); color: var(--text-secondary);
-  border-radius: 20px; padding: 5px 14px; font-size: 13px; cursor: pointer;
-  transition: 0.2s; white-space: nowrap; font-weight: 500; text-decoration: none; box-shadow: var(--shadow);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s;
+  white-space: nowrap;
+  font-weight: 500;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
 }
 .icon-btn:hover { background: var(--border); color: var(--text); transform: translateY(-1px); }
 .nav-bar { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0; }
 .nav-btn {
-  background: var(--card-bg); border: 1px solid var(--border); color: var(--text-secondary);
-  border-radius: 20px; padding: 5px 16px; font-size: 14px; cursor: pointer; white-space: nowrap;
-  transition: 0.2s; font-weight: 500; box-shadow: var(--shadow);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  border-radius: 20px;
+  padding: 5px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.2s;
+  font-weight: 500;
+  box-shadow: var(--shadow-sm);
 }
 .nav-btn.active { background: var(--nav-active-bg); color: var(--nav-active-text); border-color: var(--nav-active-bg); }
 .search-box {
-  width: 100%; padding: 10px 16px; margin: 8px 0; border: 1px solid var(--border);
-  border-radius: 20px; background: var(--card-bg); color: var(--text); font-size: 15px; transition: 0.2s;
+  width: 100%;
+  padding: 10px 16px;
+  margin: 8px 0;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--card-bg);
+  color: var(--text);
+  font-size: 15px;
+  transition: 0.2s;
 }
 .search-box:focus { outline: none; border-color: var(--link); }
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; padding: 8px 20px;
-  background: var(--btn-bg); color: white; border-radius: 20px; font-weight: 600; border: none;
-  cursor: pointer; font-size: 14px; text-decoration: none; transition: 0.2s; box-shadow: 0 2px 8px rgba(59,111,245,0.25);
+    .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 20px;
+  background: var(--btn-bg);
+  color: white;
+  border-radius: 20px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  text-decoration: none;
+  transition: 0.2s;
+  box-shadow: 0 2px 8px rgba(59,111,245,0.25);
 }
-.btn:hover { background: var(--btn-hover); transform: translateY(-1px); }    .card {
-      background: var(--card-bg); border-radius: var(--radius); padding: 16px 18px;
-      margin-bottom: 12px; box-shadow: var(--shadow); border: 1px solid var(--border);
-      transition: transform 0.15s;
-    }
-    .card:hover { transform: translateY(-2px); }
-    .card.notice { background: var(--notice-bg); border-color: var(--notice-border); }
-    .card h3 { font-size: 17px; margin-bottom: 4px; font-weight: 600; }
-    .desc { color: var(--text-secondary); font-size: 14px; margin-bottom: 8px; }
-    .download-link {
-      display: inline-flex; background: var(--link); color: white; padding: 5px 16px;
-      border-radius: 16px; font-size: 13px; text-decoration: none; font-weight: 500;
-    }
-    .meta { font-size: 12px; color: var(--text-secondary); margin-top: 8px; display: flex; gap: 15px; flex-wrap: wrap; }
-    .announcement {
-      background: var(--announce-bg); border-radius: 12px; padding: 14px 18px; margin-bottom: 15px;
-      border-left: 4px solid var(--link); color: var(--text); font-size: 14px;
-    }
-    .sidebar-card {
-      background: var(--card-bg); border-radius: var(--radius); padding: 16px;
-      margin-bottom: 15px; box-shadow: var(--shadow); border: 1px solid var(--border);
+.btn:hover { background: var(--btn-hover); transform: translateY(-1px); }
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  transition: transform 0.15s;
+}
+.card:hover { transform: translateY(-2px); }
+.card.notice { background: var(--notice-bg); border-color: var(--notice-border); }
+.card h3 { font-size: 17px; margin-bottom: 4px; font-weight: 600; }
+.desc { color: var(--text-secondary); font-size: 14px; margin-bottom: 8px; }
+.download-link {
+  display: inline-flex;
+  background: var(--link);
+  color: white;
+  padding: 5px 16px;
+  border-radius: 16px;
+  font-size: 13px;
+  text-decoration: none;
+  font-weight: 500;
+}
+.meta { font-size: 12px; color: var(--text-secondary); margin-top: 8px; display: flex; gap: 15px; flex-wrap: wrap; }
+.announcement {
+  background: var(--announce-bg);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 15px;
+  border-left: 4px solid var(--link);
+  color: var(--text);
+  font-size: 14px;
+}    .sidebar-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 15px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
     }
     .sidebar-card h3 { font-size: 15px; margin-bottom: 10px; font-weight: 600; }
     .banner {
-      background: var(--banner-bg); color: white; padding: 20px; border-radius: var(--radius);
-      margin-bottom: 20px; box-shadow: var(--shadow);
+      background: var(--banner-bg);
+      color: white;
+      padding: 20px;
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
     }
     .banner h2 { font-size: 22px; margin-bottom: 5px; }
     .banner p { opacity: 0.9; font-size: 14px; }
@@ -109,15 +193,28 @@
       background: rgba(0,0,0,0.4); backdrop-filter: blur(6px);
       display: flex; align-items: center; justify-content: center; z-index: 200;
     }
-    .modal-content {
-      background: var(--card-bg); border-radius: var(--radius); padding: 24px; width: 90%; max-width: 400px;
+    .modal-content { background: var(--card-bg); border-radius: var(--radius); padding: 24px; width: 90%; max-width: 400px; }
+    
+    /* 侧边栏抽屉 */
+    .main-content { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+    .sidebar-drawer {
+      position: fixed; left: -300px; top: 0; width: 280px; height: 100%;
+      background: var(--card-bg); z-index: 250; transition: left 0.3s ease;
+      box-shadow: var(--shadow); padding: 20px; overflow-y: auto;
     }
+    .sidebar-drawer.open { left: 0; }
+    .overlay {
+      display: none; position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 200;
+    }
+    .overlay.show { display: block; }
   </style>
 </head><body>
   <div class="header">
     <div class="header-inner">
-      <h1>软件库 · 社区</h1>
+      <h1>软件库</h1>
       <div class="header-actions">
+        <button class="icon-btn" onclick="openSidebar()" style="font-size:18px;">☰</button>
         <button class="icon-btn" onclick="toggleDark()" id="darkToggle">暗色模式</button>
         <a href="mailto:dghkkppp@qq.com" class="icon-btn" id="messageBtn">私信</a>
         <a href="./login.html" class="icon-btn" id="loginLink">登录</a>
@@ -131,56 +228,66 @@
     </div>
   </div>
 
-  <div class="layout">
-    <!-- 主内容区 -->
-    <div class="main-content">
-      <div class="banner">
-        <h2>欢迎来到软件库社区</h2>
-        <p>发现实用软件，分享你的工具，和朋友们一起构建更好用的数字生活。</p>
-      </div>
-      <div class="nav-bar" id="navBar">
-        <button class="nav-btn active" data-category="all">全部</button>
-        <button class="nav-btn" data-category="software">软件</button>
-        <button class="nav-btn" data-category="tool">工具</button>
-        <button class="nav-btn" data-category="personal">个人</button>
-      </div>
-      <input type="text" class="search-box" id="searchInput" placeholder="搜索软件或工具..." oninput="filterSoftwares()">
-      <div class="announcement">
-        公告：欢迎来到社区！这里可以浏览软件，登录后即可下载。遇到问题请私信管理员。
-      </div>
-      <div style="text-align:right; margin-bottom:10px;">
-        <button class="icon-btn" onclick="toggleNotice()" id="noticeToggleBtn">查看通知</button>
-      </div>
-      <div id="noticeList" class="hidden" style="margin-bottom:14px;"></div>
-      <div id="adminPanel" class="hidden" style="margin-bottom:14px;"></div>
-      <div id="list"></div>
+  <!-- 主内容 -->
+  <div class="main-content">
+    <div class="banner">
+      <h2>欢迎来到软件库</h2>
+      <p>发现实用软件，分享你的工具，和朋友们一起构建更好用的数字生活。</p>
     </div>
+    <div class="nav-bar" id="navBar">
+      <button class="nav-btn active" data-category="all">全部</button>
+      <button class="nav-btn" data-category="software">软件</button>
+      <button class="nav-btn" data-category="tool">工具</button>
+      <button class="nav-btn" data-category="personal">个人</button>
+    </div>
+    <input type="text" class="search-box" id="searchInput" placeholder="搜索软件或工具..." oninput="filterSoftwares()">
+    <div class="announcement">
+      公告：欢迎来到软件库！这里可以浏览软件，登录后即可下载。遇到问题请私信管理员。
+    </div>
+    <div style="text-align:right; margin-bottom:10px;">
+      <button class="icon-btn" onclick="toggleNotice()" id="noticeToggleBtn">查看通知</button>
+    </div>
+    <div id="noticeList" class="hidden" style="margin-bottom:14px;"></div>
+    <div id="adminPanel" class="hidden" style="margin-bottom:14px;"></div>
+    <div id="list"></div>
+  </div>
 
-    <!-- 侧边栏 -->
-    <div class="sidebar">
-      <div class="sidebar-card" id="statsCard">
-        <h3>社区统计</h3>
-        <div id="statsContent">加载中...</div>
-      </div>
-      <div class="sidebar-card">
-        <h3>最新通知</h3>
-        <div id="sidebarNotices">暂无通知</div>
-      </div>
-      <div class="sidebar-card">
-        <h3>联系管理员</h3>
-        <p style="font-size:13px;">如有问题，请发送邮件至：<br><a href="mailto:dghkkppp@qq.com">dghkkppp@qq.com</a></p>
-      </div>
+  <!-- 左侧滑出侧边栏 -->
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+  <div class="sidebar-drawer" id="sidebarDrawer">
+    <h3 style="margin-bottom:15px;">菜单</h3>
+    <div class="sidebar-card">
+      <h3>统计</h3>
+      <div id="statsContent">加载中...</div>
+    </div>
+    <div class="sidebar-card">
+      <h3>最新通知</h3>
+      <div id="sidebarNotices">暂无通知</div>
+    </div>
+    <div class="sidebar-card">
+      <h3>联系管理员</h3>
+      <p style="font-size:13px;">如有问题，请发送邮件至：<br><a href="mailto:dghkkppp@qq.com">dghkkppp@qq.com</a></p>
     </div>
   </div>
 
   <div id="aboutModal" class="modal hidden" onclick="hideAbout()">
     <div class="modal-content" onclick="event.stopPropagation()" style="text-align:center;">
-      <h3>软件库</h3><p>测试版 1.1</p>
+      <h3>软件库</h3><p>正式版 1.2</p>
       <p>管理员: zeruan</p>
       <button class="btn" onclick="hideAbout()">关闭</button>
     </div>
   </div>
-  <div class="footer" id="secretTrigger" style="text-align:center; padding:20px; color:var(--text-secondary); font-size:12px;">✔zeci rjk</div><script>
+  <div class="footer" id="secretTrigger" style="text-align:center; padding:20px; color:var(--text-secondary); font-size:12px;">✔zeci rjk</div>
+  <script>
+  function openSidebar() {
+    document.getElementById('sidebarDrawer').classList.add('open');
+    document.getElementById('overlay').classList.add('show');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebarDrawer').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+  }
+
   const API = 'https://api.github.com/repos/ctctycyc/softlib/issues';
   const ADMIN_USERNAMES = ['zeruan'];
   let allSoftwares = [], currentCategory = 'all', adminToken = localStorage.getItem('adminToken');
@@ -299,7 +406,7 @@ function renderSoftwares(softwares) {
     </div>`;
   });
   listDiv.innerHTML = html;
-      }// 通知列表（主区域）
+    }// 通知列表（主区域）
 async function loadNotices() {
   try {
     const res = await fetch(API + '?labels=notice&state=open&sort=created&direction=desc&per_page=10');
@@ -336,7 +443,7 @@ function toggleNotice() {
   }
 }
 
-// 侧边栏最新通知（只显示标题）
+// 侧边栏最新通知
 async function loadSidebarNotices() {
   try {
     const res = await fetch(API + '?labels=notice&state=open&sort=created&direction=desc&per_page=3');
@@ -350,6 +457,7 @@ async function loadSidebarNotices() {
   } catch(e) { document.getElementById('sidebarNotices').innerHTML = '<p>加载失败</p>'; }
 }
 loadSidebarNotices();
+
 // 登录状态显示
 function updateAuthUI() {
   const email = localStorage.getItem('authEmail');
@@ -374,52 +482,54 @@ document.getElementById('logoutLink').addEventListener('click', function(e) {
   localStorage.removeItem('authEmail');
   localStorage.removeItem('authToken');
   location.reload();
-});
+});    // 私信按钮
+    document.getElementById('messageBtn').addEventListener('click', function(e) {
+      const email = localStorage.getItem('authEmail');
+      if (email) {
+        e.preventDefault();
+        window.location.href = `mailto:dghkkppp@qq.com?subject=来自软件库社区的私信&body=我的邮箱：${email}`;
+      } else {
+        e.preventDefault();
+        alert('请先登录后再发送私信');
+        location.href = './login.html';
+      }
+    });
 
-// 私信按钮
-document.getElementById('messageBtn').addEventListener('click', function(e) {
-  const email = localStorage.getItem('authEmail');
-  if (email) {
-    e.preventDefault();
-    window.location.href = `mailto:dghkkppp@qq.com?subject=来自软件库社区的私信&body=我的邮箱：${email}`;
-  } else {
-    e.preventDefault();
-    alert('请先登录后再发送私信');
-    location.href = './login.html';
-  }
-});function filterSoftwares() {
-  let base = allSoftwares;
-  if (currentCategory === 'all') base = base.filter(sw => !sw.isTool);
-  else if (currentCategory === 'software') base = base.filter(sw => sw.isSoftware && !sw.isNotice);
-  else if (currentCategory === 'tool') base = base.filter(sw => sw.isTool);
-  else if (currentCategory === 'personal') return;
-  const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
-  if (!keyword) renderSoftwares(base);
-  else renderSoftwares(base.filter(sw => sw.title.toLowerCase().includes(keyword) || (sw.description&&sw.description.toLowerCase().includes(keyword))));
-}
+    function filterSoftwares() {
+      let base = allSoftwares;
+      if (currentCategory === 'all') base = base.filter(sw => !sw.isTool);
+      else if (currentCategory === 'software') base = base.filter(sw => sw.isSoftware && !sw.isNotice);
+      else if (currentCategory === 'tool') base = base.filter(sw => sw.isTool);
+      else if (currentCategory === 'personal') return;
+      const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+      if (!keyword) renderSoftwares(base);
+      else renderSoftwares(base.filter(sw => sw.title.toLowerCase().includes(keyword) || (sw.description&&sw.description.toLowerCase().includes(keyword))));
+    }
 
-function showAbout() { document.getElementById('aboutModal').classList.remove('hidden'); }
-function hideAbout() { document.getElementById('aboutModal').classList.add('hidden'); }
-function toggleAdmin() { document.getElementById('adminPanel').classList.toggle('hidden'); if (!document.getElementById('adminPanel').classList.contains('hidden')) loadPendingIssues(); }
+    function showAbout() { document.getElementById('aboutModal').classList.remove('hidden'); }
+    function hideAbout() { document.getElementById('aboutModal').classList.add('hidden'); }
+    function toggleAdmin() { document.getElementById('adminPanel').classList.toggle('hidden'); if (!document.getElementById('adminPanel').classList.contains('hidden')) loadPendingIssues(); }
 
-async function loadPendingIssues() {
-  if (!adminToken) return;
-  const res = await fetch(API + '?labels=pending&state=open&sort=created&direction=desc');
-  const issues = await res.json(); const div = document.getElementById('pendingList');
-  if (!issues.length) { div.innerHTML = '<p>暂无待审核</p>'; return; }
-  let html = ''; issues.forEach(issue => { html += `<div class="card"><h3>${issue.title}</h3><p>${issue.body ? issue.body.substring(0,80) : ''}...</p><div style="margin-top:10px;"><button class="btn" onclick="approve(${issue.number})">通过</button><button class="btn" style="background:#e74c3c;margin-left:5px;" onclick="reject(${issue.number})">驳回</button></div></div>`; });
-  div.innerHTML = html;
-}
-async function approve(number) {
-  if (!adminToken) return;
-  await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${number}/labels`, { method: 'PUT', headers: { Authorization: `token ${adminToken}` }, body: JSON.stringify({ labels: ['approved'] }) });
-  alert('已通过'); loadPendingIssues(); loadSoftwares();
-}
-async function reject(number) {
-  if (!adminToken) return;
-  await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${number}`, { method: 'PATCH', headers: { Authorization: `token ${adminToken}` }, body: JSON.stringify({ state: 'closed', labels: ['rejected'] }) });
-  alert('已驳回'); loadPendingIssues();
-}    loadSoftwares();
+    async function loadPendingIssues() {
+      if (!adminToken) return;
+      const res = await fetch(API + '?labels=pending&state=open&sort=created&direction=desc');
+      const issues = await res.json(); const div = document.getElementById('pendingList');
+      if (!issues.length) { div.innerHTML = '<p>暂无待审核</p>'; return; }
+      let html = ''; issues.forEach(issue => { html += `<div class="card"><h3>${issue.title}</h3><p>${issue.body ? issue.body.substring(0,80) : ''}...</p><div style="margin-top:10px;"><button class="btn" onclick="approve(${issue.number})">通过</button><button class="btn" style="background:#e74c3c;margin-left:5px;" onclick="reject(${issue.number})">驳回</button></div></div>`; });
+      div.innerHTML = html;
+    }
+    async function approve(number) {
+      if (!adminToken) return;
+      await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${number}/labels`, { method: 'PUT', headers: { Authorization: `token ${adminToken}` }, body: JSON.stringify({ labels: ['approved'] }) });
+      alert('已通过'); loadPendingIssues(); loadSoftwares();
+    }
+    async function reject(number) {
+      if (!adminToken) return;
+      await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${number}`, { method: 'PATCH', headers: { Authorization: `token ${adminToken}` }, body: JSON.stringify({ state: 'closed', labels: ['rejected'] }) });
+      alert('已驳回'); loadPendingIssues();
+    }
+
+    loadSoftwares();
   </script>
 </body>
 </html>
