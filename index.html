@@ -431,7 +431,7 @@ loadSidebarNotices();function updateAuthUI() {
   else { loginLink.classList.remove('hidden'); userDisplay.classList.add('hidden'); logoutLink.classList.add('hidden'); }
 }
 updateAuthUI();
-  // 动态设置聊天室链接（携带登录邮箱）
+  // 动态设置聊天室链接（携带登录邮箱）终极版
 (function() {
   var chatLink = document.getElementById('chat-link');
   if (chatLink) {
@@ -439,10 +439,10 @@ updateAuthUI();
       e.preventDefault();
       var email = localStorage.getItem('authEmail');
       if (email) {
-        // 将邮箱作为参数传递给聊天室
+        // 同时写入 Cookie 和 URL 参数，双保险
+        document.cookie = "chat_email=" + encodeURIComponent(email) + ";path=/;max-age=86400";
         location.href = './chat.html?email=' + encodeURIComponent(email);
       } else {
-        // 未登录则跳转到登录页
         location.href = './login.html';
       }
     });
