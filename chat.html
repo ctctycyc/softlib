@@ -3,27 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>聊天室 - 软件库</title>
+  <title>聊天室</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body { font-family: sans-serif; background: #f4f6f9; margin: 0; padding: 16px; }
-    .chat-container { max-width: 500px; margin: auto; }
-    .back-link { display: inline-block; margin-bottom: 12px; color: #3b6ff5; text-decoration: none; }
-    #chat-box { background: white; border-radius: 12px; padding: 12px; height: 300px; overflow-y: auto; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .msg { margin-bottom: 6px; }
-    .msg strong { color: #2c3e50; }
-    input { width: calc(100% - 22px); padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
-    button { width: 100%; padding: 10px; background: #3b6ff5; color: white; border: none; border-radius: 8px; margin-top: 6px; font-weight: bold; }
+    body { font-family: sans-serif; background: #f4f6f9; margin: 20px; }
+    #chat-box { background: white; border-radius: 10px; padding: 10px; height: 250px; overflow-y: auto; margin-bottom: 10px; }
+    .msg { margin-bottom: 5px; }
+    input { width: calc(100% - 80px); padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+    button { padding: 8px 16px; background: #3b6ff5; color: white; border: none; border-radius: 6px; }
+    #error { color: red; margin-top: 5px; }
   </style>
 </head>
 <body>
-  <div class="chat-container">
-    <a href="./" class="back-link">← 返回软件库</a>
-    <h2>聊天室</h2>
-    <div id="chat-box"></div>
-    <input type="text" id="msg-input" placeholder="输入消息..." autofocus>
-    <button id="send-btn">发送</button>
-  </div>
+  <h2>聊天室</h2>
+  <a href="./">← 返回</a>
+  <div id="chat-box"></div>
+  <input id="msg" placeholder="输入消息..."><button id="send">发送</button>
+  <div id="error"></div>
 
   <script>
     const supabase = window.supabase.createClient(
@@ -32,65 +28,50 @@
     );
 
     const email = localStorage.getItem('authEmail');
-    if (!email) {
-      alert('请先登录后再进入聊天室');
-      location.href = './login.html';
+    if (!email) { alert('请先登录'); location.href = './login.html'; }
+
+    const box = document.getElementById('chat-box');
+    const input = document.getElementById('msg');
+    const sendBtn = document.getElementById('send');
+    const errorDiv = document.getElementById('error');
+
+    // 加载历史
+    async function load() {
+      const { data, error } = await supabase.from('chat_messages').select('*').order('created_at', { ascending: true }).limit(50);
+      if (error) { errorDiv.textContent = '加载失败：' + error.message; return; }
+      box.innerHTML = '';
+      data.forEach(m => addMsg(m.email, m.message));
     }
 
-    const chatBox = document.getElementById('chat-box');
-    const msgInput = document.getElementById('msg-input');
-    const sendBtn = document.getElementById('send-btn');
-
-    // 加载历史消息
-    async function loadHistory() {
-      const { data, error } = await supabase
-        .from('chat_messages')
-        .select('*')
-        .order('created_at', { ascending: true })
-        .limit(50);
-      if (error) {
-        chatBox.innerHTML = '<p style="color:red;">加载失败：' + error.message + '</p>';
-        return;
-      }
-      chatBox.innerHTML = '';
-      if (data) data.forEach(m => addMsg(m.email, m.message));
-    }
-
-    function addMsg(email, msg) {
+    function addMsg(e, m) {
       const div = document.createElement('div');
       div.className = 'msg';
-      div.innerHTML = `<strong>${email}:</strong> ${msg}`;
-      chatBox.appendChild(div);
-      chatBox.scrollTop = chatBox.scrollHeight;
+      div.textContent = e + ': ' + m;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
     }
 
-    // 发送消息
-    sendBtn.addEventListener('click', async function() {
-      const msg = msgInput.value.trim();
+    // 发送
+    sendBtn.onclick = async () => {
+      const msg = input.value.trim();
       if (!msg) return;
-      sendBtn.disabled = true;
-      sendBtn.textContent = '发送中...';
-      const { error } = await supabase
-        .from('chat_messages')
-        .insert({ email: email, message: msg });
+      const { error } = await supabase.from('chat_messages').insert({ email, message: msg });
       if (error) {
-        alert('发送失败：' + error.message);
+        errorDiv.textContent = '发送失败：' + error.message;
       } else {
-        msgInput.value = '';
+        input.value = '';
+        errorDiv.textContent = '';
       }
-      sendBtn.disabled = false;
-      sendBtn.textContent = '发送';
-    });
+    };
 
-    // 实时接收新消息
-    supabase
-      .channel('chat-room')
+    // 实时接收
+    supabase.channel('chat-room')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
         addMsg(payload.new.email, payload.new.message);
       })
       .subscribe();
 
-    loadHistory();
+    load();
   </script>
 </body>
 </html>
