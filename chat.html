@@ -14,6 +14,7 @@
     .msg strong { color: #2c3e50; }
     input { width: calc(100% - 22px); padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
     button { width: 100%; padding: 10px; background: #3b6ff5; color: white; border: none; border-radius: 8px; margin-top: 6px; font-weight: bold; }
+    .error { color: red; font-size: 14px; margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -23,6 +24,7 @@
     <div id="chat-box"></div>
     <input type="text" id="msg-input" placeholder="输入消息..." autofocus>
     <button onclick="sendMsg()">发送</button>
+    <div id="error-msg" class="error"></div>
   </div>
 
   <script>
@@ -39,11 +41,15 @@
 
     // 加载历史消息
     async function loadHistory() {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('chat_messages')
         .select('*')
         .order('created_at', { ascending: true })
         .limit(50);
+      if (error) {
+        document.getElementById('error-msg').textContent = '加载历史失败：' + error.message;
+        return;
+      }
       const box = document.getElementById('chat-box');
       box.innerHTML = '';
       if (data) data.forEach(m => addMsg(m.email, m.message));
@@ -58,16 +64,20 @@
       box.scrollTop = box.scrollHeight;
     }
 
-    // 发送消息
+    // 发送消息（页面直接显示错误）
     window.sendMsg = async function() {
       const input = document.getElementById('msg-input');
       const msg = input.value.trim();
+      const errorDiv = document.getElementById('error-msg');
+      errorDiv.textContent = '';
       if (!msg) return;
+
       const { error } = await supabase
         .from('chat_messages')
         .insert({ email: email, message: msg });
+
       if (error) {
-        alert('发送失败：' + error.message);
+        errorDiv.textContent = '发送失败：' + error.message + ' (代码: ' + error.code + ')';
       } else {
         input.value = '';
       }
