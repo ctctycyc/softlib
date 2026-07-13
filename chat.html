@@ -27,19 +27,24 @@
   <div id="error"></div>
 
   <!-- 管理员面板（默认隐藏） -->
+  <button id="toggle-admin-btn" style="margin-top:10px; background:#aaa;">管理头衔</button>
   <div id="admin-panel" class="admin-panel" style="display:none;">
     <h3>管理头衔</h3>
     <p>管理员密钥：<input id="admin-key-input" type="password" placeholder="输入密钥"></p>
     <button id="verify-admin-btn">验证</button>
     <div id="admin-content" style="display:none;">
       <input id="target-email" placeholder="用户邮箱"><input id="new-title" placeholder="头衔">
-      <button id="set-title-btn">设置头衔</button>
-      <div id="admin-error" style="color:red;"></div>
+      <div style="margin-top:5px;">
+        <button id="set-title-btn">设置头衔</button>
+        <button id="clear-title-btn" style="background:#e74c3c;">清除头衔</button>
+      </div>
+      <div id="admin-error" style="color:red; margin-top:5px;"></div>
+      <div style="margin-top:10px;">
+        <strong>已有头衔：</strong>
+        <div id="title-list" style="font-size:13px; margin-top:5px;"></div>
+      </div>
     </div>
   </div>
-
-  <!-- 显示/隐藏管理员面板的按钮（仅管理员可见） -->
-  <button id="toggle-admin-btn" style="margin-top:10px; background:#aaa;">管理头衔</button>
 
   <script>
     var supabase = window.supabase.createClient(
@@ -116,6 +121,7 @@
     var targetEmail = document.getElementById('target-email');
     var newTitle = document.getElementById('new-title');
     var setTitleBtn = document.getElementById('set-title-btn');
+    var clearTitleBtn = document.getElementById('clear-title-btn');
     var adminError = document.getElementById('admin-error');
     var adminVerified = false;
 
@@ -134,6 +140,7 @@
         adminVerified = true;
         adminContent.style.display = 'block';
         adminError.textContent = '';
+        loadTitleList(); // 显示已有头衔
       } else {
         adminVerified = false;
         adminError.textContent = '密钥错误';
@@ -141,25 +148,58 @@
       }
     };
 
+    // 设置头衔
     setTitleBtn.onclick = async function() {
       if (!adminVerified) { alert('请先验证管理员密钥'); return; }
       var tEmail = targetEmail.value.trim();
       var tTitle = newTitle.value.trim();
       if (!tEmail || !tTitle) return;
-      // 发送请求，带上管理员密钥 header
       var res = await supabase
         .from('user_titles')
-        .upsert({ email: tEmail, title: tTitle }, { headers: { 'admin-key': adminKey } });
+        .upsert({ email: tEmail, title: tTitle });
       if (res.error) {
         adminError.textContent = '设置失败：' + res.error.message;
       } else {
         adminError.textContent = '头衔设置成功！';
-        // 更新本地缓存
         titleCache[tEmail] = tTitle;
-        // 刷新聊天消息显示（简单重载）
         loadHistory();
+        loadTitleList();
       }
     };
+
+    // 清除头衔
+    clearTitleBtn.onclick = async function() {
+      if (!adminVerified) { alert('请先验证管理员密钥'); return; }
+      var tEmail = targetEmail.value.trim();
+      if (!tEmail) { adminError.textContent = '请输入用户邮箱'; return; }
+      var res = await supabase
+        .from('user_titles')
+        .delete()
+        .eq('email', tEmail);
+      if (res.error) {
+        adminError.textContent = '清除失败：' + res.error.message;
+      } else {
+        adminError.textContent = '头衔已清除！';
+        delete titleCache[tEmail];
+        loadHistory();
+        loadTitleList();
+      }
+    };
+
+    // 加载已有头衔列表
+    async function loadTitleList() {
+      var res = await supabase.from('user_titles').select('*');
+      var listDiv = document.getElementById('title-list');
+      if (res.data && res.data.length > 0) {
+        var html = '';
+        res.data.forEach(function(row) {
+          html += '<div>' + row.email + ' - ' + row.title + '</div>';
+        });
+        listDiv.innerHTML = html;
+      } else {
+        listDiv.innerHTML = '暂无头衔';
+      }
+    }
 
     // 初始化
     loadTitles().then(loadHistory);
