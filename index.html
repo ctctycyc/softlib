@@ -502,7 +502,7 @@ document.getElementById('messageBtn').addEventListener('click', function(e) {
       .catch(() => console.log('SW registration failed'));
   }
 function openChatExternal() {
-  var chatUrl = 'https://ctctycyc.github.io/softlib/chat.html';
+var chatUrl = 'https://red-moon-3f78.dghkkppp.workers.dev';
   var email = localStorage.getItem('authEmail');
   if (email) {
     chatUrl += '?email=' + encodeURIComponent(email);
