@@ -55,7 +55,9 @@
     'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr'
   );
 
-  var email = localStorage.getItem('authEmail');
+  // 优先从 URL 参数获取邮箱，兼容不支持 localStorage 的打包环境
+var urlParams = new URLSearchParams(window.location.search);
+var email = urlParams.get('email') || localStorage.getItem('authEmail');
   if (!email) { alert('请先登录'); location.href = './login.html'; }
 
   var box = document.getElementById('chat-box');
