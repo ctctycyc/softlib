@@ -259,7 +259,7 @@ body {
     <p style="font-size:13px;">如有问题，请发送邮件至：<br><a href="mailto:dghkkppp@qq.com">dghkkppp@qq.com</a></p>
   </div>
   <div class="sidebar-card" style="text-align:center;">
-  <a href="./chat.html" class="btn" style="width:100%;">进入聊天室</a>
+<a href="#" id="chat-link" class="btn" style="width:100%;">进入聊天室</a>
   </div>
 </div><div id="aboutModal" class="modal hidden" onclick="hideAbout()">
   <div class="modal-content" onclick="event.stopPropagation()" style="text-align:center;">
@@ -431,6 +431,23 @@ loadSidebarNotices();function updateAuthUI() {
   else { loginLink.classList.remove('hidden'); userDisplay.classList.add('hidden'); logoutLink.classList.add('hidden'); }
 }
 updateAuthUI();
+  // 动态设置聊天室链接（携带登录邮箱）
+(function() {
+  var chatLink = document.getElementById('chat-link');
+  if (chatLink) {
+    chatLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      var email = localStorage.getItem('authEmail');
+      if (email) {
+        // 将邮箱作为参数传递给聊天室
+        location.href = './chat.html?email=' + encodeURIComponent(email);
+      } else {
+        // 未登录则跳转到登录页
+        location.href = './login.html';
+      }
+    });
+  }
+})();
 document.getElementById('logoutLink').addEventListener('click', function(e) {
   e.preventDefault();
   localStorage.removeItem('authEmail');
