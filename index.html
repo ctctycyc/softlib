@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <title>软件库</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -268,6 +269,13 @@ body {
       <h3>联系管理员</h3>
       <p style="font-size:13px;">如有问题，请发送邮件至：<br><a href="mailto:dghkkppp@qq.com">dghkkppp@qq.com</a></p>
     </div>
+  <div class="sidebar-card">
+  <h3>聊天室</h3>
+  <div id="chat-messages" style="max-height:200px; overflow-y:auto; margin-bottom:10px; font-size:13px;"></div>
+  <input type="text" id="chat-input" placeholder="说点什么..." style="width:100%; padding:6px; border:1px solid var(--border); border-radius:6px;">
+  <button class="btn" onclick="sendChat()" style="margin-top:5px; width:100%;">发送</button>
+  </div>
+ 
   </div>
 
   <div id="aboutModal" class="modal hidden" onclick="hideAbout()">
@@ -288,7 +296,10 @@ body {
     document.getElementById('overlay').classList.remove('show');
   }
 
-  const API = 'https://api.github.com/repos/ctctycyc/softlib/issues';
+  const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const API = 'https://api.github.com/repos/ctctycyc/softlib/issues';
   const ADMIN_USERNAMES = ['zeruan'];
   let allSoftwares = [], currentCategory = 'all', adminToken = localStorage.getItem('adminToken');
 
@@ -530,6 +541,58 @@ document.getElementById('logoutLink').addEventListener('click', function(e) {
     }
 
     loadSoftwares();
+    // ========== 聊天功能 ==========
+async function loadChatHistory() {
+  const { data, error } = await supabase
+    .from('chat_messages')
+    .select('*')
+    .order('created_at', { ascending: true })
+    .limit(50);
+  if (data) {
+    const box = document.getElementById('chat-messages');
+    box.innerHTML = '';
+    data.forEach(m => addMessageToChat(m.email, m.message));
+  }
+}
+
+function addMessageToChat(email, msg) {
+  const box = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.innerHTML = `<strong>${email}:</strong> ${msg}`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function sendChat() {
+  const email = localStorage.getItem('authEmail');
+  if (!email) {
+    alert('请先登录后再发言');
+    location.href = './login.html';
+    return;
+  }
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  const { error } = await supabase
+    .from('chat_messages')
+    .insert({ email: email, message: msg });
+  if (error) {
+    alert('发送失败: ' + error.message);
+  } else {
+    input.value = '';
+  }
+}
+
+// 订阅实时新消息
+supabase
+  .channel('chat-room')
+  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
+    addMessageToChat(payload.new.email, payload.new.message);
+  })
+  .subscribe();
+
+// 初始加载历史消息
+loadChatHistory();
   </script>
 </body>
 </html>
