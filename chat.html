@@ -10,6 +10,7 @@
     #chat-box { background: white; border-radius: 10px; padding: 10px; height: 250px; overflow-y: auto; margin-bottom: 10px; }
     .msg { margin-bottom: 5px; }
     .title-badge { background: #f0a500; color: white; border-radius: 4px; padding: 0 4px; font-size: 12px; margin-right: 4px; }
+    .delete-btn { background: #e74c3c; color: white; border: none; border-radius: 4px; font-size: 12px; margin-left: 8px; cursor: pointer; display: none; }
     input { width: calc(100% - 80px); padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
     button { padding: 8px 16px; background: #3b6ff5; color: white; border: none; border-radius: 6px; }
     #error { color: red; margin-top: 5px; }
@@ -26,7 +27,6 @@
   <input id="msg" placeholder="输入消息..."><button id="send">发送</button>
   <div id="error"></div>
 
-  <!-- 管理员面板（默认隐藏） -->
   <button id="toggle-admin-btn" style="margin-top:10px; background:#aaa;">管理头衔</button>
   <div id="admin-panel" class="admin-panel" style="display:none;">
     <h3>管理头衔</h3>
@@ -37,6 +37,12 @@
       <div style="margin-top:5px;">
         <button id="set-title-btn">设置头衔</button>
         <button id="clear-title-btn" style="background:#e74c3c;">清除头衔</button>
+      </div>
+      <div style="margin-top:10px;">
+        <strong>禁言管理</strong><br>
+        <input id="mute-email" placeholder="用户邮箱">
+        <button id="mute-btn">禁言</button>
+        <button id="unmute-btn" style="background:#2ecc71;">解除禁言</button>
       </div>
       <div id="admin-error" style="color:red; margin-top:5px;"></div>
       <div style="margin-top:10px;">
@@ -59,9 +65,10 @@
     var input = document.getElementById('msg');
     var sendBtn = document.getElementById('send');
     var errorDiv = document.getElementById('error');
-    var titleCache = {}; // 缓存头衔
+    var titleCache = {};
+    var isAdmin = false; // 管理员状态（控制删除按钮显示）
 
-    // 加载头衔缓存
+    // 加载头衔
     async function loadTitles() {
       var res = await supabase.from('user_titles').select('*');
       if (res.data) {
@@ -77,25 +84,48 @@
       var data = result.data;
       if (data) {
         for (var i = 0; i < data.length; i++) {
-          addMessage(data[i].email, data[i].message);
+          addMessage(data[i].id, data[i].email, data[i].message);
         }
       }
     }
 
-    function addMessage(e, m) {
+    function addMessage(id, e, m) {
       var div = document.createElement('div');
       div.className = 'msg';
+      div.setAttribute('data-id', id);
       var title = titleCache[e] || '';
       var badge = title ? '<span class="title-badge">' + title + '</span> ' : '';
-      div.innerHTML = badge + '<strong>' + e + ':</strong> ' + m;
+      var deleteBtn = isAdmin ? '<button class="delete-btn" onclick="deleteMsg(' + id + ')">删除</button>' : '';
+      div.innerHTML = badge + '<strong>' + e + ':</strong> ' + m + deleteBtn;
       box.appendChild(div);
       box.scrollTop = box.scrollHeight;
     }
 
-    // 发送消息
+    // 删除消息
+    window.deleteMsg = async function(id) {
+      if (!isAdmin) return;
+      var res = await supabase.from('chat_messages').delete().eq('id', id);
+      if (res.error) {
+        errorDiv.textContent = '删除失败：' + res.error.message;
+      } else {
+        // 移除该消息元素
+        var msgDiv = document.querySelector('.msg[data-id="' + id + '"]');
+        if (msgDiv) msgDiv.remove();
+      }
+    };
+
+    // 发送消息（含禁言检查）
     sendBtn.onclick = async function() {
       var msg = input.value.trim();
       if (!msg) return;
+
+      // 检查是否被禁言
+      var muteCheck = await supabase.from('mutes').select('email').eq('email', email).maybeSingle();
+      if (muteCheck.data) {
+        errorDiv.textContent = '你已被禁言，无法发送消息';
+        return;
+      }
+
       var result = await supabase.from('chat_messages').insert({ email: email, message: msg });
       if (result.error) {
         errorDiv.textContent = '发送失败：' + result.error.message;
@@ -108,12 +138,12 @@
     // 实时接收消息
     supabase.channel('chat-room')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, function(payload) {
-        addMessage(payload.new.email, payload.new.message);
+        addMessage(payload.new.id, payload.new.email, payload.new.message);
       })
       .subscribe();
 
     // ---- 管理头衔功能 ----
-    var adminKey = 'zeruan2026'; // 预设管理员密钥，可修改
+    var adminKey = 'zeruan2026';
     var adminPanel = document.getElementById('admin-panel');
     var toggleAdminBtn = document.getElementById('toggle-admin-btn');
     var verifyBtn = document.getElementById('verify-admin-btn');
@@ -138,25 +168,28 @@
       var key = document.getElementById('admin-key-input').value;
       if (key === adminKey) {
         adminVerified = true;
+        isAdmin = true; // 管理员可删消息
         adminContent.style.display = 'block';
         adminError.textContent = '';
-        loadTitleList(); // 显示已有头衔
+        loadTitleList();
+        // 刷新消息列表以显示删除按钮
+        loadHistory();
       } else {
         adminVerified = false;
+        isAdmin = false;
         adminError.textContent = '密钥错误';
         adminContent.style.display = 'none';
+        loadHistory(); // 隐藏删除按钮
       }
     };
 
-    // 设置头衔
+  // 设置头衔
     setTitleBtn.onclick = async function() {
       if (!adminVerified) { alert('请先验证管理员密钥'); return; }
       var tEmail = targetEmail.value.trim();
       var tTitle = newTitle.value.trim();
       if (!tEmail || !tTitle) return;
-      var res = await supabase
-        .from('user_titles')
-        .upsert({ email: tEmail, title: tTitle });
+      var res = await supabase.from('user_titles').upsert({ email: tEmail, title: tTitle });
       if (res.error) {
         adminError.textContent = '设置失败：' + res.error.message;
       } else {
@@ -172,10 +205,7 @@
       if (!adminVerified) { alert('请先验证管理员密钥'); return; }
       var tEmail = targetEmail.value.trim();
       if (!tEmail) { adminError.textContent = '请输入用户邮箱'; return; }
-      var res = await supabase
-        .from('user_titles')
-        .delete()
-        .eq('email', tEmail);
+      var res = await supabase.from('user_titles').delete().eq('email', tEmail);
       if (res.error) {
         adminError.textContent = '清除失败：' + res.error.message;
       } else {
@@ -183,6 +213,32 @@
         delete titleCache[tEmail];
         loadHistory();
         loadTitleList();
+      }
+    };
+
+    // 禁言
+    document.getElementById('mute-btn').onclick = async function() {
+      if (!adminVerified) { alert('请先验证管理员密钥'); return; }
+      var mEmail = document.getElementById('mute-email').value.trim();
+      if (!mEmail) return;
+      var res = await supabase.from('mutes').upsert({ email: mEmail });
+      if (res.error) {
+        adminError.textContent = '禁言失败：' + res.error.message;
+      } else {
+        adminError.textContent = '已禁言 ' + mEmail;
+      }
+    };
+
+    // 解除禁言
+    document.getElementById('unmute-btn').onclick = async function() {
+      if (!adminVerified) { alert('请先验证管理员密钥'); return; }
+      var mEmail = document.getElementById('mute-email').value.trim();
+      if (!mEmail) return;
+      var res = await supabase.from('mutes').delete().eq('email', mEmail);
+      if (res.error) {
+        adminError.textContent = '解禁失败：' + res.error.message;
+      } else {
+        adminError.textContent = '已解除禁言 ' + mEmail;
       }
     };
 
