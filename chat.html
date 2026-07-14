@@ -6,16 +6,9 @@
   <title>聊天室</title>
   <style>
     :root {
-      --bg: #f0f2f5;
-      --card: #ffffff;
-      --text: #1a1a1a;
-      --sub: #8e8e93;
-      --bubble-self: #0a84ff;
-      --bubble-other: #ffffff;
-      --border: #e0e0e0;
-      --accent: #0a84ff;
-      --radius: 20px;
-      --shadow: 0 2px 12px rgba(0,0,0,0.06);
+      --bg: #f0f2f5; --card: #ffffff; --text: #1a1a1a; --sub: #8e8e93;
+      --bubble-self: #0a84ff; --bubble-other: #ffffff; --border: #e0e0e0;
+      --accent: #0a84ff; --radius: 20px; --shadow: 0 2px 12px rgba(0,0,0,0.06);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -45,14 +38,15 @@
     .meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 12px; color: var(--sub); padding: 0 4px; }
     .user-link { color: var(--accent); text-decoration: underline; cursor: pointer; font-weight: 600; }
     .title-badge { background: #f0a500; color: white; border-radius: 10px; padding: 0 6px; font-size: 10px; margin-right: 4px; }
+    .level-badge { color: white; border-radius: 10px; padding: 0 6px; font-size: 10px; margin-right: 4px; }
     .input-area {
       display: flex; gap: 6px; background: var(--card); padding: 8px 12px;
       border-radius: 30px; box-shadow: var(--shadow); align-items: center;
     }
     .input-area input { flex: 1; border: none; outline: none; font-size: 15px; background: transparent; }
-    .input-area button {
+    .input-area button, .input-area label {
       background: var(--accent); color: white; border: none;
-      border-radius: 20px; padding: 8px 18px; font-weight: 600; cursor: pointer;
+      border-radius: 20px; padding: 8px 18px; font-weight: 600; cursor: pointer; font-size: 14px;
     }
     .action-btns { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
     .action-btns button {
@@ -67,16 +61,19 @@
     .success { color: green; margin: 5px 0; }
     .follow-btn { background: #ff5e62; color: white; border: none; border-radius: 14px; padding: 6px 14px; cursor: pointer; }
     .unfollow-btn { background: #aaa; color: white; border: none; border-radius: 14px; padding: 6px 14px; cursor: pointer; }
+    .file-upload-label { cursor: pointer; font-size: 18px; padding: 0 5px; }
   </style>
 </head><body>
   <div class="header">
-    <h2 id="chat-title">聊天室</h2>
+    <h2 id="chat-title">💬 聊天室</h2>
   </div>
 
   <div class="chat-wrap" id="chat-box"></div>
 
   <div class="input-area">
     <input id="msg" placeholder="说点什么..." autocomplete="off">
+    <input type="file" id="file-input" accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" style="display:none;" multiple onchange="uploadFile()">
+    <label for="file-input" class="file-upload-label" title="发送文件">📎</label>
     <button onclick="sendMsg()">发送</button>
   </div>
 
@@ -84,6 +81,7 @@
     <button onclick="toggleLogin()">登录/注册</button>
     <button onclick="loadHistory()">刷新消息</button>
     <button onclick="loadRanks()">粉丝榜</button>
+    <button onclick="loadScoreRanks()">积分榜</button>
     <button onclick="document.getElementById('change-pwd-panel').style.display='block'">修改密码</button>
     <button onclick="loadMyFollowing()">我的关注</button>
     <button onclick="loadMyFollowers()">我的粉丝</button>
@@ -140,6 +138,12 @@
     <div id="rank-list"></div>
   </div>
 
+  <!-- 积分排行榜面板 -->
+  <div id="score-rank-panel" class="panel">
+    <h3>积分排行榜</h3>
+    <div id="score-rank-list"></div>
+  </div>
+
   <!-- 管理面板（点标题5次出现） -->
   <button id="admin-toggle" style="display:none; background:#aaa;" onclick="toggleAdminPanel()">管理</button>
   <div id="admin-panel" class="admin-panel">
@@ -161,12 +165,37 @@
   let isRegisterMode = false;
   let isAdmin = false;
   let titleCache = {};
+  let scoreCache = {};
   let currentProfileEmail = '';
 
   function getEmail() {
     const p = new URLSearchParams(location.search);
     if (p.get('email')) return p.get('email');
     return localStorage.getItem('authEmail');
+  }
+
+  function getLevel(score) {
+    if (score >= 1000) return { name: '王者', color: '#f44336' };
+    if (score >= 500) return { name: '钻石', color: '#2196f3' };
+    if (score >= 200) return { name: '黄金', color: '#ff9800' };
+    if (score >= 50) return { name: '白银', color: '#607d8b' };
+    return { name: '青铜', color: '#795548' };
+  }
+
+  async function loadScores() {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/user_scores?select=*', { headers: { 'apikey': SUPABASE_KEY } });
+    const data = await res.json();
+    if (Array.isArray(data)) data.forEach(r => scoreCache[r.email] = r.score || 0);
+  }
+
+  async function addScore(email) {
+    const current = scoreCache[email] || 0;
+    scoreCache[email] = current + 1;
+    await fetch(SUPABASE_URL + '/rest/v1/user_scores', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify({ email, score: current + 1 })
+    });
   }
 
   function toggleLogin() {
@@ -189,8 +218,7 @@
     try {
       if (isRegisterMode) {
         const res = await fetch(SUPABASE_URL + '/auth/v1/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
           body: JSON.stringify({ email, password })
         });
         const data = await res.json();
@@ -198,8 +226,7 @@
         err.textContent = '注册成功！请查看邮箱验证（如果开启）。';
       } else {
         const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
           body: JSON.stringify({ email, password })
         });
         const data = await res.json();
@@ -212,9 +239,7 @@
           throw new Error(data.error_description || '邮箱或密码错误');
         }
       }
-    } catch (e) {
-      err.textContent = e.message;
-    }
+    } catch (e) { err.textContent = e.message; }
   }
 
   function showError(msg, isSuccess) {
@@ -240,7 +265,28 @@
       div.className = 'msg';
       div.setAttribute('data-id', m.id);
       const title = titleCache[m.email] ? '<span class="title-badge">' + titleCache[m.email] + '</span> ' : '';
-      div.innerHTML = title + '<b><span class="user-link" onclick="showProfile(\'' + m.email + '\')">' + m.email + '</span>:</b> ' + m.message;
+      const score = scoreCache[m.email] || 0;
+      const level = getLevel(score);
+      const levelBadge = '<span class="level-badge" style="background:' + level.color + ';">' + level.name + '</span> ';
+      let msgHtml = '';
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      const parts = m.message.split(urlRegex);
+      parts.forEach(p => {
+        if (p && p.match(urlRegex)) {
+          if (p.match(/\.(jpg|jpeg|png|gif|svg|webp|mp4|mov|avi|pdf|doc|docx|xls|xlsx|txt|zip|rar)$/i)) {
+            if (p.match(/\.(jpg|jpeg|png|gif|svg|webp)$/i)) {
+              msgHtml += '<br><img src="' + p + '" style="max-width:200px; border-radius:8px;"><br>';
+            } else {
+              msgHtml += '<br><a href="' + p + '" target="_blank">📄 下载文件</a><br>';
+            }
+          } else {
+            msgHtml += '<a href="' + p + '" target="_blank">' + p + '</a>';
+          }
+        } else if (p) {
+          msgHtml += p;
+        }
+      });
+      div.innerHTML = levelBadge + title + '<b><span class="user-link" onclick="showProfile(\'' + m.email + '\')">' + m.email + '</span>:</b> ' + msgHtml;
       if (isAdmin) {
         const delBtn = document.createElement('button');
         delBtn.style.cssText = 'background:#e74c3c;color:white;border:none;border-radius:4px;font-size:12px;padding:2px 6px;margin-left:8px;';
@@ -269,8 +315,46 @@ async function sendMsg() {
     headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=minimal' },
     body: JSON.stringify({ email, message: msg })
   });
-  if (res.ok) { document.getElementById('msg').value = ''; showError(''); loadHistory(); }
-  else { const err = await res.json(); showError('发送失败: ' + (err.message || '请重试')); }
+  if (res.ok) {
+    document.getElementById('msg').value = '';
+    showError('');
+    await addScore(email);
+    loadScores().then(loadHistory);
+  } else {
+    const err = await res.json();
+    showError('发送失败: ' + (err.message || '请重试'));
+  }
+}
+
+async function uploadFile() {
+  const email = getEmail();
+  if (!email) { showError('请先登录'); return; }
+  const files = document.getElementById('file-input').files;
+  if (!files.length) return;
+  for (let file of files) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    const fileName = Date.now() + '_' + Math.random().toString(36).substr(2,9) + '.' + ext;
+    const uploadRes = await fetch(SUPABASE_URL + '/storage/v1/object/chat-files/' + fileName, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Content-Type': file.type },
+      body: file
+    });
+    if (uploadRes.ok) {
+      const fileUrl = SUPABASE_URL + '/storage/v1/object/public/chat-files/' + fileName;
+      const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ email, message: fileUrl })
+      });
+      if (res.ok) {
+        await addScore(email);
+      }
+    } else {
+      showError('上传失败');
+    }
+  }
+  document.getElementById('file-input').value = '';
+  loadScores().then(loadHistory);
 }
 
 async function deleteMsg(id) {
@@ -281,7 +365,6 @@ async function deleteMsg(id) {
   if (res.ok) { const el = document.querySelector('.msg[data-id="' + id + '"]'); if (el) el.remove(); }
 }
 
-// 用户主页
 async function showProfile(email) {
   currentProfileEmail = email;
   document.getElementById('profile-email').textContent = email;
@@ -291,82 +374,87 @@ async function showProfile(email) {
   });
   const data = await res.json();
   const msgDiv = document.getElementById('profile-messages');
-  msgDiv.innerHTML = '<h4>最近消息</h4>';
-  if (Array.isArray(data)) data.forEach(m => { const d = document.createElement('div'); d.textContent = m.message; msgDiv.appendChild(d); });
-  const followRes = await fetch(SUPABASE_URL + '/rest/v1/follows?select=*&follower=eq.' + encodeURIComponent(getEmail()) + '&following=eq.' + encodeURIComponent(email), {
-    headers: { 'apikey': SUPABASE_KEY }
-  });
-  const followData = await followRes.json();
-  const btn = document.getElementById('follow-btn');
-  if (Array.isArray(followData) && followData.length > 0) { btn.textContent = '取消关注'; btn.className = 'unfollow-btn'; }
-  else { btn.textContent = '关注'; btn.className = 'follow-btn'; }
-}
+      msgDiv.innerHTML = '<h4>最近消息</h4>';
+      if (Array.isArray(data)) data.forEach(m => { const d = document.createElement('div'); d.textContent = m.message; msgDiv.appendChild(d); });
+      const followRes = await fetch(SUPABASE_URL + '/rest/v1/follows?select=*&follower=eq.' + encodeURIComponent(getEmail()) + '&following=eq.' + encodeURIComponent(email), {
+        headers: { 'apikey': SUPABASE_KEY }
+      });
+      const followData = await followRes.json();
+      const btn = document.getElementById('follow-btn');
+      if (Array.isArray(followData) && followData.length > 0) { btn.textContent = '取消关注'; btn.className = 'unfollow-btn'; }
+      else { btn.textContent = '关注'; btn.className = 'follow-btn'; }
+    }
 
-async function toggleFollow() {
-  const follower = getEmail();
-  const following = currentProfileEmail;
-  if (follower === following) { showError('不能关注自己哦'); return; }
-  if (!follower) { showError('请先登录'); return; }
-  if (!following) return;
-  const btn = document.getElementById('follow-btn');
-  if (btn.textContent === '关注') {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/follows', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ follower, following })
-    });
-    if (res.ok) { btn.textContent = '取消关注'; btn.className = 'unfollow-btn'; }
-  } else {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/follows?follower=eq.' + encodeURIComponent(follower) + '&following=eq.' + encodeURIComponent(following), {
-      method: 'DELETE', headers: { 'apikey': SUPABASE_KEY }
-    });
-    if (res.ok) { btn.textContent = '关注'; btn.className = 'follow-btn'; }
-  }
-}
+    async function toggleFollow() {
+      const follower = getEmail();
+      const following = currentProfileEmail;
+      if (follower === following) { showError('不能关注自己哦'); return; }
+      if (!follower) { showError('请先登录'); return; }
+      if (!following) return;
+      const btn = document.getElementById('follow-btn');
+      if (btn.textContent === '关注') {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/follows', {
+          method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ follower, following })
+        });   if (res.ok) { btn.textContent = '取消关注'; btn.className = 'unfollow-btn'; }
+      } else {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/follows?follower=eq.' + encodeURIComponent(follower) + '&following=eq.' + encodeURIComponent(following), {
+          method: 'DELETE', headers: { 'apikey': SUPABASE_KEY }
+        });
+        if (res.ok) { btn.textContent = '关注'; btn.className = 'follow-btn'; }
+      }
+    }
 
-async function loadRanks() {
-  const res = await fetch(SUPABASE_URL + '/rest/v1/follows?select=following', { headers: { 'apikey': SUPABASE_KEY } });
-  const data = await res.json();
-  const count = {};
-  if (Array.isArray(data)) data.forEach(f => { count[f.following] = (count[f.following] || 0) + 1; });
-  const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
-  document.getElementById('rank-list').innerHTML = sorted.map((e, i) => (i+1) + '. ' + e[0] + ' - ' + e[1] + '粉丝').join('<br>') || '暂无数据';
+    async function loadRanks() {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/follows?select=following', { headers: { 'apikey': SUPABASE_KEY } });
+      const data = await res.json();
+      const count = {};
+      if (Array.isArray(data)) data.forEach(f => { count[f.following] = (count[f.following] || 0) + 1; });
+    const sorted = Object.entries(count).sort((a,b) => b[1] - a[1]);
+      document.getElementById('rank-list').innerHTML = sorted.map((e,i) => (i+1) + '. ' + e[0] + ' - ' + e[1] + '粉丝').join('<br>') || '暂无数据';
       document.getElementById('rank-panel').style.display = 'block';
     }
 
-    // 修改密码
-    async function changePassword() {
+    async function loadScoreRanks() {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/user_scores?select=*&order=score.desc&limit=20', { headers: { 'apikey': SUPABASE_KEY } });
+      const data = await res.json();
+      const list = document.getElementById('score-rank-list');
+      if (Array.isArray(data) && data.length > 0) {
+        list.innerHTML = data.map((r,i) => (i+1) + '. ' + r.email + ' - ' + (r.score||0) + '分 (' + getLevel(r.score).name + ')').join('<br>');
+      } else {
+        list.innerHTML = '暂无数据';
+      }
+      document.getElementById('score-rank-panel').style.display = 'block';
+    }
+
+   async function changePassword() {
       const oldPwd = document.getElementById('old-password').value.trim();
       const newPwd = document.getElementById('new-password').value.trim();
       const errDiv = document.getElementById('change-pwd-error');
       const successDiv = document.getElementById('change-pwd-success');
-      errDiv.textContent = '';
-      successDiv.textContent = '';
+      errDiv.textContent = ''; successDiv.textContent = '';
       if (!oldPwd || !newPwd) { errDiv.textContent = '请输入旧密码和新密码'; return; }
       const email = getEmail();
       if (!email) { errDiv.textContent = '请先登录'; return; }
       const checkRes = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
         body: JSON.stringify({ email, password: oldPwd })
-      });
- if (!checkRes.ok) { errDiv.textContent = '旧密码错误'; return; }
+      });    if (!checkRes.ok) { errDiv.textContent = '旧密码错误'; return; }
       const token = localStorage.getItem('authToken');
       const updateRes = await fetch(SUPABASE_URL + '/auth/v1/user', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token },
+        method: 'PUT', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token },
         body: JSON.stringify({ password: newPwd })
       });
       if (updateRes.ok) {
         successDiv.textContent = '密码修改成功';
         document.getElementById('old-password').value = '';
-        document.getElementById('new-password').value = '';
+       document.getElementById('new-password').value = '';
       } else {
         const errData = await updateRes.json();
         errDiv.textContent = errData.error_description || '修改失败';
       }
     }
 
-  // 加载我的关注
     async function loadMyFollowing() {
       const email = getEmail();
       if (!email) { alert('请先登录'); return; }
@@ -375,16 +463,11 @@ async function loadRanks() {
       });
       const data = await res.json();
       const list = document.getElementById('my-following-list');
-      if (Array.isArray(data) && data.length > 0) {
-        list.innerHTML = data.map(f => f.following).join('<br>');
-      } else {
-        list.innerHTML = '暂无关注';
-      }
+      list.innerHTML = Array.isArray(data) && data.length ? data.map(f => f.following).join('<br>') : '暂无关注';
       document.getElementById('my-following-panel').style.display = 'block';
     }
 
-  // 加载我的粉丝
-    async function loadMyFollowers() {
+   async function loadMyFollowers() {
       const email = getEmail();
       if (!email) { alert('请先登录'); return; }
       const res = await fetch(SUPABASE_URL + '/rest/v1/follows?select=follower&following=eq.' + encodeURIComponent(email), {
@@ -392,14 +475,9 @@ async function loadRanks() {
       });
       const data = await res.json();
       const list = document.getElementById('my-followers-list');
-      if (Array.isArray(data) && data.length > 0) {
-        list.innerHTML = data.map(f => f.follower).join('<br>');
-      } else {
-        list.innerHTML = '暂无粉丝';
-      }
+      list.innerHTML = Array.isArray(data) && data.length ? data.map(f => f.follower).join('<br>') : '暂无粉丝';
       document.getElementById('my-followers-panel').style.display = 'block';
-    }    // 管理员激活：点标题5次
-    let clickCount = 0;
+   }    let clickCount = 0;
     document.getElementById('chat-title').onclick = () => {
       clickCount++;
       if (clickCount >= 5) { document.getElementById('admin-toggle').style.display = 'inline-block'; clickCount = 0; }
@@ -454,7 +532,7 @@ async function loadRanks() {
       document.getElementById('title-list').innerHTML = Array.isArray(data) && data.length ? data.map(r => r.email + ' - ' + r.title).join('<br>') : '暂无头衔';
     }
 
-    loadTitles().then(() => loadHistory());
+    Promise.all([loadTitles(), loadScores()]).then(() => loadHistory());
     setInterval(loadHistory, 5000);
   </script>
 </body>
