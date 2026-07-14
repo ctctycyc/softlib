@@ -502,23 +502,49 @@
       alert('已驳回'); loadPendingIssues();
     }
 
-   // 聊天室跳转：自动携带邮箱参数
-var goChatBtn = document.getElementById('go-chat-btn');
-if (goChatBtn) {
-  goChatBtn.addEventListener('click', function(e) {
-    e.preventDefault();
-    var email = localStorage.getItem('authEmail');
-    var chatUrl = 'https://red-moon-3f78.dghkkppp.workers.dev/';
-    if (email) {
-      chatUrl += '?email=' + encodeURIComponent(email);
-    } else {
-      alert('请先登录后再进入聊天室');
+   // ========== 聊天室链接复制（自动拼接邮箱） ==========
+var copyChatBtn = document.getElementById('copy-chat-btn');
+var chatLinkDisplay = document.getElementById('chat-link-display');
+
+function updateChatLinkDisplay() {
+  var email = localStorage.getItem('authEmail');
+  if (email) {
+    var workerUrl = 'https://red-moon-3f78.dghkkppp.workers.dev/?email=' + encodeURIComponent(email);
+    chatLinkDisplay.textContent = workerUrl;
+    chatLinkDisplay.setAttribute('data-link', workerUrl);
+  } else {
+    chatLinkDisplay.textContent = '请先登录后再获取链接';
+    chatLinkDisplay.setAttribute('data-link', '');
+  }
+}
+
+if (copyChatBtn) {
+  copyChatBtn.addEventListener('click', function() {
+    var url = chatLinkDisplay.getAttribute('data-link');
+    if (!url) {
+      alert('请先登录');
       location.href = './login.html';
       return;
     }
-    window.open(chatUrl, '_blank');
-  });
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(function() {
+        alert('链接已复制！\n请打开 Chrome 或 Safari，粘贴到地址栏访问');
+      });
+    } else {
+      var textarea = document.createElement('textarea');
+      textarea.value = url;
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      alert('链接已复制！\n请打开 Chrome 或 Safari，粘贴到地址栏访问');
     }
+  });
+}
+
+updateChatLinkDisplay();
     loadSoftwares();
   </script>
 </body>
