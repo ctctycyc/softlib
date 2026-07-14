@@ -223,8 +223,14 @@
       var muteCheck = await supabase.from('mutes').select('*').eq('email', currentEmail).maybeSingle();
       if (muteCheck.data) { errorDiv.textContent = '你已被禁言'; return; }
       var res = await supabase.from('chat_messages').insert({ email: currentEmail, message: msg });
-      if (res.error) { errorDiv.textContent = '发送失败'; }
-      else { input.value = ''; loadHistory(); }
+if (res.error) {
+  errorDiv.textContent = '发送失败：' + res.error.message + ' (代码: ' + res.error.code + ')';
+  alert('发送失败：' + res.error.message);
+}
+else {
+  input.value = '';
+  loadHistory();
+    }
     };
 
     document.getElementById('refresh-btn').onclick = loadHistory;
