@@ -127,7 +127,8 @@
   transition: 0.2s;
   box-shadow: 0 2px 8px rgba(59,111,245,0.25);
 }
-.btn:hover { background: var(--btn-hover); transform: translateY(-1px); }.card {
+.btn:hover { background: var(--btn-hover); transform: translateY(-1px); }
+.card {
   background: var(--card-bg);
   border-radius: var(--radius);
   padding: 16px 18px;
@@ -159,7 +160,7 @@
   border-left: 4px solid var(--link);
   color: var(--text);
   font-size: 14px;
-  }    .sidebar-card {
+                 }    .sidebar-card {
       background: var(--card-bg);
       border-radius: var(--radius);
       padding: 16px;
@@ -260,12 +261,9 @@
       <h3>联系管理员</h3>
       <p style="font-size:13px;">如有问题，请发送邮件至：<br><a href="mailto:dghkkppp@qq.com">dghkkppp@qq.com</a></p>
     </div>
-    <!-- 聊天室入口：文字链接，点击新标签页打开，下方显示代理地址 -->
+    <!-- 聊天室入口：直接跳转到 chat.html -->
     <div class="sidebar-card" style="text-align:center;">
-      <a href="https://red-moon-3f78.dghkkppp.workers.dev/" target="_blank" rel="noopener" style="text-decoration:none; color: var(--text);">
-        <div style="font-size:16px; font-weight:600; margin-bottom:4px;">进入聊天室</div>
-        <div style="font-size:12px; color: var(--text-secondary); word-break:break-all;">https://red-moon-3f78.dghkkppp.workers.dev/</div>
-      </a>
+      <a href="./chat.html" class="btn" style="width:100%;">进入聊天室</a>
     </div>
   </div>
 
@@ -385,7 +383,7 @@
 
     function renderSoftwares(softwares) {
       const listDiv = document.getElementById('list');
-       if (softwares.length === 0) { listDiv.innerHTML = '<div class="card">暂无内容</div>'; return; }
+  if (softwares.length === 0) { listDiv.innerHTML = '<div class="card">暂无内容</div>'; return; }
       let html = '';
       softwares.forEach(sw => {
         const iconHtml = getDefaultIcon(sw);
@@ -397,7 +395,7 @@
             downloadBtn = `<a class="download-link" href="javascript:void(0)" onclick="alert('请先登录后再下载'); location.href='./login.html';" style="background:#aaa;">登录后下载</a>`;
           }
         }
-        const date = sw.created_at ? new Date(sw.created_at).toLocaleDateString('zh-CN') : '';
+   const date = sw.created_at ? new Date(sw.created_at).toLocaleDateString('zh-CN') : '';
         html += `<div class="card${sw.isNotice ? ' notice' : ''}">
           <h3>${iconHtml}${sw.title}</h3>
           <div class="desc">${sw.description || ''}</div>
@@ -422,8 +420,7 @@
         });
         list.innerHTML = html;
       } catch(e) { document.getElementById('noticeList').innerHTML = '<p>加载通知失败</p>'; }
-    }
-    function toggleNotice() {
+    }    function toggleNotice() {
       const list = document.getElementById('noticeList');
       const btn = document.getElementById('noticeToggleBtn');
       if (list.classList.contains('hidden')) { loadNotices(); list.classList.remove('hidden'); btn.textContent = '收起通知'; }
@@ -438,8 +435,7 @@
         if (issues.length === 0) { div.innerHTML = '<p style="font-size:13px;">暂无通知</p>'; return; }
         let html = '<ul style="font-size:13px; padding-left:18px;">';
         issues.forEach(issue => { html += `<li><a href="#" onclick="alert('${issue.title}')" style="color:var(--link);">${issue.title}</a></li>`; });
-        html += '</ul>';
-        div.innerHTML = html;
+        html += '</ul>';   div.innerHTML = html;
       } catch(e) { document.getElementById('sidebarNotices').innerHTML = '<p>加载失败</p>'; }
     }
     loadSidebarNotices();
@@ -453,8 +449,7 @@
       const logoutLink = document.getElementById('logoutLink');
       if (email && token) { loginLink.classList.add('hidden'); userDisplay.classList.remove('hidden'); logoutLink.classList.remove('hidden'); userDisplay.textContent = email; }
       else { loginLink.classList.remove('hidden'); userDisplay.classList.add('hidden'); logoutLink.classList.add('hidden'); }
-    }
-    updateAuthUI();
+    }    updateAuthUI();
     document.getElementById('logoutLink').addEventListener('click', function(e) {
       e.preventDefault();
       localStorage.removeItem('authEmail');
@@ -479,19 +474,18 @@
       else renderSoftwares(base.filter(sw => sw.title.toLowerCase().includes(keyword) || (sw.description&&sw.description.toLowerCase().includes(keyword))));
     }
 
-    function showAbout() { document.getElementById('aboutModal').classList.remove('hidden'); }
+   function showAbout() { document.getElementById('aboutModal').classList.remove('hidden'); }
     function hideAbout() { document.getElementById('aboutModal').classList.add('hidden'); }
     function toggleAdmin() { document.getElementById('adminPanel').classList.toggle('hidden'); if (!document.getElementById('adminPanel').classList.contains('hidden')) loadPendingIssues(); }
 
     async function loadPendingIssues() {
       if (!adminToken) return;
       const res = await fetch(API + '?labels=pending&state=open&sort=created&direction=desc');
-      const issues = await res.json(); const div = document.getElementById('pendingList');
+    const issues = await res.json(); const div = document.getElementById('pendingList');
       if (!issues.length) { div.innerHTML = '<p>暂无待审核</p>'; return; }
       let html = ''; issues.forEach(issue => { html += `<div class="card"><h3>${issue.title}</h3><p>${issue.body ? issue.body.substring(0,80) : ''}...</p><div style="margin-top:10px;"><button class="btn" onclick="approve(${issue.number})">通过</button><button class="btn" style="background:#e74c3c;margin-left:5px;" onclick="reject(${issue.number})">驳回</button></div></div>`; });
       div.innerHTML = html;
-    }
-    async function approve(number) {
+    }    async function approve(number) {
       if (!adminToken) return;
       await fetch(`https://api.github.com/repos/ctctycyc/softlib/issues/${number}/labels`, { method: 'PUT', headers: { Authorization: `token ${adminToken}` }, body: JSON.stringify({ labels: ['approved'] }) });
       alert('已通过'); loadPendingIssues(); loadSoftwares();
@@ -502,49 +496,6 @@
       alert('已驳回'); loadPendingIssues();
     }
 
-   // ========== 聊天室链接复制（自动拼接邮箱） ==========
-var copyChatBtn = document.getElementById('copy-chat-btn');
-var chatLinkDisplay = document.getElementById('chat-link-display');
-
-function updateChatLinkDisplay() {
-  var email = localStorage.getItem('authEmail');
-  if (email) {
-    var workerUrl = 'https://red-moon-3f78.dghkkppp.workers.dev/?email=' + encodeURIComponent(email);
-    chatLinkDisplay.textContent = workerUrl;
-    chatLinkDisplay.setAttribute('data-link', workerUrl);
-  } else {
-    chatLinkDisplay.textContent = '请先登录后再获取链接';
-    chatLinkDisplay.setAttribute('data-link', '');
-  }
-}
-
-if (copyChatBtn) {
-  copyChatBtn.addEventListener('click', function() {
-    var url = chatLinkDisplay.getAttribute('data-link');
-    if (!url) {
-      alert('请先登录');
-      location.href = './login.html';
-      return;
-    }
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(url).then(function() {
-        alert('链接已复制！\n请打开 Chrome 或 Safari，粘贴到地址栏访问');
-      });
-    } else {
-      var textarea = document.createElement('textarea');
-      textarea.value = url;
-      textarea.style.position = 'fixed';
-      textarea.style.left = '-9999px';
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-      alert('链接已复制！\n请打开 Chrome 或 Safari，粘贴到地址栏访问');
-    }
-  });
-}
-
-updateChatLinkDisplay();
     loadSoftwares();
   </script>
 </body>
