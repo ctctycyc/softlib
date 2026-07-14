@@ -329,33 +329,43 @@ async function sendMsg() {
 async function uploadFile() {
   const email = getEmail();
   if (!email) { showError('请先登录'); return; }
-  const files = document.getElementById('file-input').files;
+  const fileInput = document.getElementById('file-input');
+  const files = fileInput.files;
   if (!files.length) return;
+
   for (let file of files) {
-    const ext = file.name.split('.').pop().toLowerCase();
-    const fileName = Date.now() + '_' + Math.random().toString(36).substr(2,9) + '.' + ext;
+    const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
+    const fileName = Date.now() + '_' + safeName;
     const uploadRes = await fetch(SUPABASE_URL + '/storage/v1/object/chat-files/' + fileName, {
       method: 'POST',
-      headers: { 'apikey': SUPABASE_KEY, 'Content-Type': file.type },
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Content-Type': file.type,
+      },
       body: file
     });
+
     if (uploadRes.ok) {
       const fileUrl = SUPABASE_URL + '/storage/v1/object/public/chat-files/' + fileName;
-      const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
+      const msgRes = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=minimal' },
         body: JSON.stringify({ email, message: fileUrl })
       });
-      if (res.ok) {
+      if (msgRes.ok) {
         await addScore(email);
+      } else {
+        showError('消息发送失败');
       }
     } else {
-      showError('上传失败');
+      const err = await uploadRes.json();
+      showError('上传失败: ' + (err.message || '未知错误'));
     }
   }
-  document.getElementById('file-input').value = '';
+
+  fileInput.value = '';
   loadScores().then(loadHistory);
-}
+    }
 
 async function deleteMsg(id) {
   if (!isAdmin) return;
