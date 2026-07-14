@@ -54,10 +54,10 @@
       background: var(--accent); color: white; border: none;
       border-radius: 20px; padding: 8px 18px; font-weight: 600; cursor: pointer;
     }
-    .action-btns { display: flex; gap: 8px; margin-top: 6px; }
+    .action-btns { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
     .action-btns button {
-      flex: 1; border: none; border-radius: 14px; padding: 8px;
-      font-size: 13px; cursor: pointer; background: #e0e0e0; color: #333;
+      flex: 1; border: none; border-radius: 14px; padding: 8px 6px;
+      font-size: 12px; cursor: pointer; background: #e0e0e0; color: #333; min-width: 60px;
     }
     .action-btns button.primary { background: var(--accent); color: white; }
     .panel { background: var(--card); border-radius: 16px; padding: 12px; margin: 8px 0; display: none; box-shadow: var(--shadow); }
@@ -70,7 +70,7 @@
   </style>
 </head><body>
   <div class="header">
-    <h2 id="chat-title">聊天室</h2>
+    <h2 id="chat-title">💬 聊天室</h2>
   </div>
 
   <div class="chat-wrap" id="chat-box"></div>
@@ -84,6 +84,9 @@
     <button onclick="toggleLogin()">登录/注册</button>
     <button onclick="loadHistory()">刷新消息</button>
     <button onclick="loadRanks()">粉丝榜</button>
+    <button onclick="document.getElementById('change-pwd-panel').style.display='block'">修改密码</button>
+    <button onclick="loadMyFollowing()">我的关注</button>
+    <button onclick="loadMyFollowers()">我的粉丝</button>
   </div>
 
   <div id="error" class="error"></div>
@@ -104,6 +107,31 @@
     <button id="follow-btn" class="follow-btn" onclick="toggleFollow()">关注</button>
     <div id="profile-messages" style="margin-top:8px;"></div>
     <button onclick="document.getElementById('profile-panel').style.display='none'" style="background:#e74c3c; color:white; border:none; border-radius:20px; padding:8px 20px; margin-top:8px; cursor:pointer;">关闭</button>
+  </div>
+
+  <!-- 修改密码面板 -->
+  <div id="change-pwd-panel" class="panel">
+    <h3>修改密码</h3>
+    <input type="password" id="old-password" placeholder="旧密码"><br>
+    <input type="password" id="new-password" placeholder="新密码"><br>
+    <button onclick="changePassword()">确认修改</button>
+    <button onclick="document.getElementById('change-pwd-panel').style.display='none'">取消</button>
+    <div id="change-pwd-error" class="error"></div>
+    <div id="change-pwd-success" class="success"></div>
+  </div>
+
+  <!-- 我的关注面板 -->
+  <div id="my-following-panel" class="panel">
+    <h3>我的关注</h3>
+    <div id="my-following-list"></div>
+    <button onclick="document.getElementById('my-following-panel').style.display='none'">关闭</button>
+  </div>
+
+  <!-- 我的粉丝面板 -->
+  <div id="my-followers-panel" class="panel">
+    <h3>我的粉丝</h3>
+    <div id="my-followers-list"></div>
+    <button onclick="document.getElementById('my-followers-panel').style.display='none'">关闭</button>
   </div>
 
   <!-- 粉丝排行榜面板 -->
@@ -277,11 +305,7 @@ async function showProfile(email) {
 async function toggleFollow() {
   const follower = getEmail();
   const following = currentProfileEmail;
-  // 禁止自己关注自己
-  if (follower === following) {
-    showError('不能关注自己哦');
-    return;
-  }
+  if (follower === following) { showError('不能关注自己哦'); return; }
   if (!follower) { showError('请先登录'); return; }
   if (!following) return;
   const btn = document.getElementById('follow-btn');
@@ -307,7 +331,74 @@ async function loadRanks() {
   const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
   document.getElementById('rank-list').innerHTML = sorted.map((e, i) => (i+1) + '. ' + e[0] + ' - ' + e[1] + '粉丝').join('<br>') || '暂无数据';
       document.getElementById('rank-panel').style.display = 'block';
-}    // 管理员激活：点标题5次
+    }
+
+    // 修改密码
+    async function changePassword() {
+      const oldPwd = document.getElementById('old-password').value.trim();
+      const newPwd = document.getElementById('new-password').value.trim();
+      const errDiv = document.getElementById('change-pwd-error');
+      const successDiv = document.getElementById('change-pwd-success');
+      errDiv.textContent = '';
+      successDiv.textContent = '';
+      if (!oldPwd || !newPwd) { errDiv.textContent = '请输入旧密码和新密码'; return; }
+      const email = getEmail();
+      if (!email) { errDiv.textContent = '请先登录'; return; }
+      const checkRes = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ email, password: oldPwd })
+      });
+ if (!checkRes.ok) { errDiv.textContent = '旧密码错误'; return; }
+      const token = localStorage.getItem('authToken');
+      const updateRes = await fetch(SUPABASE_URL + '/auth/v1/user', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ password: newPwd })
+      });
+      if (updateRes.ok) {
+        successDiv.textContent = '密码修改成功';
+        document.getElementById('old-password').value = '';
+        document.getElementById('new-password').value = '';
+      } else {
+        const errData = await updateRes.json();
+        errDiv.textContent = errData.error_description || '修改失败';
+      }
+    }
+
+  // 加载我的关注
+    async function loadMyFollowing() {
+      const email = getEmail();
+      if (!email) { alert('请先登录'); return; }
+      const res = await fetch(SUPABASE_URL + '/rest/v1/follows?select=following&follower=eq.' + encodeURIComponent(email), {
+        headers: { 'apikey': SUPABASE_KEY }
+      });
+      const data = await res.json();
+      const list = document.getElementById('my-following-list');
+      if (Array.isArray(data) && data.length > 0) {
+        list.innerHTML = data.map(f => f.following).join('<br>');
+      } else {
+        list.innerHTML = '暂无关注';
+      }
+      document.getElementById('my-following-panel').style.display = 'block';
+    }
+
+  // 加载我的粉丝
+    async function loadMyFollowers() {
+      const email = getEmail();
+      if (!email) { alert('请先登录'); return; }
+      const res = await fetch(SUPABASE_URL + '/rest/v1/follows?select=follower&following=eq.' + encodeURIComponent(email), {
+        headers: { 'apikey': SUPABASE_KEY }
+      });
+      const data = await res.json();
+      const list = document.getElementById('my-followers-list');
+      if (Array.isArray(data) && data.length > 0) {
+        list.innerHTML = data.map(f => f.follower).join('<br>');
+      } else {
+        list.innerHTML = '暂无粉丝';
+      }
+      document.getElementById('my-followers-panel').style.display = 'block';
+    }    // 管理员激活：点标题5次
     let clickCount = 0;
     document.getElementById('chat-title').onclick = () => {
       clickCount++;
