@@ -5,27 +5,96 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>聊天室</title>
   <style>
-    body { font-family: sans-serif; background: #f5f5f5; margin: 10px; }
-    #chat-box { background: white; border-radius: 8px; padding: 10px; height: 250px; overflow-y: auto; margin-bottom: 10px; }
-    .msg { border-bottom: 1px solid #eee; padding: 5px 0; position: relative; }
-    button { margin: 5px; padding: 8px 14px; border-radius: 6px; border: none; background: #3b6ff5; color: white; cursor: pointer; }
-    input { padding: 8px; margin: 5px; border-radius: 6px; border: 1px solid #ccc; }
-    .panel { background: white; padding: 10px; border-radius: 8px; margin: 10px 0; display: none; }
-    .admin-panel { background: #fff8dc; padding: 10px; border-radius: 8px; margin: 10px 0; display: none; }
+    :root {
+      --bg: #f0f2f5;
+      --card: #ffffff;
+      --text: #1a1a1a;
+      --sub: #8e8e93;
+      --bubble-self: #0a84ff;
+      --bubble-other: #ffffff;
+      --border: #e0e0e0;
+      --accent: #0a84ff;
+      --radius: 20px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg); color: var(--text);
+      display: flex; flex-direction: column; height: 100vh; padding: 12px;
+    }
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 4px; margin-bottom: 8px;
+    }
+    .header h2 { font-size: 22px; font-weight: 700; }
+    .chat-wrap {
+      flex: 1; overflow-y: auto; display: flex; flex-direction: column;
+      gap: 10px; padding: 8px 4px; margin-bottom: 8px;
+    }
+    .msg-row {
+      display: flex; flex-direction: column; max-width: 82%;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .msg-row.self { align-self: flex-end; }
+    .msg-row.other { align-self: flex-start; }
+    .bubble {
+      padding: 10px 14px; border-radius: 18px; font-size: 15px;
+      line-height: 1.45; word-break: break-word; box-shadow: var(--shadow);
+    }
+    .self .bubble { background: var(--bubble-self); color: white; border-bottom-right-radius: 4px; }
+    .other .bubble { background: var(--bubble-other); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+    .meta {
+      display: flex; align-items: center; gap: 6px; margin-top: 4px;
+      font-size: 12px; color: var(--sub); padding: 0 4px;
+    }
+    .user-link { color: var(--accent); text-decoration: underline; cursor: pointer; font-weight: 600; }
+    .title-badge { background: #f0a500; color: white; border-radius: 10px; padding: 0 6px; font-size: 10px; margin-right: 4px; }
+    .input-area {
+      display: flex; gap: 6px; background: var(--card); padding: 8px 12px;
+      border-radius: 30px; box-shadow: var(--shadow); align-items: center;
+    }
+    .input-area input { flex: 1; border: none; outline: none; font-size: 15px; background: transparent; }
+    .input-area button {
+      background: var(--accent); color: white; border: none;
+      border-radius: 20px; padding: 8px 18px; font-weight: 600; cursor: pointer;
+    }
+    .action-btns { display: flex; gap: 8px; margin-top: 6px; }
+    .action-btns button {
+      flex: 1; border: none; border-radius: 14px; padding: 8px;
+      font-size: 13px; cursor: pointer; background: #e0e0e0; color: #333;
+    }
+    .action-btns button.primary { background: var(--accent); color: white; }
+    .panel { background: var(--card); border-radius: 16px; padding: 12px; margin: 8px 0; display: none; box-shadow: var(--shadow); }
+    .panel input { width: 100%; padding: 8px; margin-bottom: 8px; border: 1px solid var(--border); border-radius: 10px; }
+    .admin-panel { background: #fff8dc; border-radius: 16px; padding: 12px; margin: 8px 0; display: none; }
     .error { color: red; margin: 5px 0; }
     .success { color: green; margin: 5px 0; }
-    .title-badge { background: #f0a500; color: white; border-radius: 4px; padding: 0 4px; font-size: 12px; margin-right: 4px; }
-    .delete-btn { background: #e74c3c; color: white; border: none; border-radius: 4px; font-size: 12px; padding: 2px 6px; cursor: pointer; }
+    .follow-btn { background: #ff5e62; color: white; border: none; border-radius: 14px; padding: 6px 14px; cursor: pointer; }
+    .unfollow-btn { background: #aaa; color: white; border: none; border-radius: 14px; padding: 6px 14px; cursor: pointer; }
   </style>
 </head><body>
-  <h2 id="chat-title">聊天室</h2>
-  <div id="chat-box"></div>
-  <input type="text" id="msg" placeholder="输入消息..."><button onclick="sendMsg()">发送</button>
-  <button onclick="loadHistory()">刷新</button>
+  <div class="header">
+    <h2 id="chat-title">💬 聊天室</h2>
+  </div>
+
+  <div class="chat-wrap" id="chat-box"></div>
+
+  <div class="input-area">
+    <input id="msg" placeholder="说点什么..." autocomplete="off">
+    <button onclick="sendMsg()">发送</button>
+  </div>
+
+  <div class="action-btns">
+    <button onclick="toggleLogin()">登录/注册</button>
+    <button onclick="loadHistory()">刷新消息</button>
+    <button onclick="loadRanks()">粉丝榜</button>
+  </div>
+
   <div id="error" class="error"></div>
 
-  <br>
-  <button onclick="toggleLogin()">登录/注册</button>
+  <!-- 登录面板 -->
   <div id="login-panel" class="panel">
     <h3 id="auth-mode-title">登录</h3>
     <input type="email" id="login-email" placeholder="邮箱"><br>
@@ -35,7 +104,21 @@
     <div id="login-error" class="error"></div>
   </div>
 
-  <!-- 管理员面板（点标题5次出现） -->
+  <!-- 用户主页面板 -->
+  <div id="profile-panel" class="panel">
+    <h3 id="profile-email"></h3>
+    <button id="follow-btn" class="follow-btn" onclick="toggleFollow()">关注</button>
+    <div id="profile-messages" style="margin-top:8px;"></div>
+    <button onclick="document.getElementById('profile-panel').style.display='none'" style="background:#aaa; margin-top:8px;">关闭</button>
+  </div>
+
+  <!-- 粉丝排行榜面板 -->
+  <div id="rank-panel" class="panel">
+    <h3>粉丝排行榜</h3>
+    <div id="rank-list"></div>
+  </div>
+
+  <!-- 管理面板（点标题5次出现） -->
   <button id="admin-toggle" style="display:none; background:#aaa;" onclick="toggleAdminPanel()">管理</button>
   <div id="admin-panel" class="admin-panel">
     <h3>管理面板</h3>
@@ -56,28 +139,25 @@
   let isRegisterMode = false;
   let isAdmin = false;
   let titleCache = {};
+  let currentProfileEmail = '';
 
-  // 获取邮箱
   function getEmail() {
     const p = new URLSearchParams(location.search);
     if (p.get('email')) return p.get('email');
     return localStorage.getItem('authEmail');
   }
 
-  // 显示/隐藏登录面板
   function toggleLogin() {
     const p = document.getElementById('login-panel');
     p.style.display = p.style.display === 'none' ? 'block' : 'none';
   }
 
-  // 切换登录/注册模式
   function switchMode() {
     isRegisterMode = !isRegisterMode;
     document.getElementById('auth-mode-title').textContent = isRegisterMode ? '注册' : '登录';
     document.getElementById('auth-action-btn').textContent = isRegisterMode ? '注册' : '登录';
   }
 
-  // 处理登录/注册
   async function handleAuth() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value.trim();
@@ -105,7 +185,6 @@
           localStorage.setItem('authToken', data.access_token);
           localStorage.setItem('authEmail', email);
           document.getElementById('login-panel').style.display = 'none';
-          document.getElementById('login-error').textContent = '';
           showError('登录成功', true);
         } else {
           throw new Error(data.error_description || '邮箱或密码错误');
@@ -116,20 +195,17 @@
     }
   }
 
-  // 通用错误/成功显示
   function showError(msg, isSuccess) {
     const div = document.getElementById('error');
     div.textContent = msg;
     div.className = isSuccess ? 'success' : 'error';
   }
 
-  // 加载头衔缓存
   async function loadTitles() {
     const res = await fetch(SUPABASE_URL + '/rest/v1/user_titles?select=*', { headers: { 'apikey': SUPABASE_KEY } });
     const data = await res.json();
     if (Array.isArray(data)) data.forEach(r => titleCache[r.email] = r.title);
-  }// 加载历史消息
-async function loadHistory() {
+  }async function loadHistory() {
   const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50', {
     headers: { 'apikey': SUPABASE_KEY }
   });
@@ -142,11 +218,10 @@ async function loadHistory() {
       div.className = 'msg';
       div.setAttribute('data-id', m.id);
       const title = titleCache[m.email] ? '<span class="title-badge">' + titleCache[m.email] + '</span> ' : '';
-      div.innerHTML = title + '<b>' + m.email + ':</b> ' + m.message;
-      // 管理员删除按钮
+      div.innerHTML = title + '<b><span class="user-link" onclick="showProfile(\'' + m.email + '\')">' + m.email + '</span>:</b> ' + m.message;
       if (isAdmin) {
         const delBtn = document.createElement('button');
-        delBtn.className = 'delete-btn';
+        delBtn.style.cssText = 'background:#e74c3c;color:white;border:none;border-radius:4px;font-size:12px;padding:2px 6px;margin-left:8px;';
         delBtn.textContent = '删除';
         delBtn.onclick = function() { deleteMsg(m.id); };
         div.appendChild(delBtn);
@@ -154,154 +229,134 @@ async function loadHistory() {
       box.appendChild(div);
     });
   }
+  box.scrollTop = box.scrollHeight;
 }
 
-// 发送消息
 async function sendMsg() {
   const msg = document.getElementById('msg').value.trim();
   if (!msg) return;
   const email = getEmail();
   if (!email) { showError('请先登录'); return; }
-
-  // 禁言检查
   const muteRes = await fetch(SUPABASE_URL + '/rest/v1/mutes?select=*&email=eq.' + encodeURIComponent(email), {
     headers: { 'apikey': SUPABASE_KEY }
   });
   const muteData = await muteRes.json();
-  if (Array.isArray(muteData) && muteData.length > 0) {
-    showError('你已被禁言，无法发送消息');
-    return;
-  }
-
+  if (Array.isArray(muteData) && muteData.length > 0) { showError('你已被禁言'); return; }
   const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': SUPABASE_KEY,
-      'Prefer': 'return=minimal'
-    },
+    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=minimal' },
     body: JSON.stringify({ email, message: msg })
   });
-  if (res.ok) {
-    document.getElementById('msg').value = '';
-    showError('');
-    loadHistory();
-  } else {
-    const err = await res.json();
-    showError('发送失败: ' + (err.message || '请重试'));
-  }
+  if (res.ok) { document.getElementById('msg').value = ''; showError(''); loadHistory(); }
+  else { const err = await res.json(); showError('发送失败: ' + (err.message || '请重试')); }
 }
 
-// 删除消息（管理员）
 async function deleteMsg(id) {
   if (!isAdmin) return;
   const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?id=eq.' + id, {
-    method: 'DELETE',
+    method: 'DELETE', headers: { 'apikey': SUPABASE_KEY }
+  });
+  if (res.ok) { const el = document.querySelector('.msg[data-id="' + id + '"]'); if (el) el.remove(); }
+}
+
+// 用户主页
+async function showProfile(email) {
+  currentProfileEmail = email;
+  document.getElementById('profile-email').textContent = email;
+  document.getElementById('profile-panel').style.display = 'block';
+  const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&email=eq.' + encodeURIComponent(email) + '&order=created_at.desc&limit=10', {
     headers: { 'apikey': SUPABASE_KEY }
   });
-  if (res.ok) {
-    const msgDiv = document.querySelector('.msg[data-id="' + id + '"]');
-    if (msgDiv) msgDiv.remove();
+  const data = await res.json();
+  const msgDiv = document.getElementById('profile-messages');
+  msgDiv.innerHTML = '<h4>最近消息</h4>';
+  if (Array.isArray(data)) data.forEach(m => { const d = document.createElement('div'); d.textContent = m.message; msgDiv.appendChild(d); });
+  const followRes = await fetch(SUPABASE_URL + '/rest/v1/follows?select=*&follower=eq.' + encodeURIComponent(getEmail()) + '&following=eq.' + encodeURIComponent(email), {
+    headers: { 'apikey': SUPABASE_KEY }
+  });
+  const followData = await followRes.json();
+  const btn = document.getElementById('follow-btn');
+  if (Array.isArray(followData) && followData.length > 0) { btn.textContent = '取消关注'; btn.className = 'unfollow-btn'; }
+  else { btn.textContent = '关注'; btn.className = 'follow-btn'; }
+}
+
+async function toggleFollow() {
+  const follower = getEmail();
+  if (!follower) { showError('请先登录'); return; }
+  const following = currentProfileEmail;
+  if (!following) return;
+  const btn = document.getElementById('follow-btn');
+  if (btn.textContent === '关注') {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/follows', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ follower, following })
+    });
+    if (res.ok) { btn.textContent = '取消关注'; btn.className = 'unfollow-btn'; }
+  } else {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/follows?follower=eq.' + encodeURIComponent(follower) + '&following=eq.' + encodeURIComponent(following), {
+      method: 'DELETE', headers: { 'apikey': SUPABASE_KEY }
+    });
+    if (res.ok) { btn.textContent = '关注'; btn.className = 'follow-btn'; }
   }
-}    // 管理员激活：点标题5次
+}
+
+async function loadRanks() {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/follows?select=following', { headers: { 'apikey': SUPABASE_KEY } });
+  const data = await res.json();
+  const count = {};
+  if (Array.isArray(data)) data.forEach(f => { count[f.following] = (count[f.following] || 0) + 1; });
+  const sorted = Object.entries(count).sort((a, b) => b[1] - a[1]);
+  document.getElementById('rank-list').innerHTML = sorted.map((e, i) => (i+1) + '. ' + e[0] + ' - ' + e[1] + '粉丝').join('<br>') || '暂无数据';
+  document.getElementById('rank-panel').style.display = 'block';
+}    // 管理员
     let clickCount = 0;
     document.getElementById('chat-title').onclick = () => {
       clickCount++;
-      if (clickCount >= 5) {
-        document.getElementById('admin-toggle').style.display = 'inline-block';
-        clickCount = 0;
-      }
+      if (clickCount >= 5) { document.getElementById('admin-toggle').style.display = 'inline-block'; clickCount = 0; }
       setTimeout(() => clickCount = 0, 2000);
     };
-
-    function toggleAdminPanel() {
-      const p = document.getElementById('admin-panel');
-      p.style.display = p.style.display === 'none' ? 'block' : 'none';
-    }
-
+    function toggleAdminPanel() { const p = document.getElementById('admin-panel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; }
     function verifyAdmin() {
       if (document.getElementById('admin-key').value === 'zeruan2026') {
-        isAdmin = true;
-        document.getElementById('admin-content').style.display = 'block';
-        document.getElementById('admin-error').textContent = '';
-        loadTitleList();
-        loadHistory(); // 刷新以显示删除按钮
-      } else {
-        document.getElementById('admin-error').textContent = '密钥错误';
-      }
+        isAdmin = true; document.getElementById('admin-content').style.display = 'block';
+        document.getElementById('admin-error').textContent = ''; loadTitleList(); loadHistory();
+      } else { document.getElementById('admin-error').textContent = '密钥错误'; }
     }
-
     async function setTitle() {
       const e = document.getElementById('target-email').value.trim();
       const t = document.getElementById('new-title').value.trim();
       if (!e || !t) return;
       const res = await fetch(SUPABASE_URL + '/rest/v1/user_titles', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Prefer': 'resolution=merge-duplicates'
-        },
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'resolution=merge-duplicates' },
         body: JSON.stringify({ email: e, title: t })
       });
-      if (res.ok) {
-        titleCache[e] = t;
-        document.getElementById('admin-success').textContent = '头衔设置成功';
-        loadHistory();
-        loadTitleList();
-      } else {
-        document.getElementById('admin-error').textContent = '设置失败';
-      }
+      if (res.ok) { titleCache[e] = t; document.getElementById('admin-success').textContent = '头衔设置成功'; loadHistory(); loadTitleList(); }
+      else { document.getElementById('admin-error').textContent = '设置失败'; }
     }
-
     async function clearTitle() {
       const e = document.getElementById('target-email').value.trim();
       if (!e) return;
-      const res = await fetch(SUPABASE_URL + '/rest/v1/user_titles?email=eq.' + encodeURIComponent(e), {
-        method: 'DELETE',
-        headers: { 'apikey': SUPABASE_KEY }
-      });
-      if (res.ok) {
-        delete titleCache[e];
-        document.getElementById('admin-success').textContent = '头衔已清除';
-        loadHistory();
-        loadTitleList();
-      }
+      const res = await fetch(SUPABASE_URL + '/rest/v1/user_titles?email=eq.' + encodeURIComponent(e), { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } });
+      if (res.ok) { delete titleCache[e]; document.getElementById('admin-success').textContent = '头衔已清除'; loadHistory(); loadTitleList(); }
     }
-
     async function muteUser() {
       const e = document.getElementById('mute-email').value.trim();
       if (!e) return;
-      const res = await fetch(SUPABASE_URL + '/rest/v1/mutes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': SUPABASE_KEY,
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({ email: e })
-      });
+      const res = await fetch(SUPABASE_URL + '/rest/v1/mutes', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=minimal' }, body: JSON.stringify({ email: e }) });
       document.getElementById('admin-success').textContent = res.ok ? '已禁言' : '禁言失败';
     }
-
     async function unmuteUser() {
       const e = document.getElementById('mute-email').value.trim();
       if (!e) return;
-      const res = await fetch(SUPABASE_URL + '/rest/v1/mutes?email=eq.' + encodeURIComponent(e), {
-        method: 'DELETE',
-        headers: { 'apikey': SUPABASE_KEY }
-      });
+      const res = await fetch(SUPABASE_URL + '/rest/v1/mutes?email=eq.' + encodeURIComponent(e), { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } });
       document.getElementById('admin-success').textContent = res.ok ? '已解禁' : '解禁失败';
     }
-
     async function loadTitleList() {
       const res = await fetch(SUPABASE_URL + '/rest/v1/user_titles?select=*', { headers: { 'apikey': SUPABASE_KEY } });
       const data = await res.json();
-      const div = document.getElementById('title-list');
-      div.innerHTML = Array.isArray(data) && data.length ? data.map(r => r.email + ' - ' + r.title).join('<br>') : '暂无头衔';
+      document.getElementById('title-list').innerHTML = Array.isArray(data) && data.length ? data.map(r => r.email + ' - ' + r.title).join('<br>') : '暂无头衔';
     }
 
-    // 初始化
     loadTitles().then(() => loadHistory());
     setInterval(loadHistory, 5000);
   </script>
