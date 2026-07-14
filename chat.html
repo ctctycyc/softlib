@@ -111,12 +111,12 @@
 
   <div class="input-area">
     <input id="msg" placeholder="说点什么..." autocomplete="off">
-    <button id="send">发送</button>
+    <button id="send" onclick="sendMessage()">发送</button>
   </div>
 
   <div class="action-btns">
-    <button id="login-toggle-btn">登录 / 注册</button>
-    <button id="refresh-btn">刷新消息</button>
+    <button id="login-toggle-btn" onclick="toggleLogin()">登录 / 注册</button>
+    <button id="refresh-btn" onclick="loadHistory()">刷新消息</button>
   </div>
 
   <!-- 登录/注册面板 -->
@@ -125,8 +125,8 @@
     <input type="email" id="auth-email" placeholder="邮箱">
     <input type="password" id="auth-password" placeholder="密码">
     <div style="display:flex; gap:8px;">
-      <button class="primary" id="auth-submit-btn">登录</button>
-      <button id="switch-mode-btn">没有账号？去注册</button>
+      <button class="primary" id="auth-submit-btn" onclick="handleAuth()">登录</button>
+      <button id="switch-mode-btn" onclick="switchAuthMode()">没有账号？去注册</button>
     </div>
     <div id="auth-error" style="color:red; margin-top:6px; font-size:13px;"></div>
   </div>
@@ -136,17 +136,17 @@
   <div class="admin-panel" id="admin-panel">
     <h4>管理面板</h4>
     <input id="admin-key-input" type="password" placeholder="管理员密钥">
-    <button id="verify-admin-btn" class="primary">验证</button>
+    <button id="verify-admin-btn" class="primary" onclick="verifyAdmin()">验证</button>
     <div id="admin-content" style="display:none; margin-top:8px;">
       <input id="target-email" placeholder="用户邮箱"><input id="new-title" placeholder="头衔">
       <div style="display:flex; gap:8px; margin-top:6px;">
-        <button class="primary" id="set-title-btn">设置头衔</button>
-        <button id="clear-title-btn">清除头衔</button>
+        <button class="primary" id="set-title-btn" onclick="setTitle()">设置头衔</button>
+        <button id="clear-title-btn" onclick="clearTitle()">清除头衔</button>
       </div>
       <input id="mute-email" placeholder="禁言邮箱" style="margin-top:8px;">
       <div style="display:flex; gap:8px; margin-top:6px;">
-        <button id="mute-btn">禁言</button>
-        <button id="unmute-btn">解禁</button>
+        <button id="mute-btn" onclick="muteUser()">禁言</button>
+        <button id="unmute-btn" onclick="unmuteUser()">解禁</button>
       </div>
       <div id="admin-error" style="color:red; margin-top:6px;"></div>
       <div id="title-list" style="font-size:13px; margin-top:8px;"></div>
@@ -155,7 +155,6 @@
   // ========== 配置 ==========
   const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
-  // 创建 supabase 客户端用于数据库操作
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   let isRegisterMode = false;
@@ -172,7 +171,7 @@
     return localStorage.getItem('authEmail');
   }
 
-  // UI 更新
+  // 更新登录状态界面
   function updateLoginUI() {
     currentEmail = getEmail();
     const btn = document.getElementById('login-toggle-btn');
@@ -188,20 +187,20 @@
   updateLoginUI();
 
   // 显示/隐藏登录面板
-  document.getElementById('login-toggle-btn').addEventListener('click', function() {
+  function toggleLogin() {
     const p = document.getElementById('login-panel');
     p.style.display = (p.style.display === 'none' || p.style.display === '') ? 'block' : 'none';
-  });
+  }
 
   // 切换登录/注册模式
-  document.getElementById('switch-mode-btn').addEventListener('click', function() {
+  function switchAuthMode() {
     isRegisterMode = !isRegisterMode;
     document.getElementById('auth-title').textContent = isRegisterMode ? '注册' : '登录';
     document.getElementById('auth-submit-btn').textContent = isRegisterMode ? '注册' : '登录';
     document.getElementById('switch-mode-btn').textContent = isRegisterMode ? '已有账号？去登录' : '没有账号？去注册';
-  });
+  }
 
-  // 处理登录/注册（fetch 方式）
+  // 登录/注册处理（兼容邮箱验证）
   async function handleAuth() {
     const email = document.getElementById('auth-email').value.trim();
     const password = document.getElementById('auth-password').value.trim();
@@ -214,34 +213,21 @@
     try {
       if (isRegisterMode) {
         // 注册
-        const signUpRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+        const signUpRes = await fetch(SUPABASE_URL + '/auth/v1/signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
           body: JSON.stringify({ email, password })
         });
         const signUpData = await signUpRes.json();
-        if (signUpData.error || signUpData.msg) {
-          throw new Error(signUpData.error_description || signUpData.msg || '注册失败');
-        }
-        // 注册后自动登录
-        const signInRes = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-          body: JSON.stringify({ email, password })
-        });
-        const signInData = await signInRes.json();
-        if (signInData.access_token) {
-          localStorage.setItem('authToken', signInData.access_token);
-          localStorage.setItem('authEmail', email);
-          updateLoginUI();
-          document.getElementById('login-panel').style.display = 'none';
-          errDiv.textContent = '';
+        // 注册成功通常没有 access_token，需要邮箱验证
+        if (signUpData.identities || signUpData.id) {
+          errDiv.textContent = '注册成功！请去邮箱查收验证邮件，然后返回登录。';
         } else {
-          errDiv.textContent = '注册成功，请登录';
+          throw new Error(signUpData.error_description || signUpData.msg || '注册失败');
         }
       } else {
         // 登录
-        const signInRes = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+        const signInRes = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
           body: JSON.stringify({ email, password })
@@ -254,39 +240,41 @@
           document.getElementById('login-panel').style.display = 'none';
           errDiv.textContent = '';
         } else {
-          throw new Error(signInData.error_description || '邮箱或密码错误');
+          // 未验证邮箱或其他错误
+          if (signInData.error === 'Email not confirmed') {
+            errDiv.textContent = '邮箱尚未验证，请去邮箱点击验证链接后再登录。';
+          } else {
+            throw new Error(signInData.error_description || '邮箱或密码错误');
+          }
         }
       }
     } catch (e) {
       errDiv.textContent = e.message;
     }
-  }
+  }// 头像生成
+function avatarHTML(email) {
+  const letter = email.charAt(0).toUpperCase();
+  const colors = ['#FF5E62','#FF8A5C','#F9C74F','#90BE6D','#4D908E','#577590','#F94144','#F8961E'];
+  const color = colors[Math.abs(hashCode(email)) % colors.length];
+  return `<span class="avatar" style="background:${color};">${letter}</span>`;
+}
+function hashCode(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = (hash * 31 + str.charCodeAt(i)) & 0x7fffffff;
+  return hash;
+}
 
-  // 绑定登录按钮事件
-  document.getElementById('auth-submit-btn').addEventListener('click', handleAuth);
+function timeAgo(dateStr) {
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  const diff = Math.floor((now - then) / 1000);
+  if (diff < 60) return '刚刚';
+  if (diff < 3600) return Math.floor(diff/60) + '分钟前';
+  if (diff < 86400) return Math.floor(diff/3600) + '小时前';
+  return new Date(dateStr).toLocaleDateString('zh-CN');
+}
 
-  // 头像
-  function avatarHTML(email) {
-    const letter = email.charAt(0).toUpperCase();
-    const colors = ['#FF5E62','#FF8A5C','#F9C74F','#90BE6D','#4D908E','#577590','#F94144','#F8961E'];
-    const color = colors[Math.abs(hashCode(email)) % colors.length];
-    return `<span class="avatar" style="background:${color};">${letter}</span>`;
-  }
-  function hashCode(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) hash = (hash * 31 + str.charCodeAt(i)) & 0x7fffffff;
-    return hash;
-  }
-
-  function timeAgo(dateStr) {
-    const now = Date.now();
-    const then = new Date(dateStr).getTime();
-    const diff = Math.floor((now - then) / 1000);
-    if (diff < 60) return '刚刚';
-    if (diff < 3600) return Math.floor(diff/60) + '分钟前';
-      if (diff < 86400) return Math.floor(diff/3600) + '小时前';
-      return new Date(dateStr).toLocaleDateString('zh-CN');
-    }function addMessage(msg) {
+function addMessage(msg) {
   const box = document.getElementById('chat-box');
   const isSelf = currentEmail && msg.email === currentEmail;
   const row = document.createElement('div');
@@ -331,7 +319,7 @@ async function loadTitles() {
 }
 
 // 发送消息
-document.getElementById('send').onclick = async () => {
+async function sendMessage() {
   const msg = document.getElementById('msg').value.trim();
   if (!msg) return;
   const email = getEmail();
@@ -341,72 +329,76 @@ document.getElementById('send').onclick = async () => {
   await supabase.from('chat_messages').insert({ email, message: msg });
   document.getElementById('msg').value = '';
   loadHistory();
-};
+}
 
-// 刷新
-document.getElementById('refresh-btn').addEventListener('click', loadHistory);
-setInterval(loadHistory, 5000);// 管理入口：点击标题 5 次
-let clickCount = 0;
-document.getElementById('chat-title').onclick = () => {
-  clickCount++;
-  if (clickCount >= 5) {
-    document.getElementById('toggle-admin-btn').style.display = 'block';
-    clickCount = 0;
-  }
-  setTimeout(() => clickCount = 0, 2000);
-};
+// 定时刷新
+setInterval(loadHistory, 5000);    // 管理员激活：点标题5次
+    let clickCount = 0;
+    document.getElementById('chat-title').onclick = () => {
+      clickCount++;
+      if (clickCount >= 5) {
+        document.getElementById('toggle-admin-btn').style.display = 'block';
+        clickCount = 0;
+      }
+      setTimeout(() => clickCount = 0, 2000);
+    };
 
-document.getElementById('toggle-admin-btn').addEventListener('click', () => {
-  const p = document.getElementById('admin-panel');
-  p.style.display = (p.style.display === 'none' || p.style.display === '') ? 'block' : 'none';
-});
+    document.getElementById('toggle-admin-btn').addEventListener('click', () => {
+      const p = document.getElementById('admin-panel');
+      p.style.display = (p.style.display === 'none' || p.style.display === '') ? 'block' : 'none';
+    });
 
-document.getElementById('verify-admin-btn').addEventListener('click', () => {
-  if (document.getElementById('admin-key-input').value === 'zeruan2026') {
-    isAdmin = true;
-    document.getElementById('admin-content').style.display = 'block';
-    loadTitleList();
-    loadHistory();
-  } else {
-    alert('密钥错误');
-  }
-});
+    function verifyAdmin() {
+      if (document.getElementById('admin-key-input').value === 'zeruan2026') {
+        isAdmin = true;
+        document.getElementById('admin-content').style.display = 'block';
+        loadTitleList();
+        loadHistory();
+      } else {
+        alert('密钥错误');
+      }
+    }
 
-document.getElementById('set-title-btn').onclick = async () => {
-  const e = document.getElementById('target-email').value.trim();
-  const t = document.getElementById('new-title').value.trim();
-  if (e && t) {
-    await supabase.from('user_titles').upsert({ email: e, title: t });
-    titleCache[e] = t;
-    loadHistory();
-    loadTitleList();
-  }
-};
-document.getElementById('clear-title-btn').onclick = async () => {
-  const e = document.getElementById('target-email').value.trim();
-  if (e) {
-    await supabase.from('user_titles').delete().eq('email', e);
-    delete titleCache[e];
-    loadHistory();
-    loadTitleList();
-  }
-};
-document.getElementById('mute-btn').onclick = async () => {
-  const e = document.getElementById('mute-email').value.trim();
-  if (e) await supabase.from('mutes').upsert({ email: e });
-};
-document.getElementById('unmute-btn').onclick = async () => {
-  const e = document.getElementById('mute-email').value.trim();
-  if (e) await supabase.from('mutes').delete().eq('email', e);
-};
+    async function setTitle() {
+      const e = document.getElementById('target-email').value.trim();
+      const t = document.getElementById('new-title').value.trim();
+      if (e && t) {
+        await supabase.from('user_titles').upsert({ email: e, title: t });
+        titleCache[e] = t;
+        loadHistory();
+        loadTitleList();
+      }
+    }
 
-async function loadTitleList() {
-  const { data } = await supabase.from('user_titles').select('*');
-  const div = document.getElementById('title-list');
-  if (data && data.length) {
-    div.innerHTML = data.map(r => `<div>${r.email} - ${r.title}</div>`).join('');
-  } else div.textContent = '暂无头衔';
-}    // 初始化
+    async function clearTitle() {
+      const e = document.getElementById('target-email').value.trim();
+      if (e) {
+        await supabase.from('user_titles').delete().eq('email', e);
+        delete titleCache[e];
+        loadHistory();
+        loadTitleList();
+      }
+    }
+
+    async function muteUser() {
+      const e = document.getElementById('mute-email').value.trim();
+      if (e) await supabase.from('mutes').upsert({ email: e });
+    }
+
+    async function unmuteUser() {
+      const e = document.getElementById('mute-email').value.trim();
+      if (e) await supabase.from('mutes').delete().eq('email', e);
+    }
+
+    async function loadTitleList() {
+      const { data } = await supabase.from('user_titles').select('*');
+      const div = document.getElementById('title-list');
+      if (data && data.length) {
+        div.innerHTML = data.map(r => `<div>${r.email} - ${r.title}</div>`).join('');
+      } else div.textContent = '暂无头衔';
+    }
+
+    // 初始化
     loadTitles().then(() => loadHistory());
   </script>
 </body>
