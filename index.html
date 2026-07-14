@@ -502,6 +502,23 @@
       alert('已驳回'); loadPendingIssues();
     }
 
+   // 聊天室跳转：自动携带邮箱参数
+var goChatBtn = document.getElementById('go-chat-btn');
+if (goChatBtn) {
+  goChatBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    var email = localStorage.getItem('authEmail');
+    var chatUrl = 'https://red-moon-3f78.dghkkppp.workers.dev/';
+    if (email) {
+      chatUrl += '?email=' + encodeURIComponent(email);
+    } else {
+      alert('请先登录后再进入聊天室');
+      location.href = './login.html';
+      return;
+    }
+    window.open(chatUrl, '_blank');
+  });
+    }
     loadSoftwares();
   </script>
 </body>
