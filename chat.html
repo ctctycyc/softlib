@@ -7,38 +7,67 @@
   <style>
     body { font-family: sans-serif; background: #f5f5f5; margin: 10px; }
     #chat-box { background: white; border-radius: 8px; padding: 10px; height: 250px; overflow-y: auto; margin-bottom: 10px; }
-    .msg { border-bottom: 1px solid #eee; padding: 5px 0; }
-    button { margin: 5px; padding: 8px 14px; border-radius: 6px; border: none; background: #3b6ff5; color: white; }
+    .msg { border-bottom: 1px solid #eee; padding: 5px 0; position: relative; }
+    button { margin: 5px; padding: 8px 14px; border-radius: 6px; border: none; background: #3b6ff5; color: white; cursor: pointer; }
     input { padding: 8px; margin: 5px; border-radius: 6px; border: 1px solid #ccc; }
     .panel { background: white; padding: 10px; border-radius: 8px; margin: 10px 0; display: none; }
+    .admin-panel { background: #fff8dc; padding: 10px; border-radius: 8px; margin: 10px 0; display: none; }
+    .error { color: red; margin: 5px 0; }
+    .success { color: green; margin: 5px 0; }
+    .title-badge { background: #f0a500; color: white; border-radius: 4px; padding: 0 4px; font-size: 12px; margin-right: 4px; }
+    .delete-btn { background: #e74c3c; color: white; border: none; border-radius: 4px; font-size: 12px; padding: 2px 6px; cursor: pointer; }
   </style>
-</head>
-<body>
-  <h2>聊天室</h2>
+</head><body>
+  <h2 id="chat-title">聊天室</h2>
   <div id="chat-box"></div>
   <input type="text" id="msg" placeholder="输入消息..."><button onclick="sendMsg()">发送</button>
   <button onclick="loadHistory()">刷新</button>
+  <div id="error" class="error"></div>
+
   <br>
-  <button onclick="document.getElementById('login-panel').style.display='block'">登录/注册</button>
+  <button onclick="toggleLogin()">登录/注册</button>
   <div id="login-panel" class="panel">
     <h3 id="auth-mode-title">登录</h3>
     <input type="email" id="login-email" placeholder="邮箱"><br>
     <input type="password" id="login-password" placeholder="密码"><br>
     <button id="auth-action-btn" onclick="handleAuth()">登录</button>
     <button onclick="switchMode()">切换到注册</button>
-    <div id="login-error" style="color:red;"></div>
+    <div id="login-error" class="error"></div>
+  </div>
+
+  <!-- 管理员面板（点标题5次出现） -->
+  <button id="admin-toggle" style="display:none; background:#aaa;" onclick="toggleAdminPanel()">管理</button>
+  <div id="admin-panel" class="admin-panel">
+    <h3>管理面板</h3>
+    <input type="password" id="admin-key" placeholder="管理员密钥"><button onclick="verifyAdmin()">验证</button>
+    <div id="admin-content" style="display:none;">
+      <input id="target-email" placeholder="用户邮箱"><input id="new-title" placeholder="头衔">
+      <button onclick="setTitle()">设置头衔</button><button onclick="clearTitle()">清除头衔</button>
+      <br>
+      <input id="mute-email" placeholder="禁言邮箱"><button onclick="muteUser()">禁言</button><button onclick="unmuteUser()">解禁</button>
+      <div id="admin-error" class="error"></div>
+      <div id="admin-success" class="success"></div>
+      <div id="title-list" style="font-size:13px; margin-top:5px;"></div>
+    </div>
   </div><script>
-  // ========== 配置 ==========
   const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
 
   let isRegisterMode = false;
+  let isAdmin = false;
+  let titleCache = {};
 
   // 获取邮箱
   function getEmail() {
     const p = new URLSearchParams(location.search);
     if (p.get('email')) return p.get('email');
     return localStorage.getItem('authEmail');
+  }
+
+  // 显示/隐藏登录面板
+  function toggleLogin() {
+    const p = document.getElementById('login-panel');
+    p.style.display = p.style.display === 'none' ? 'block' : 'none';
   }
 
   // 切换登录/注册模式
@@ -48,29 +77,24 @@
     document.getElementById('auth-action-btn').textContent = isRegisterMode ? '注册' : '登录';
   }
 
-  // 处理登录/注册（使用最原始的 fetch 请求）
+  // 处理登录/注册
   async function handleAuth() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value.trim();
     const err = document.getElementById('login-error');
     err.textContent = '';
     if (!email || !password) { err.textContent = '请输入邮箱和密码'; return; }
-
     try {
       if (isRegisterMode) {
-        // 注册
         const res = await fetch(SUPABASE_URL + '/auth/v1/signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
           body: JSON.stringify({ email, password })
         });
         const data = await res.json();
-        if (data.error || data.msg) {
-          throw new Error(data.error_description || data.msg || '注册失败');
-        }
+        if (data.error || data.msg) throw new Error(data.error_description || data.msg || '注册失败');
         err.textContent = '注册成功！请查看邮箱验证（如果开启）。';
       } else {
-        // 登录
         const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
@@ -81,7 +105,8 @@
           localStorage.setItem('authToken', data.access_token);
           localStorage.setItem('authEmail', email);
           document.getElementById('login-panel').style.display = 'none';
-          alert('登录成功');
+          document.getElementById('login-error').textContent = '';
+          showError('登录成功', true);
         } else {
           throw new Error(data.error_description || '邮箱或密码错误');
         }
@@ -91,52 +116,193 @@
     }
   }
 
-  // 加载历史消息（直接 fetch Supabase REST API）
-  async function loadHistory() {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50', {
-      headers: { 'apikey': SUPABASE_KEY }
-    });
-    const data = await res.json();
-    const box = document.getElementById('chat-box');
-    box.innerHTML = '';
-    if (Array.isArray(data)) {
-      data.forEach(m => {
-        const div = document.createElement('div');
-        div.className = 'msg';
-        div.textContent = m.email + ': ' + m.message;
-        box.appendChild(div);
-      });
-    } else {
-      box.textContent = '加载失败: ' + JSON.stringify(data);
-    }
+  // 通用错误/成功显示
+  function showError(msg, isSuccess) {
+    const div = document.getElementById('error');
+    div.textContent = msg;
+    div.className = isSuccess ? 'success' : 'error';
   }
 
-  // 发送消息（直接 fetch Supabase REST API）
-  async function sendMsg() {
-    const msg = document.getElementById('msg').value.trim();
-    if (!msg) return;
-    const email = getEmail();
-    if (!email) { alert('请先登录'); return; }
-
-    const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_KEY,
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({ email, message: msg })
+  // 加载头衔缓存
+  async function loadTitles() {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/user_titles?select=*', { headers: { 'apikey': SUPABASE_KEY } });
+    const data = await res.json();
+    if (Array.isArray(data)) data.forEach(r => titleCache[r.email] = r.title);
+  }// 加载历史消息
+async function loadHistory() {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50', {
+    headers: { 'apikey': SUPABASE_KEY }
+  });
+  const data = await res.json();
+  const box = document.getElementById('chat-box');
+  box.innerHTML = '';
+  if (Array.isArray(data)) {
+    data.forEach(m => {
+      const div = document.createElement('div');
+      div.className = 'msg';
+      div.setAttribute('data-id', m.id);
+      const title = titleCache[m.email] ? '<span class="title-badge">' + titleCache[m.email] + '</span> ' : '';
+      div.innerHTML = title + '<b>' + m.email + ':</b> ' + m.message;
+      // 管理员删除按钮
+      if (isAdmin) {
+        const delBtn = document.createElement('button');
+        delBtn.className = 'delete-btn';
+        delBtn.textContent = '删除';
+        delBtn.onclick = function() { deleteMsg(m.id); };
+        div.appendChild(delBtn);
+      }
+      box.appendChild(div);
     });
+  }
+}
 
-    if (res.ok) {
-      document.getElementById('msg').value = '';
-      loadHistory();
-    } else {
-      const err = await res.json();
-      alert('发送失败: ' + (err.message || '请重试'));
-    }
-  }    // 初始化
+// 发送消息
+async function sendMsg() {
+  const msg = document.getElementById('msg').value.trim();
+  if (!msg) return;
+  const email = getEmail();
+  if (!email) { showError('请先登录'); return; }
+
+  // 禁言检查
+  const muteRes = await fetch(SUPABASE_URL + '/rest/v1/mutes?select=*&email=eq.' + encodeURIComponent(email), {
+    headers: { 'apikey': SUPABASE_KEY }
+  });
+  const muteData = await muteRes.json();
+  if (Array.isArray(muteData) && muteData.length > 0) {
+    showError('你已被禁言，无法发送消息');
+    return;
+  }
+
+  const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify({ email, message: msg })
+  });
+  if (res.ok) {
+    document.getElementById('msg').value = '';
+    showError('');
     loadHistory();
+  } else {
+    const err = await res.json();
+    showError('发送失败: ' + (err.message || '请重试'));
+  }
+}
+
+// 删除消息（管理员）
+async function deleteMsg(id) {
+  if (!isAdmin) return;
+  const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?id=eq.' + id, {
+    method: 'DELETE',
+    headers: { 'apikey': SUPABASE_KEY }
+  });
+  if (res.ok) {
+    const msgDiv = document.querySelector('.msg[data-id="' + id + '"]');
+    if (msgDiv) msgDiv.remove();
+  }
+}    // 管理员激活：点标题5次
+    let clickCount = 0;
+    document.getElementById('chat-title').onclick = () => {
+      clickCount++;
+      if (clickCount >= 5) {
+        document.getElementById('admin-toggle').style.display = 'inline-block';
+        clickCount = 0;
+      }
+      setTimeout(() => clickCount = 0, 2000);
+    };
+
+    function toggleAdminPanel() {
+      const p = document.getElementById('admin-panel');
+      p.style.display = p.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function verifyAdmin() {
+      if (document.getElementById('admin-key').value === 'zeruan2026') {
+        isAdmin = true;
+        document.getElementById('admin-content').style.display = 'block';
+        document.getElementById('admin-error').textContent = '';
+        loadTitleList();
+        loadHistory(); // 刷新以显示删除按钮
+      } else {
+        document.getElementById('admin-error').textContent = '密钥错误';
+      }
+    }
+
+    async function setTitle() {
+      const e = document.getElementById('target-email').value.trim();
+      const t = document.getElementById('new-title').value.trim();
+      if (!e || !t) return;
+      const res = await fetch(SUPABASE_URL + '/rest/v1/user_titles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Prefer': 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({ email: e, title: t })
+      });
+      if (res.ok) {
+        titleCache[e] = t;
+        document.getElementById('admin-success').textContent = '头衔设置成功';
+        loadHistory();
+        loadTitleList();
+      } else {
+        document.getElementById('admin-error').textContent = '设置失败';
+      }
+    }
+
+    async function clearTitle() {
+      const e = document.getElementById('target-email').value.trim();
+      if (!e) return;
+      const res = await fetch(SUPABASE_URL + '/rest/v1/user_titles?email=eq.' + encodeURIComponent(e), {
+        method: 'DELETE',
+        headers: { 'apikey': SUPABASE_KEY }
+      });
+      if (res.ok) {
+        delete titleCache[e];
+        document.getElementById('admin-success').textContent = '头衔已清除';
+        loadHistory();
+        loadTitleList();
+      }
+    }
+
+    async function muteUser() {
+      const e = document.getElementById('mute-email').value.trim();
+      if (!e) return;
+      const res = await fetch(SUPABASE_URL + '/rest/v1/mutes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({ email: e })
+      });
+      document.getElementById('admin-success').textContent = res.ok ? '已禁言' : '禁言失败';
+    }
+
+    async function unmuteUser() {
+      const e = document.getElementById('mute-email').value.trim();
+      if (!e) return;
+      const res = await fetch(SUPABASE_URL + '/rest/v1/mutes?email=eq.' + encodeURIComponent(e), {
+        method: 'DELETE',
+        headers: { 'apikey': SUPABASE_KEY }
+      });
+      document.getElementById('admin-success').textContent = res.ok ? '已解禁' : '解禁失败';
+    }
+
+    async function loadTitleList() {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/user_titles?select=*', { headers: { 'apikey': SUPABASE_KEY } });
+      const data = await res.json();
+      const div = document.getElementById('title-list');
+      div.innerHTML = Array.isArray(data) && data.length ? data.map(r => r.email + ' - ' + r.title).join('<br>') : '暂无头衔';
+    }
+
+    // 初始化
+    loadTitles().then(() => loadHistory());
     setInterval(loadHistory, 5000);
   </script>
 </body>
