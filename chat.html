@@ -8,6 +8,130 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    /* ========== 新增动效样式 ========== */
+
+/* 1. 消息气泡弹入动画（替换原有 slideUp） */
+@keyframes bubbleIn {
+    0% { opacity: 0; transform: translateY(16px) scale(0.95); }
+    60% { transform: translateY(-2px) scale(1.02); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.msg-row {
+    animation: bubbleIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* 2. 消息气泡悬停微放大 */
+.bubble {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.bubble:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+/* 3. 发送按钮点击水波效果 */
+.send-btn {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s ease, background 0.2s;
+}
+.send-btn:active {
+    transform: scale(0.9);
+}
+.send-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+    transform: scale(0);
+    transition: transform 0.4s ease, opacity 0.4s;
+    pointer-events: none;
+}
+.send-btn:active::after {
+    transform: scale(2.5);
+    opacity: 0;
+}
+
+/* 4. 头像悬停光晕旋转 */
+.avatar {
+    position: relative;
+    transition: transform 0.3s ease;
+}
+.avatar:hover {
+    transform: rotate(8deg) scale(1.1);
+}
+.avatar::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--accent), #60a5fa, #818cf8, var(--accent));
+    animation: avatarSpin 3s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: -1;
+}
+.avatar:hover::before {
+    opacity: 1;
+}
+@keyframes avatarSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* 5. 输入框聚焦流光边框 */
+.input-area textarea {
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.input-area textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15), 0 0 20px rgba(37, 99, 235, 0.1);
+}
+
+/* 6. 抽屉弹性打开 */
+.drawer {
+    transition: right 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 7. 全局主题切换平滑过渡 */
+body, .top-bar, .message-list, .input-area, .drawer, .bubble, .avatar, .icon-btn, .form-input {
+    transition: background 0.5s ease, color 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+/* 8. 文件上传图标旋转 */
+.file-label.uploading i {
+    animation: spin 1s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 9. 管理按钮脉冲呼吸 */
+#toggleAdminBtn {
+    animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(100, 116, 139, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(100, 116, 139, 0); }
+}
+
+/* 10. 功能按钮悬停上浮 */
+.icon-btn {
+    transition: transform 0.2s ease, background 0.2s, color 0.2s;
+}
+.icon-btn:hover {
+    transform: translateY(-2px);
+    color: var(--accent);
+}
+
+/* 11. 新消息高亮闪烁（仅最新一条） */
+.msg-row:last-child .bubble {
+    animation: highlightGlow 1.5s ease-out;
+}
+@keyframes highlightGlow {
+    0% { box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.3); }
+    100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}
     <style>
         :root {
             --bg: #f5f7fa;
@@ -353,6 +477,8 @@ async function uploadFile() {
     const email = getEmail();
     if (!email) { alert('请先登录'); return; }
     const fileInput = document.getElementById('file-input');
+    const fileLabel = document.querySelector('.file-label');
+fileLabel.classList.add('uploading');
     const files = fileInput.files;
     if (!files.length) return;
     for (let file of files) {
@@ -372,6 +498,8 @@ async function uploadFile() {
             alert('文件上传失败');
         }
     }
+    
+    fileLabel.classList.remove('uploading');
     fileInput.value = '';
     loadHistory();
 }// 删除消息（管理员）
@@ -606,7 +734,7 @@ document.getElementById('toggleAdminBtn').addEventListener('click', () => {
             openDrawer(html);
         });
 
-        async function searchMessages() {
+        window.searchMessages = async function searchMessages() {
             const term = document.getElementById('searchTerm')?.value.trim().toLowerCase();
             const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.desc&limit=100', {
                 headers: { apikey: SUPABASE_KEY }
