@@ -218,6 +218,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
     <h3>管理面板</h3>
     <input class="form-input" id="admin-key" placeholder="管理员密钥">
     <button class="btn-primary" onclick="verifyAdmin()">验证</button>
+    <div id="admin-error" style="color:red; margin:8px 0;"></div>
     <div id="admin-content" style="display:none;">
         <input class="form-input" id="target-email" placeholder="用户邮箱">
         <input class="form-input" id="new-title" placeholder="头衔">
