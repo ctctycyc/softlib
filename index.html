@@ -22,59 +22,46 @@
 body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
 .top-nav {
   background: var(--nav-bg); color: var(--nav-text);
-  padding: 10px 16px; display: flex; align-items: center; gap: 16px;
+  padding: 10px 16px; display: flex; align-items: center; gap: 10px;
   flex-wrap: wrap; position: sticky; top: 0; z-index: 100;
 }
-.top-nav a { color: var(--nav-text); text-decoration: none; font-size: 14px; }
+.top-nav a { color: var(--nav-text); text-decoration: none; font-size: 13px; }
 .top-nav a:hover { opacity: 0.8; }
 .logo { font-size: 18px; font-weight: 700; margin-right: auto; }
-.nav-links { display: flex; gap: 12px; flex-wrap: wrap; }
-.nav-links a { padding: 4px 10px; border-radius: 20px; transition: 0.2s; }
+.nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+.nav-links a { padding: 4px 8px; border-radius: 20px; transition: 0.2s; font-size: 13px; }
 .nav-links a.active { background: rgba(255,255,255,0.2); }.search-box {
-  padding: 6px 12px; border: none; border-radius: 20px; outline: none;
-  font-size: 14px; width: 200px; max-width: 100%;
+  padding: 6px 10px; border: none; border-radius: 20px; outline: none;
+  font-size: 13px; width: 160px; max-width: 100%;
 }
-.main-container {
-  max-width: 1000px; margin: 20px auto; padding: 0 16px;
-  display: flex; gap: 20px; flex-wrap: wrap;
-}
-.content { flex: 1; min-width: 0; }
-.sidebar {
-  width: 260px; flex-shrink: 0; display: flex; flex-direction: column; gap: 16px;
-}
-@media (max-width: 700px) {
-  .sidebar { width: 100%; }
-}.card {
+.container { max-width: 800px; margin: 16px auto; padding: 0 16px; }
+.card {
   background: var(--card); border-radius: var(--radius);
-  padding: 14px; margin-bottom: 12px; box-shadow: var(--shadow);
+  padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow);
   display: flex; align-items: center; gap: 12px; transition: 0.2s;
 }
 .card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
 .card-icon { width: 48px; height: 48px; border-radius: 8px; background: #eee; flex-shrink: 0; }
 .card-info { flex: 1; }
 .card-info h3 { font-size: 16px; margin-bottom: 4px; }
-.card-info .desc { font-size: 13px; color: var(--sub); }
-.download-btn {
+.card-info .desc { font-size: 13px; color: var(--sub); }.download-btn {
   background: var(--btn); color: white; border: none;
   padding: 6px 16px; border-radius: 20px; font-weight: 600; cursor: pointer;
   text-decoration: none; font-size: 13px; white-space: nowrap;
 }
-.download-btn:hover { opacity: 0.9; }.sidebar-card {
+.download-btn:hover { opacity: 0.9; }
+.sidebar-card {
   background: var(--card); border-radius: var(--radius);
-  padding: 14px; box-shadow: var(--shadow);
+  padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow);
 }
 .sidebar-card h3 { font-size: 15px; margin-bottom: 8px; color: var(--accent); }
-.footer {
-  text-align: center; color: #999; font-size: 12px;
-  margin-top: 20px; padding: 16px;
-}
+.footer { text-align: center; color: #999; font-size: 12px; margin-top: 20px; padding: 16px; }
 .hidden { display: none !important; }
 .announcement {
   background: #fff8e1; border-left: 4px solid var(--btn);
   padding: 10px 14px; margin-bottom: 16px; border-radius: 4px;
 }
 .badge { background: var(--btn); color: white; border-radius: 4px; padding: 2px 8px; font-size: 11px; }
-.level-badge { border-radius: 4px; padding: 2px 8px; font-size: 11px; color: white; }
 .type-badge { border-radius: 4px; padding: 2px 8px; font-size: 11px; color: white; }
 .badge-software { background: #4caf93; }
 .badge-tool { background: #7386d5; }
@@ -105,26 +92,24 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
     <a href="./login.html" id="loginLink">登录</a>
     <span id="userDisplay" class="hidden"></span>
     <a href="#" id="logoutLink" class="hidden">退出</a>
-  </div><div class="main-container">
-  <div class="content">
-    <div class="announcement" id="announcement">
-      🔥 欢迎来到软件库！这里收集了实用软件和工具。登录后可下载，聊天室支持积分、等级、文件上传，快来体验吧！
-    </div>
-    <div id="list"></div>
+  </div><div class="container">
+  <div class="announcement" id="announcement">
+    🔥 欢迎来到软件库！这里收集了实用软件和工具。登录后可下载，聊天室支持积分、等级、文件上传，快来体验吧！
   </div>
-  <div class="sidebar">
-    <div class="sidebar-card">
-      <h3>社区统计</h3>
-      <div id="statsContent">加载中...</div>
-    </div>
-    <div class="sidebar-card">
-      <h3>最新通知</h3>
-      <div id="sidebarNotices">暂无通知</div>
-    </div>
-    <div class="sidebar-card">
-      <h3>联系管理员</h3>
-      <p style="font-size:13px;">如有问题，请发送邮件至：<br><a href="mailto:dghkkppp@qq.com">dghkkppp@qq.com</a></p>
-    </div>
+  <div id="list"></div>
+
+  <!-- 侧边栏区域（显示在列表下方） -->
+  <div class="sidebar-card">
+    <h3>社区统计</h3>
+    <div id="statsContent">加载中...</div>
+  </div>
+  <div class="sidebar-card">
+    <h3>最新通知</h3>
+    <div id="sidebarNotices">暂无通知</div>
+  </div>
+  <div class="sidebar-card">
+    <h3>联系管理员</h3>
+    <p style="font-size:13px;">如有问题，请发送邮件至：<br><a href="mailto:dghkkppp@qq.com">dghkkppp@qq.com</a></p>
   </div>
   </div><div id="aboutModal" class="modal hidden" onclick="hideAbout()">
   <div class="modal-content" onclick="event.stopPropagation()" style="text-align:center;">
@@ -172,7 +157,7 @@ function getDefaultIcon(sw) {
   if (sw.isNotice) return '<span class="type-badge badge-notice">公告</span>';
   if (sw.isTool) return '<span class="type-badge badge-tool">工具</span>';
   return '<span class="type-badge badge-software">软件</span>';
-}async function loadSoftwares() {
+  }async function loadSoftwares() {
   try {
     const res = await fetch(API + '?labels=approved&state=open&sort=created&direction=desc&per_page=100');
     const issues = await res.json();
@@ -200,7 +185,7 @@ function updateStats() {
   document.getElementById('statsContent').innerHTML = `
     <p>软件: ${softwareCount}</p><p>工具: ${toolCount}</p><p>公告: ${noticeCount}</p>
   `;
-}function renderFilteredSoftwares() {
+              }function renderFilteredSoftwares() {
   let filtered = allSoftwares;
   if (currentCategory === 'all') filtered = allSoftwares.filter(sw => !sw.isTool);
   else if (currentCategory === 'software') filtered = allSoftwares.filter(sw => sw.isSoftware && !sw.isNotice);
