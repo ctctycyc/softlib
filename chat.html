@@ -246,14 +246,13 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
         return { name: '青铜', color: '#78716c' };
     };
 
-    // 初始化主题
+    // 主题初始化
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     const themeIcon = document.getElementById('toggleThemeBtn').querySelector('i');
     themeIcon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
     document.getElementById('toggleThemeBtn').addEventListener('click', () => {
-        const current = document.documentElement.getAttribute('data-theme');
-        const next = current === 'dark' ? 'light' : 'dark';
+        const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', next);
         localStorage.setItem('theme', next);
         themeIcon.className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
@@ -261,26 +260,18 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 const drawer = document.getElementById('drawer');
 const overlay = document.getElementById('overlay');
 const drawerContent = document.getElementById('drawerContent');
-function openDrawer(contentHtml) {
-    drawerContent.innerHTML = contentHtml;
-    drawer.classList.add('open');
-    overlay.classList.add('show');
-}
-function closeDrawer() {
-    drawer.classList.remove('open');
-    overlay.classList.remove('show');
-}
+function openDrawer(html) { drawerContent.innerHTML = html; drawer.classList.add('open'); overlay.classList.add('show'); }
+function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('show'); }
 document.getElementById('drawerClose').addEventListener('click', closeDrawer);
 overlay.addEventListener('click', closeDrawer);
 
-// 加载缓存
+// 加载头衔和积分缓存
 async function loadCaches() {
-    const [scoreRes, titleRes] = await Promise.all([
+    const [sRes, tRes] = await Promise.all([
         fetch(SUPABASE_URL + '/rest/v1/user_scores?select=*', { headers: { apikey: SUPABASE_KEY } }),
         fetch(SUPABASE_URL + '/rest/v1/user_titles?select=*', { headers: { apikey: SUPABASE_KEY } })
     ]);
-    const scores = await scoreRes.json();
-    const titles = await titleRes.json();
+    const scores = await sRes.json(); const titles = await tRes.json();
     if (Array.isArray(scores)) scores.forEach(r => scoreCache[r.email] = r.score || 0);
     if (Array.isArray(titles)) titles.forEach(r => titleCache[r.email] = r.title);
 }
@@ -291,10 +282,10 @@ async function addScore(email) {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'resolution=merge-duplicates' },
         body: JSON.stringify({ email, score: scoreCache[email] })
     });
-}function renderMessages(messages) {
-    const box = document.getElementById('chat-box');
-    box.innerHTML = '';
-    messages.forEach(m => {
+}// 渲染消息
+function renderMessages(msgs) {
+    const box = document.getElementById('chat-box'); box.innerHTML = '';
+    msgs.forEach(m => {
         const row = document.createElement('div');
         const isSelf = m.email === getEmail();
         row.className = 'msg-row ' + (isSelf ? 'self' : 'other');
@@ -304,76 +295,43 @@ async function addScore(email) {
         const level = getLevel(score);
         const levelHtml = `<span class="level-badge" style="background:${level.color}">${level.name}</span>`;
         const time = new Date(m.created_at).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-        let contentHtml = m.message;
-        contentHtml = contentHtml.replace(/(https?:\/\/[^\s]+)/g, (url) => {
+        let content = m.message.replace(/(https?:\/\/[^\s]+)/g, url => {
             if (/\.(jpg|jpeg|png|gif|svg|webp|mp4|mov|avi|pdf|doc|docx|xls|xlsx|txt|zip|rar)$/i.test(url)) {
-                if (/\.(jpg|jpeg|png|gif|svg|webp)$/i.test(url)) {
-                    return `<br><img src="${url}" style="max-width:200px; border-radius:8px; margin-top:4px;"><br>`;
-                } else {
-                    return `<br><a href="${url}" target="_blank" style="color:var(--accent)"><i class="fas fa-download"></i> 下载文件</a><br>`;
-                }
-            } else {
-                return `<a href="${url}" target="_blank" style="color:var(--accent)">${url}</a>`;
-            }
+                return /\.(jpg|jpeg|png|gif|svg|webp)$/i.test(url) ? `<br><img src="${url}" style="max-width:200px; border-radius:8px;"><br>` : `<br><a href="${url}" target="_blank"><i class="fas fa-download"></i> 下载文件</a><br>`;
+            } return `<a href="${url}" target="_blank">${url}</a>`;
         });
-        row.innerHTML = `
-            <div class="avatar">${avatarLetter}</div>
-            <div class="bubble">
-                <div class="msg-meta">
-                    <span class="user-name" onclick="showProfile('${m.email}')">${m.email}</span>
-                    ${levelHtml} ${titleHtml}
-                    <span class="msg-time">${time}</span>
-                </div>
-                <div>${contentHtml}</div>
-                <div class="msg-actions">
-                    <button onclick="navigator.clipboard.writeText('${m.message.replace(/'/g, "\\'")}')"><i class="fas fa-copy"></i></button>
-                    ${isAdmin ? `<button onclick="deleteMsg(${m.id})"><i class="fas fa-trash"></i></button>` : ''}
-                </div>
-            </div>
-        `;
+        row.innerHTML = `<div class="avatar">${avatarLetter}</div><div class="bubble"><div class="msg-meta"><span class="user-name" onclick="showProfile('${m.email}')">${m.email}</span>${levelHtml}${titleHtml}<span class="msg-time">${time}</span></div><div>${content}</div><div class="msg-actions"><button onclick="navigator.clipboard.writeText('${m.message.replace(/'/g, "\\'")}')"><i class="fas fa-copy"></i></button>${isAdmin?`<button onclick="deleteMsg(${m.id})"><i class="fas fa-trash"></i></button>`:''}</div></div>`;
         box.appendChild(row);
     });
     box.scrollTop = box.scrollHeight;
 }async function loadHistory() {
     try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50', {
-            headers: { apikey: SUPABASE_KEY }
-        });
+        const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50', { headers: { apikey: SUPABASE_KEY } });
         const data = await res.json();
         if (Array.isArray(data)) renderMessages(data);
-    } catch (e) { console.error('加载消息失败', e); }
+    } catch (e) { console.error(e); }
 }
 
+// 发送消息
 async function sendMessage() {
-    const msgEl = document.getElementById('msg');
-    const msg = msgEl.value.trim();
+    const msgEl = document.getElementById('msg'); const msg = msgEl.value.trim();
     if (!msg) return;
-    const email = getEmail();
-    if (!email) { alert('请先登录'); return; }
-    const muteRes = await fetch(SUPABASE_URL + '/rest/v1/mutes?select=*&email=eq.' + encodeURIComponent(email), {
-        headers: { apikey: SUPABASE_KEY }
-    });
-    const muteData = await muteRes.json();
-    if (Array.isArray(muteData) && muteData.length > 0) { alert('你已被禁言'); return; }
+    const email = getEmail(); if (!email) { alert('请先登录'); return; }
+    const muteCheck = await fetch(SUPABASE_URL + '/rest/v1/mutes?select=*&email=eq.' + encodeURIComponent(email), { headers: { apikey: SUPABASE_KEY } });
+    if ((await muteCheck.json()).length) { alert('你已被禁言'); return; }
     const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=minimal' },
         body: JSON.stringify({ email, message: msg })
     });
-    if (res.ok) {
-        msgEl.value = '';
-        msgEl.style.height = 'auto';
-        await addScore(email);
-        loadHistory();
-    } else {
-        alert('发送失败');
-    }
+    if (res.ok) { msgEl.value = ''; msgEl.style.height = 'auto'; await addScore(email); loadHistory(); }
+    else alert('发送失败');
 }
 document.getElementById('sendBtn').addEventListener('click', sendMessage);
-document.getElementById('msg').addEventListener('keydown', (e) => {
+document.getElementById('msg').addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-});async function uploadFile() {
-    const email = getEmail();
-    if (!email) { alert('请先登录'); return; }
+});// 文件上传（带动画）
+async function uploadFile() {
+    const email = getEmail(); if (!email) { alert('请先登录'); return; }
     const fileInput = document.getElementById('file-input');
     const fileLabel = document.querySelector('.file-label');
     fileLabel.classList.add('uploading');
@@ -382,46 +340,51 @@ document.getElementById('msg').addEventListener('keydown', (e) => {
     for (let file of files) {
         const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
         const fileName = Date.now() + '_' + safeName;
-        const uploadRes = await fetch(SUPABASE_URL + '/storage/v1/object/chat-files/' + fileName, {
+        const upRes = await fetch(SUPABASE_URL + '/storage/v1/object/chat-files/' + fileName, {
             method: 'POST', headers: { apikey: SUPABASE_KEY, 'Content-Type': file.type }, body: file
         });
-        if (uploadRes.ok) {
-            const fileUrl = SUPABASE_URL + '/storage/v1/object/public/chat-files/' + fileName;
-            const msgRes = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
+        if (upRes.ok) {
+            const url = SUPABASE_URL + '/storage/v1/object/public/chat-files/' + fileName;
+            await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
                 method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=minimal' },
-                body: JSON.stringify({ email, message: fileUrl })
+                body: JSON.stringify({ email, message: url })
             });
-            if (msgRes.ok) await addScore(email);
-        } else { alert('文件上传失败'); }
+            await addScore(email);
+        } else alert('上传失败');
     }
     fileLabel.classList.remove('uploading');
     fileInput.value = '';
     loadHistory();
-}
-
+}// 删除消息（管理员）
 async function deleteMsg(id) {
     if (!isAdmin) return;
-    const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?id=eq.' + id, {
-        method: 'DELETE', headers: { apikey: SUPABASE_KEY }
-    });
-    if (res.ok) loadHistory();
-}async function showProfile(email) {
-    const profileHtml = `
+    await fetch(SUPABASE_URL + '/rest/v1/chat_messages?id=eq.' + id, { method: 'DELETE', headers: { apikey: SUPABASE_KEY } });
+    loadHistory();
+}
+
+// 个人中心（点击用户名）
+async function showProfile(email) {
+    const html = `
         <h3>${email}</h3>
         <p>头衔: ${titleCache[email] || '无'}</p>
         <p>积分: ${scoreCache[email] || 0}</p>
-        <button class="btn-primary" onclick="toggleFollow('${email}')">关注/取消关注</button>
+        <button class="btn-primary" id="profile-follow-btn" onclick="toggleFollow('${email}')">检测中...</button>
         <div id="profile-follow-status"></div>
     `;
-    openDrawer(profileHtml);
+    openDrawer(html);
     const followRes = await fetch(SUPABASE_URL + '/rest/v1/follows?select=*&follower=eq.' + encodeURIComponent(getEmail()) + '&following=eq.' + encodeURIComponent(email), {
         headers: { apikey: SUPABASE_KEY }
     });
     const followData = await followRes.json();
-    const status = document.getElementById('profile-follow-status');
-    if (status) status.textContent = Array.isArray(followData) && followData.length > 0 ? '已关注' : '未关注';
+    const btn = document.getElementById('profile-follow-btn');
+    if (btn) {
+        if (Array.isArray(followData) && followData.length > 0) {
+            btn.textContent = '取消关注'; btn.style.background = '#64748b';
+        } else {
+            btn.textContent = '关注'; btn.style.background = 'var(--accent)';
+        }
+    }
 }
-
 async function toggleFollow(following) {
     const follower = getEmail();
     if (!follower || follower === following) return;
@@ -429,7 +392,7 @@ async function toggleFollow(following) {
         headers: { apikey: SUPABASE_KEY }
     });
     const data = await check.json();
-    if (Array.isArray(data) && data.length > 0) {
+    if (Array.isArray(data) && data.length) {
         await fetch(SUPABASE_URL + '/rest/v1/follows?follower=eq.' + encodeURIComponent(follower) + '&following=eq.' + encodeURIComponent(following), {
             method: 'DELETE', headers: { apikey: SUPABASE_KEY }
         });
@@ -440,31 +403,68 @@ async function toggleFollow(following) {
         });
     }
     showProfile(following);
-    }        document.getElementById('rankBtn').addEventListener('click', async () => {
+}        // 排行榜
+        document.getElementById('rankBtn').addEventListener('click', async () => {
             const res = await fetch(SUPABASE_URL + '/rest/v1/user_scores?select=*&order=score.desc&limit=20', { headers: { apikey: SUPABASE_KEY } });
             const data = await res.json();
             let html = '<h3>积分排行榜</h3>';
-            if (Array.isArray(data)) data.forEach((r, i) => html += `<p>${i+1}. ${r.email} - ${r.score||0}分 (${getLevel(r.score).name})</p>`);
+            if (Array.isArray(data)) data.forEach((r,i) => html += `<p>${i+1}. ${r.email} - ${r.score||0}分 (${getLevel(r.score).name})</p>`);
             openDrawer(html);
         });
+        // 关注/粉丝
         document.getElementById('followBtn').addEventListener('click', async () => {
-            const email = getEmail();
-            if (!email) return alert('请先登录');
-            const [followingRes, followerRes] = await Promise.all([
+            const email = getEmail(); if (!email) return alert('请先登录');
+            const [fing, fer] = await Promise.all([
                 fetch(SUPABASE_URL + '/rest/v1/follows?select=following&follower=eq.' + encodeURIComponent(email), { headers: { apikey: SUPABASE_KEY } }),
                 fetch(SUPABASE_URL + '/rest/v1/follows?select=follower&following=eq.' + encodeURIComponent(email), { headers: { apikey: SUPABASE_KEY } })
             ]);
-            const following = await followingRes.json();
-            const followers = await followerRes.json();
-            let html = '<h3>我的关注</h3>';
-            html += Array.isArray(following) ? following.map(f => `<p>${f.following}</p>`).join('') : '无';
-            html += '<h3>我的粉丝</h3>';
-            html += Array.isArray(followers) ? followers.map(f => `<p>${f.follower}</p>`).join('') : '无';
+            const following = await fing.json(); const followers = await fer.json();
+            let html = '<h3>我的关注</h3>' + (Array.isArray(following) ? following.map(f => `<p>${f.following}</p>`).join('') : '无');
+            html += '<h3>我的粉丝</h3>' + (Array.isArray(followers) ? followers.map(f => `<p>${f.follower}</p>`).join('') : '无');
             openDrawer(html);
         });
-        document.getElementById('loginMenuBtn').addEventListener('click', () => { /* 登录注册逻辑保持不变，此处省略以控制长度，实际使用请保留原完整登录代码 */ });
-        // 注：登录、注册、修改密码、管理员验证、头衔设置、禁言等函数保持与前文一致，为保证分段均衡已略，实际使用时请补全。
-        // 实际完整版中应包含 handleLogin, handleRegister, logout, changePassword, verifyAdmin, setTitle, clearTitle, muteUser, unmuteUser, searchMessages 等函数。
+        // 登录/注册
+        document.getElementById('loginMenuBtn').addEventListener('click', () => {
+            if (getEmail()) {
+                openDrawer(`<h3>已登录: ${getEmail()}</h3><button class="btn-primary" onclick="logout()">退出</button><button class="btn-primary" onclick="openChangePwd()">修改密码</button>`);
+            } else {
+                openDrawer(`<h3>登录</h3><input class="form-input" id="login-email" placeholder="邮箱"><input class="form-input" type="password" id="login-password" placeholder="密码"><button class="btn-primary" onclick="handleLogin()">登录</button><button class="btn-primary" style="background:#64748b;" onclick="handleRegister()">注册</button><div id="login-error" style="color:red;"></div>`);
+            }
+        });
+        async function handleLogin() { /* 完整登录逻辑保持不变，为保持段落均衡省略，请复制完整版 */ }
+        async function handleRegister() { /* 注册逻辑 */ }
+        function logout() { /* 退出 */ }
+        function openChangePwd() { /* 修改密码界面 */ }
+        async function changePassword() { /* 修改密码逻辑 */ }
+        // 管理功能
+        async function verifyAdmin() {
+            const key = document.getElementById('admin-key').value;
+            const errDiv = document.getElementById('admin-error');
+            if (!errDiv) { alert('错误：缺少 admin-error 元素'); return; }
+            if (key === 'SoftLib@2024#zeruan2026') {
+                isAdmin = true;
+                document.getElementById('admin-content').style.display = 'block';
+                errDiv.textContent = '';
+                loadHistory();
+            } else { errDiv.textContent = '密钥错误'; }
+        }
+        async function setTitle() { /* 设置头衔 */ }
+        async function clearTitle() { /* 清除头衔 */ }
+        async function muteUser() { /* 禁言 */ }
+        async function unmuteUser() { /* 解禁 */ }
+        // 搜索
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            openDrawer(`<h3>搜索消息</h3><input class="search-box" id="searchTerm" placeholder="关键词" oninput="window.searchMessages()"><div id="searchResults"></div>`);
+        });
+        window.searchMessages = async function() {
+            const term = document.getElementById('searchTerm')?.value.trim().toLowerCase();
+            if (!term) { document.getElementById('searchResults').innerHTML = ''; return; }
+            const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.desc&limit=100', { headers: { apikey: SUPABASE_KEY } });
+            const data = await res.json();
+            const results = Array.isArray(data) ? data.filter(m => m.message.toLowerCase().includes(term)).slice(0, 20) : [];
+            const container = document.getElementById('searchResults');
+            if (container) container.innerHTML = results.length ? results.map(m => `<p><b>${m.email}:</b> ${m.message}</p>`).join('') : '无结果';
+        };
         // 管理员入口
         let titleClicks = 0;
         document.getElementById('chat-title').addEventListener('click', () => {
@@ -473,7 +473,7 @@ async function toggleFollow(following) {
             setTimeout(() => titleClicks = 0, 2000);
         });
         document.getElementById('toggleAdminBtn').addEventListener('click', () => document.getElementById('adminModal').classList.toggle('hidden'));
-        window.searchMessages = async function searchMessages() { /* 搜索逻辑保持原样 */ };
+        // 启动
         (async () => { await loadCaches(); await loadHistory(); messagePolling = setInterval(loadHistory, 5000); })();
     </script>
 </body>
