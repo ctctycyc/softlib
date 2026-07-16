@@ -496,11 +496,28 @@ async function showProfile(email) {
 
     function toggleAdminPanel() { const p = document.getElementById('admin-panel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; }
 
-    function verifyAdmin() {
-      if (document.getElementById('admin-key').value === 'zeruan2026') {
-        isAdmin = true; document.getElementById('admin-content').style.display = 'block';
-        document.getElementById('admin-error').textContent = ''; loadTitleList(); loadHistory();
-      } else { document.getElementById('admin-error').textContent = '密钥错误'; }
+    async function verifyAdmin() {
+  const key = document.getElementById('admin-key').value;
+  const errDiv = document.getElementById('admin-error');
+  try {
+    const res = await fetch('https://softlib-submit.dghkkppp.workers.dev/verify-admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key })
+    });
+    const data = await res.json();
+    if (data.valid) {
+      isAdmin = true;
+      document.getElementById('admin-content').style.display = 'block';
+      errDiv.textContent = '';
+      loadTitleList();
+      loadHistory();
+    } else {
+      errDiv.textContent = '密钥错误';
+    }
+  } catch (e) {
+    errDiv.textContent = '验证失败，请稍后再试';
+  }
     }
 
     async function setTitle() {
