@@ -404,7 +404,7 @@ document.getElementById('toggleAdminBtn').addEventListener('click', () => docume
                 await loadCaches();
                 await loadHistory();
                 scrollToBottom();
-                messagePolling = setInterval(loadHistory, 5000);
+                //messagePolling = setInterval(loadHistory, 5000);
             } else {
                 errEl.textContent = data.error_description || 'Invalid email or password.';
             }
