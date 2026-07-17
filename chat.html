@@ -96,8 +96,18 @@
     </div>
     <div style="display:flex;gap:8px;margin-top:10px;"><span class="tg-dot active"></span><span class="tg-dot"></span><span class="tg-dot"></span><span class="tg-dot"></span><span class="tg-dot"></span></div>
   </div>
-    <div id="tg-login-form" style="flex:1;background:var(--card);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px;min-width:320px;">
-    <div style="max-width:360px;width:100%;">
+    #tg-login-form {
+    flex:1;
+    background:var(--card);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    padding: 40px 40px 60px;   /* 底部多留 60px 空间 */
+    min-width:320px;
+    overflow-y: auto;
+}
+        <div style="max-width:360px;width:100%;">
       <h2 style="font-size:24px;margin-bottom:24px;color:var(--text);">Your Email</h2>
       <p style="font-size:14px;color:var(--sub);margin-bottom:20px;">Please enter your email and password to start messaging.</p>
       <label style="font-size:13px;color:var(--sub);margin-bottom:4px;display:block;">Email</label>
