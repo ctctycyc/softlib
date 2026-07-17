@@ -415,7 +415,7 @@ if (localStorage.getItem('authToken') && localStorage.getItem('authEmail')) {
         await loadCaches();
         await loadHistory();
         scrollToBottom();
-        messagePolling = setInterval(loadHistory, 5000);
+        messagePolling = setInterval(loadHistory, 30000);
     })();
 } else {
     document.getElementById('app-main').classList.add('hidden');
