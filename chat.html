@@ -2,7 +2,7 @@
 <html lang="zh" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>聊天室 · 软件库</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -10,41 +10,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
-            --bg: #e8ecef;
-            --card: #ffffff;
-            --text: #222222;
-            --sub: #707579;
-            --border: #d0d5da;
-            --accent: #3390ec;
-            --accent-light: #4da3f5;
-            --bubble-self: #3390ec;
-            --bubble-other: #ffffff;
-            --shadow: 0 1px 2px rgba(0,0,0,0.04);
-            --shadow-md: 0 1px 3px rgba(0,0,0,0.06);
-            --radius: 10px;
-            --msg-self-text: #ffffff;
-            --msg-other-text: #222222;
-            --sidebar-bg: #ffffff;
-            --sidebar-shadow: -2px 0 6px rgba(0,0,0,0.05);
+            --bg: #e8ecef; --card: #ffffff; --text: #222222; --sub: #707579; --border: #d0d5da;
+            --accent: #3390ec; --accent-light: #4da3f5; --bubble-self: #3390ec; --bubble-other: #ffffff;
+            --shadow: 0 1px 2px rgba(0,0,0,0.04); --shadow-md: 0 1px 3px rgba(0,0,0,0.06); --radius: 10px;
+            --msg-self-text: #ffffff; --msg-other-text: #222222; --sidebar-bg: #ffffff; --sidebar-shadow: -2px 0 6px rgba(0,0,0,0.05);
         }
         [data-theme="dark"] {
-            --bg: #1a1d21;
-            --card: #24272c;
-            --text: #e8eaed;
-            --sub: #9aa0a6;
-            --border: #3c4043;
-            --accent: #5b9bd5;
-            --accent-light: #7cb3e8;
-            --bubble-self: #5b9bd5;
-            --bubble-other: #2d3136;
-            --shadow: 0 1px 2px rgba(0,0,0,0.3);
-            --shadow-md: 0 1px 3px rgba(0,0,0,0.5);
-            --msg-self-text: #ffffff;
-            --msg-other-text: #e8eaed;
-            --sidebar-bg: #24272c;
-        }* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.3s, color 0.3s; font-size: 15px; }
-.top-bar { background: var(--card); padding: 8px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); box-shadow: none; z-index: 10; }
+            --bg: #1a1d21; --card: #24272c; --text: #e8eaed; --sub: #9aa0a6; --border: #3c4043;
+            --accent: #5b9bd5; --accent-light: #7cb3e8; --bubble-self: #5b9bd5; --bubble-other: #2d3136;
+            --shadow: 0 1px 2px rgba(0,0,0,0.3); --shadow-md: 0 1px 3px rgba(0,0,0,0.5); --msg-self-text: #ffffff;
+            --msg-other-text: #e8eaed; --sidebar-bg: #24272c;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; transition: background 0.3s, color 0.3s; font-size: 15px; }.top-bar { background: var(--card); padding: 8px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); box-shadow: none; z-index: 10; }
 .top-bar h2 { font-size: 1.2rem; font-weight: 600; margin-right: auto; cursor: default; color: var(--text); }
 .icon-btn { background: none; border: none; font-size: 1.1rem; color: var(--sub); cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s; }
 .icon-btn:hover { background: var(--border); color: var(--text); }
@@ -55,60 +33,47 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helve
 .msg-row.self { align-self: flex-end; flex-direction: row-reverse; }
 .msg-row.other { align-self: flex-start; }
 .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; flex-shrink: 0; position: relative; transition: none; }
-.avatar:hover { transform: none; }
-.avatar::before { display: none; }
-.bubble { padding: 8px 12px; border-radius: 8px; font-size: 0.95rem; line-height: 1.45; word-break: break-word; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.04); transition: none; }
-.bubble:hover { transform: none; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }.self .bubble { background: var(--bubble-self); color: var(--msg-self-text); border-bottom-right-radius: 2px; }
+.avatar:hover { transform: none; } .avatar::before { display: none; }.bubble { padding: 8px 12px; border-radius: 8px; font-size: 0.95rem; line-height: 1.45; word-break: break-word; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.04); transition: none; }
+.bubble:hover { transform: none; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+.self .bubble { background: var(--bubble-self); color: var(--msg-self-text); border-bottom-right-radius: 2px; }
 .other .bubble { background: var(--bubble-other); color: var(--msg-other-text); border: 1px solid var(--border); border-bottom-left-radius: 2px; }
 .msg-meta { font-size: 0.7rem; color: var(--sub); margin-bottom: 2px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-.user-name { font-weight: 600; cursor: pointer; color: var(--accent); font-size: 0.75rem; }
-.user-name:hover { text-decoration: underline; }
+.user-name { font-weight: 600; cursor: pointer; color: var(--accent); font-size: 0.75rem; } .user-name:hover { text-decoration: underline; }
 .level-badge { padding: 1px 6px; border-radius: 10px; font-size: 0.6rem; font-weight: 600; color: white; }
 .title-badge { background: #c07e2e; color: white; border-radius: 10px; padding: 1px 6px; font-size: 0.6rem; }
 .msg-time { color: var(--sub); font-size: 0.65rem; margin-left: auto; }
 .msg-actions { display: none; position: absolute; right: 4px; top: -18px; gap: 2px; }
 .bubble:hover .msg-actions { display: flex; }
 .msg-actions button { background: var(--card); border: 1px solid var(--border); border-radius: 4px; font-size: 0.65rem; cursor: pointer; padding: 1px 5px; color: var(--sub); }
-.msg-actions button:hover { background: var(--border); }
-.input-area { padding: 8px 12px; background: var(--card); border-top: 1px solid var(--border); display: flex; gap: 6px; align-items: flex-end; box-shadow: none; }
+.msg-actions button:hover { background: var(--border); }.input-area { padding: 8px 12px; background: var(--card); border-top: 1px solid var(--border); display: flex; gap: 6px; align-items: flex-end; box-shadow: none; }
 .input-area textarea { flex: 1; border: 1px solid var(--border); border-radius: 18px; padding: 8px 14px; outline: none; resize: none; font-size: 0.95rem; background: var(--bg); color: var(--text); max-height: 100px; min-height: 38px; transition: border-color 0.15s; }
 .input-area textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 .send-btn { background: var(--accent); color: white; border: none; border-radius: 50%; width: 38px; height: 38px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; position: relative; overflow: hidden; }
-.send-btn:hover { background: var(--accent-light); }
-.send-btn:active { transform: scale(0.95); }
-.send-btn::after { display: none; }        .file-label { cursor: pointer; font-size: 1.3rem; color: var(--sub); padding: 6px; transition: color 0.15s; }
-        .file-label:hover { color: var(--accent); }
-        .file-label.uploading i { animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .drawer { position: fixed; right: -320px; top: 0; height: 100%; width: 300px; background: var(--sidebar-bg); box-shadow: var(--sidebar-shadow); transition: right 0.25s ease; z-index: 100; padding: 18px; overflow-y: auto; border-left: 1px solid var(--border); }
-        .drawer.open { right: 0; }
-        .drawer h3 { margin-bottom: 14px; font-size: 1rem; font-weight: 600; }
-        .drawer-close { float: right; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text); }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.2); z-index: 99; display: none; }
-        .overlay.show { display: block; }
+.send-btn:hover { background: var(--accent-light); } .send-btn:active { transform: scale(0.95); } .send-btn::after { display: none; }
+.file-label { cursor: pointer; font-size: 1.3rem; color: var(--sub); padding: 6px; transition: color 0.15s; } .file-label:hover { color: var(--accent); }
+.file-label.uploading i { animation: spin 1s linear infinite; } @keyframes spin { to { transform: rotate(360deg); } }
+.drawer { position: fixed; right: -320px; top: 0; height: 100%; width: 300px; background: var(--sidebar-bg); box-shadow: var(--sidebar-shadow); transition: right 0.25s ease; z-index: 100; padding: 18px; overflow-y: auto; border-left: 1px solid var(--border); }
+.drawer.open { right: 0; } .drawer h3 { margin-bottom: 14px; font-size: 1rem; font-weight: 600; }
+.drawer-close { float: right; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text); }        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.2); z-index: 99; display: none; } .overlay.show { display: block; }
         .form-input { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 8px; background: var(--bg); color: var(--text); font-size: 0.9rem; }
         .btn-primary { background: var(--accent); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 500; cursor: pointer; width: 100%; margin-top: 4px; font-size: 0.9rem; transition: background 0.15s; }
-        .btn-primary:hover { background: var(--accent-light); }
-        .btn-sm { padding: 4px 10px; font-size: 0.75rem; border-radius: 4px; }
+        .btn-primary:hover { background: var(--accent-light); } .btn-sm { padding: 4px 10px; font-size: 0.75rem; border-radius: 4px; }
         .search-box { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 10px; background: var(--bg); color: var(--text); font-size: 0.9rem; }
         .hidden { display: none !important; }
-        #tg-login-overlay { transition: opacity 0.3s ease; }
-        #tg-intro-panel { position: relative; overflow: hidden; }
-        #tg-intro-slides { position: relative; width: 100%; min-height: 220px; }
-        .tg-slide { position: absolute; top: 0; left: 0; width: 100%; opacity: 0; transform: translateY(20px); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; }
+        #tg-login-overlay { transition: opacity 0.3s ease; } #tg-intro-panel { position: relative; overflow: hidden; }
+        #tg-intro-slides { position: relative; width: 100%; height: 260px; }
+        .tg-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transform: translateY(20px); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         .tg-slide.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
-        .tg-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.4); transition: background 0.3s; }
-        .tg-dot.active { background: white; }
-        #tg-start-btn { transition: background 0.2s, transform 0.1s; }
-        #tg-start-btn:hover { background: var(--accent-light); }
-        #tg-start-btn:active { transform: scale(0.97); }
-        @media (max-width: 700px) { #tg-login-overlay { flex-direction: column; } #tg-intro-panel { padding: 20px; min-height: 280px; flex: 0 0 auto; } #tg-login-form { padding: 20px; flex: 1; } .tg-slide h2 { font-size: 22px !important; } }
+        .tg-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.4); transition: background 0.3s; } .tg-dot.active { background: white; }
+        #tg-start-btn { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 10px; font-size: 16px; font-weight: 600; width: 100%; margin-top: 24px; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+        #tg-start-btn:hover { background: var(--accent-light); } #tg-start-btn:active { transform: scale(0.97); }
+        @media (max-width: 700px) { #tg-login-overlay { flex-direction: column; overflow-y: auto; } #tg-intro-panel { padding: 20px; min-height: 300px; flex: 0 0 auto; } #tg-login-form { padding: 20px; flex: 1; } .tg-slide h2 { font-size: 22px !important; } }
     </style>
 </head>
 <body><div id="tg-login-overlay" style="position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
   <div id="tg-intro-panel" style="flex:1;background:linear-gradient(135deg,#3390ec,#4da3f5);color:white;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px;text-align:center;position:relative;overflow:hidden;">
     <div style="position:absolute;top:20px;left:20px;font-size:24px;font-weight:700;opacity:0.9;">Telegram</div>
-    <div id="tg-intro-slides" style="max-width:320px;">
+    <div id="tg-intro-slides" style="max-width:320px;width:100%;">
       <div class="tg-slide active"><div style="font-size:48px;margin-bottom:20px;">⚡</div><h2 style="font-size:28px;margin-bottom:10px;">Fast</h2><p style="font-size:16px;opacity:0.9;">Telegram delivers messages faster than any other application.</p></div>
       <div class="tg-slide"><div style="font-size:48px;margin-bottom:20px;">💬</div><h2 style="font-size:28px;margin-bottom:10px;">Free</h2><p style="font-size:16px;opacity:0.9;">Telegram provides free unlimited cloud storage for chats and media.</p></div>
       <div class="tg-slide"><div style="font-size:48px;margin-bottom:20px;">🚀</div><h2 style="font-size:28px;margin-bottom:10px;">Powerful</h2><p style="font-size:16px;opacity:0.9;">Telegram has no limits on the size of your media and chats.</p></div>
@@ -116,8 +81,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helve
       <div class="tg-slide"><div style="font-size:48px;margin-bottom:20px;">☁️</div><h2 style="font-size:28px;margin-bottom:10px;">Cloud-Based</h2><p style="font-size:16px;opacity:0.9;">Telegram lets you access your messages from multiple devices.</p></div>
     </div>
     <div style="display:flex;gap:8px;margin-top:20px;"><span class="tg-dot active"></span><span class="tg-dot"></span><span class="tg-dot"></span><span class="tg-dot"></span><span class="tg-dot"></span></div>
-  </div>
-  <div id="tg-login-form" style="flex:1;background:var(--card);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px;min-width:320px;">
+  </div>  <div id="tg-login-form" style="flex:1;background:var(--card);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px;min-width:320px;">
     <div style="max-width:360px;width:100%;">
       <h2 style="font-size:24px;margin-bottom:24px;color:var(--text);">Your phone number</h2>
       <p style="font-size:14px;color:var(--sub);margin-bottom:20px;">Please confirm your country code and enter your phone number.</p>
@@ -127,12 +91,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helve
       </select>
       <label style="font-size:13px;color:var(--sub);margin-bottom:4px;display:block;">Phone number</label>
       <div style="display:flex;gap:8px;"><input type="text" id="tg-phone" placeholder="125 4446 6668" style="flex:1;padding:12px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);font-size:15px;"></div>
-      <button id="tg-start-btn" style="width:100%;padding:14px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;margin-top:24px;cursor:pointer;">Start Messaging</button>
+      <button id="tg-start-btn">Start Messaging</button>
       <p style="font-size:12px;color:var(--sub);margin-top:12px;text-align:center;">This is a demo. No real SMS will be sent.</p>
     </div>
   </div>
-</div>
-<div id="app-main" class="hidden">
+</div><div id="app-main" class="hidden">
     <div class="top-bar">
         <h2 id="chat-title">聊天室</h2>
         <button class="icon-btn" id="toggleThemeBtn" title="切换暗黑模式"><i class="fas fa-moon"></i></button>
@@ -146,14 +109,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helve
     <div class="input-area">
         <label for="file-input" class="file-label" title="发送文件"><i class="fas fa-paperclip"></i></label>
         <input type="file" id="file-input" accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" style="display:none;" multiple onchange="uploadFile()">
-        <textarea id="msg"placeholder="输入消息... (Enter 发送, Shift+Enter 换行)" rows="1"></textarea>
+        <textarea id="msg" placeholder="输入消息... (Enter 发送, Shift+Enter 换行)" rows="1"></textarea>
         <button class="send-btn" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
-    </div>    <div class="overlay" id="overlay"></div>
+    </div>
+    <div class="overlay" id="overlay"></div>
     <div id="drawer" class="drawer">
         <button class="drawer-close" id="drawerClose"><i class="fas fa-times"></i></button>
         <div id="drawerContent"></div>
-    </div>
-    <div id="adminModal" class="hidden" style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--card); padding:20px; border-radius:12px; z-index:200; box-shadow:0 10px 30px rgba(0,0,0,0.2); width:350px;">
+    </div>    <div id="adminModal" class="hidden" style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--card); padding:20px; border-radius:12px; z-index:200; box-shadow:0 10px 30px rgba(0,0,0,0.2); width:350px;">
         <button style="float:right;" onclick="document.getElementById('adminModal').classList.add('hidden')"><i class="fas fa-times"></i></button>
         <h3>管理面板</h3>
         <input class="form-input" id="admin-key" placeholder="管理员密钥">
@@ -181,22 +144,21 @@ const getLevel = (score) => {
     if (score >= 200) return { name: '黄金', color: '#f59e0b' };
     if (score >= 50) return { name: '白银', color: '#64748b' };
     return { name: '青铜', color: '#78716c' };
-};
-const savedTheme = localStorage.getItem('theme') || 'light';
+};const savedTheme = localStorage.getItem('theme') || 'light';
 document.documentElement.setAttribute('data-theme', savedTheme);
 const themeIcon = document.getElementById('toggleThemeBtn').querySelector('i');
 themeIcon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
 document.getElementById('toggleThemeBtn').addEventListener('click', () => {
     const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
+    document.documentElement.setAttribute('data-theme', next); localStorage.setItem('theme', next);
     themeIcon.className = next === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
 });
 const drawer = document.getElementById('drawer'), overlay = document.getElementById('overlay'), drawerContent = document.getElementById('drawerContent');
 function openDrawer(html) { drawerContent.innerHTML = html; drawer.classList.add('open'); overlay.classList.add('show'); }
 function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('show'); }
 document.getElementById('drawerClose').addEventListener('click', closeDrawer);
-overlay.addEventListener('click', closeDrawer);async function loadCaches() {
+overlay.addEventListener('click', closeDrawer);
+async function loadCaches() {
     const [sRes, tRes] = await Promise.all([
         fetch(SUPABASE_URL + '/rest/v1/user_scores?select=*', { headers: { apikey: SUPABASE_KEY } }),
         fetch(SUPABASE_URL + '/rest/v1/user_titles?select=*', { headers: { apikey: SUPABASE_KEY } })
@@ -208,12 +170,10 @@ overlay.addEventListener('click', closeDrawer);async function loadCaches() {
 async function addScore(email) {
     scoreCache[email] = (scoreCache[email] || 0) + 1;
     await fetch(SUPABASE_URL + '/rest/v1/user_scores', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'resolution=merge-duplicates' }, body: JSON.stringify({ email, score: scoreCache[email] }) });
-}
-function renderMessages(msgs) {
+        }function renderMessages(msgs) {
     const box = document.getElementById('chat-box'); box.innerHTML = '';
     msgs.forEach(m => {
-        const row = document.createElement('div');
-        const isSelf = m.email === getEmail();
+        const row = document.createElement('div'); const isSelf = m.email === getEmail();
         row.className = 'msg-row ' + (isSelf ? 'self' : 'other');
         const avatarLetter = m.email ? m.email.charAt(0).toUpperCase() : '?';
         const titleHtml = titleCache[m.email] ? `<span class="title-badge">${titleCache[m.email]}</span>` : '';
@@ -232,27 +192,23 @@ function renderMessages(msgs) {
 }async function loadHistory() {
     try {
         const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50', { headers: { apikey: SUPABASE_KEY } });
-        const data = await res.json();
-        if (Array.isArray(data)) renderMessages(data);
+        const data = await res.json(); if (Array.isArray(data)) renderMessages(data);
     } catch (e) { console.error(e); }
 }
 async function sendMessage() {
-    const msgEl = document.getElementById('msg'), msg = msgEl.value.trim();
-    if (!msg) return;
+    const msgEl = document.getElementById('msg'), msg = msgEl.value.trim(); if (!msg) return;
     const email = getEmail(); if (!email) { alert('请先登录'); return; }
     const muteRes = await fetch(SUPABASE_URL + '/rest/v1/mutes?select=*&email=eq.' + encodeURIComponent(email), { headers: { apikey: SUPABASE_KEY } });
     if ((await muteRes.json()).length) { alert('你已被禁言'); return; }
     const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=minimal' }, body: JSON.stringify({ email, message: msg }) });
-    if (res.ok) { msgEl.value = ''; msgEl.style.height = 'auto'; await addScore(email); loadHistory(); }
-    else alert('发送失败');
+    if (res.ok) { msgEl.value = ''; msgEl.style.height = 'auto'; await addScore(email); loadHistory(); } else alert('发送失败');
 }
 document.getElementById('sendBtn').addEventListener('click', sendMessage);
 document.getElementById('msg').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 async function uploadFile() {
     const email = getEmail(); if (!email) { alert('请先登录'); return; }
     const fileInput = document.getElementById('file-input'), fileLabel = document.querySelector('.file-label');
-    fileLabel.classList.add('uploading');
-    const files = fileInput.files;
+    fileLabel.classList.add('uploading'); const files = fileInput.files;
     if (!files.length) { fileLabel.classList.remove('uploading'); return; }
     for (let file of files) {
         const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_'), fileName = Date.now() + '_' + safeName;
@@ -263,16 +219,13 @@ async function uploadFile() {
             await addScore(email);
         } else alert('上传失败');
     }
-    fileLabel.classList.remove('uploading');
-    fileInput.value = '';
-    loadHistory();
-}
-async function deleteMsg(id) { if (!isAdmin) return; await fetch(SUPABASE_URL + '/rest/v1/chat_messages?id=eq.' + id, { method: 'DELETE', headers: { apikey: SUPABASE_KEY } }); loadHistory(); }async function showProfile(email) {
+    fileLabel.classList.remove('uploading'); fileInput.value = ''; loadHistory();
+}async function deleteMsg(id) { if (!isAdmin) return; await fetch(SUPABASE_URL + '/rest/v1/chat_messages?id=eq.' + id, { method: 'DELETE', headers: { apikey: SUPABASE_KEY } }); loadHistory(); }
+async function showProfile(email) {
     const html = `<h3>${email}</h3><p>头衔: ${titleCache[email] || '无'}</p><p>积分: ${scoreCache[email] || 0}</p><button class="btn-primary" id="profile-follow-btn" onclick="toggleFollow('${email}')">检测中...</button><div id="profile-follow-status"></div>`;
     openDrawer(html);
     const followRes = await fetch(SUPABASE_URL + '/rest/v1/follows?select=*&follower=eq.' + encodeURIComponent(getEmail()) + '&following=eq.' + encodeURIComponent(email), { headers: { apikey: SUPABASE_KEY } });
-    const data = await followRes.json();
-    const btn = document.getElementById('profile-follow-btn');
+    const data = await followRes.json(); const btn = document.getElementById('profile-follow-btn');
     if (btn) { if (Array.isArray(data) && data.length) { btn.textContent = '取消关注'; btn.style.background = '#64748b'; } else { btn.textContent = '关注'; btn.style.background = 'var(--accent)'; } }
 }
 async function toggleFollow(following) {
@@ -282,11 +235,9 @@ async function toggleFollow(following) {
     if (Array.isArray(data) && data.length) await fetch(SUPABASE_URL + '/rest/v1/follows?follower=eq.' + encodeURIComponent(follower) + '&following=eq.' + encodeURIComponent(following), { method: 'DELETE', headers: { apikey: SUPABASE_KEY } });
     else await fetch(SUPABASE_URL + '/rest/v1/follows', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ follower, following }) });
     showProfile(following);
-}
-document.getElementById('rankBtn').addEventListener('click', async () => {
+        }document.getElementById('rankBtn').addEventListener('click', async () => {
     const res = await fetch(SUPABASE_URL + '/rest/v1/user_scores?select=*&order=score.desc&limit=20', { headers: { apikey: SUPABASE_KEY } });
-    const data = await res.json();
-    let html = '<h3>积分排行榜</h3>';
+    const data = await res.json(); let html = '<h3>积分排行榜</h3>';
     if (Array.isArray(data)) data.forEach((r,i) => html += `<p>${i+1}. ${r.email} - ${r.score||0}分 (${getLevel(r.score).name})</p>`);
     openDrawer(html);
 });
@@ -304,8 +255,7 @@ document.getElementById('followBtn').addEventListener('click', async () => {
 document.getElementById('loginMenuBtn').addEventListener('click', () => {
     if (getEmail()) openDrawer(`<h3>已登录: ${getEmail()}</h3><button class="btn-primary" onclick="logout()">退出</button><button class="btn-primary" onclick="openChangePwd()">修改密码</button>`);
     else openDrawer(`<h3>登录</h3><input class="form-input" id="login-email" placeholder="邮箱"><input class="form-input" type="password" id="login-password" placeholder="密码"><button class="btn-primary" onclick="handleLogin()">登录</button><button class="btn-primary" style="background:#64748b;" onclick="handleRegister()">注册</button><div id="login-error" style="color:red;"></div>`);
-});
-async function handleLogin() {
+});async function handleLogin() {
     const email = document.getElementById('login-email').value.trim(), pwd = document.getElementById('login-password').value.trim(), err = document.getElementById('login-error');
     const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ email, password: pwd }) });
     const data = await res.json();
@@ -315,19 +265,19 @@ async function handleLogin() {
 async function handleRegister() {
     const email = document.getElementById('login-email').value.trim(), pwd = document.getElementById('login-password').value.trim(), err = document.getElementById('login-error');
     const res = await fetch(SUPABASE_URL + '/auth/v1/signup', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ email, password: pwd }) });
-    const data = await res.json();
-    if (data.error) err.textContent = data.error_description || '注册失败';
-    else err.textContent = '注册成功，请登录。';
+    const data = await res.json(); if (data.error) err.textContent = data.error_description || '注册失败'; else err.textContent = '注册成功，请登录。';
 }
 function logout() { localStorage.removeItem('authToken'); localStorage.removeItem('authEmail'); currentUserEmail = ''; closeDrawer(); }
 function openChangePwd() { openDrawer(`<h3>修改密码</h3><input class="form-input" type="password" id="old-pwd" placeholder="旧密码"><input class="form-input" type="password" id="new-pwd" placeholder="新密码"><button class="btn-primary" onclick="changePassword()">修改</button><div id="change-pwd-msg"></div>`); }
 async function changePassword() {
     const oldPwd = document.getElementById('old-pwd').value.trim(), newPwd = document.getElementById('new-pwd').value.trim(), msg = document.getElementById('change-pwd-msg'), email = getEmail();
-    const check = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ email, password: oldPwd }) });if (!check.ok) { msg.textContent = '旧密码错误'; return; }
+    const check = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ email, password: oldPwd }) });
+    if (!check.ok) { msg.textContent = '旧密码错误'; return; }
     const token = localStorage.getItem('authToken');
     const upd = await fetch(SUPABASE_URL + '/auth/v1/user', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ password: newPwd }) });
     msg.textContent = upd.ok ? '修改成功' : '修改失败';
-}async function verifyAdmin() {
+}
+async function verifyAdmin() {
     const key = document.getElementById('admin-key').value, errDiv = document.getElementById('admin-error');
     if (!errDiv) { alert('错误：缺少 admin-error 元素'); return; }
     if (key === 'SoftLib@2024#zeruan2026') { isAdmin = true; document.getElementById('admin-content').style.display = 'block'; errDiv.textContent = ''; loadHistory(); }
@@ -342,8 +292,7 @@ window.searchMessages = async function() {
     const term = document.getElementById('searchTerm')?.value.trim().toLowerCase();
     if (!term) { document.getElementById('searchResults').innerHTML = ''; return; }
     const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.desc&limit=100', { headers: { apikey: SUPABASE_KEY } });
-    const data = await res.json();
-    const results = Array.isArray(data) ? data.filter(m => m.message.toLowerCase().includes(term)).slice(0, 20) : [];
+    const data = await res.json(); const results = Array.isArray(data) ? data.filter(m => m.message.toLowerCase().includes(term)).slice(0, 20) : [];
     const container = document.getElementById('searchResults');
     if (container) container.innerHTML = results.length ? results.map(m => `<p><b>${m.email}:</b> ${m.message}</p>`).join('') : '无结果';
 };
@@ -354,20 +303,22 @@ document.getElementById('chat-title').addEventListener('click', () => {
 });
 document.getElementById('toggleAdminBtn').addEventListener('click', () => document.getElementById('adminModal').classList.toggle('hidden'));
 (function() {
-    const slides = document.querySelectorAll('.tg-slide'), dots = document.querySelectorAll('.tg-dot'); let current = 0;
-    function showSlide(i) { slides.forEach(s => s.classList.remove('active')); dots.forEach(d => d.classList.remove('active')); slides[i].classList.add('active'); dots[i].classList.add('active'); }
-    setInterval(() => { current = (current + 1) % slides.length; showSlide(current); }, 3500);
+    const slides = document.querySelectorAll('.tg-slide'), dots = document.querySelectorAll('.tg-dot'); let current = 0, startX = 0, endX = 0;
+    const updateSlide = (i) => { slides.forEach(s => s.classList.remove('active')); dots.forEach(d => d.classList.remove('active')); slides[i].classList.add('active'); dots[i].classList.add('active'); };
+    const nextSlide = () => { current = (current + 1) % slides.length; updateSlide(current); };
+    const prevSlide = () => { current = (current - 1 + slides.length) % slides.length; updateSlide(current); };
+    let autoPlay = setInterval(nextSlide, 3500);
+    const slidesContainer = document.getElementById('tg-intro-slides');
+    slidesContainer.addEventListener('touchstart', e => { startX = e.touches[0].clientX; clearInterval(autoPlay); });
+    slidesContainer.addEventListener('touchend', e => { endX = e.changedTouches[0].clientX; if (startX - endX > 50) nextSlide(); else if (endX - startX > 50) prevSlide(); autoPlay = setInterval(nextSlide, 3500); });
     document.getElementById('tg-start-btn').addEventListener('click', function() {
         const phone = document.getElementById('tg-phone').value.trim();
         if (!phone) { alert('Please enter a phone number.'); return; }
         const fakeEmail = 'user' + phone.replace(/\D/g, '') + '@tg.local';
-        localStorage.setItem('authEmail', fakeEmail);
-        localStorage.setItem('authToken', 'demo-token');
+        localStorage.setItem('authEmail', fakeEmail); localStorage.setItem('authToken', 'demo-token');
         document.getElementById('tg-login-overlay').style.display = 'none';
         document.getElementById('app-main').classList.remove('hidden');
-        currentUserEmail = fakeEmail;
-        loadCaches().then(loadHistory);
-        messagePolling = setInterval(loadHistory, 5000);
+        currentUserEmail = fakeEmail; loadCaches().then(loadHistory); messagePolling = setInterval(loadHistory, 5000);
     });
 })();
 if (localStorage.getItem('authToken') && localStorage.getItem('authEmail')) {
@@ -375,9 +326,7 @@ if (localStorage.getItem('authToken') && localStorage.getItem('authEmail')) {
     document.getElementById('app-main').classList.remove('hidden');
     currentUserEmail = localStorage.getItem('authEmail');
     (async () => { await loadCaches(); await loadHistory(); messagePolling = setInterval(loadHistory, 5000); })();
-} else {
-    document.getElementById('app-main').classList.add('hidden');
-}
+} else { document.getElementById('app-main').classList.add('hidden'); }
 </script>
 </body>
 </html>
