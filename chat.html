@@ -82,7 +82,52 @@
         #tg-start-btn:hover { background: var(--accent-light); } #tg-start-btn:active { transform: scale(0.97); }
         @media (max-width: 700px) { #tg-login-overlay { flex-direction: column; overflow-y: auto; } #tg-intro-panel { padding: 20px; min-height: 300px; flex: 0 0 auto; } #tg-login-form { padding: 20px; flex: 1; } .tg-slide h2 { font-size: 22px !important; } }
     #tg-login-form { padding: 40px 40px 80px !important; }
-    </div>#tg-login-form {flex:1; background:var(--card);display:flex; flex-direction:column; justify-content:center;   align-items:center; padding: 40px 40px 60px;   /* 底部多留 60px 空间 */ min-width:320px;   overflow-y: auto;}
+     /* ===== 全黑登录页覆盖样式 ===== */
+#tg-login-overlay {
+    background: #000 !important;
+}
+#tg-intro-panel {
+    background: linear-gradient(135deg, #1a1a1a, #0d0d0d) !important;
+}
+#tg-login-form {
+    background: #0a0a0a !important;
+    color: #ccc !important;
+}
+#tg-login-form h2,
+#tg-login-form p,
+#tg-login-form label {
+    color: #ddd !important;
+}
+#tg-login-form input {
+    background: #1a1a1a !important;
+    border-color: #333 !important;
+    color: #fff !important;
+}
+#tg-login-form input::placeholder {
+    color: #777 !important;
+}
+#tg-start-btn {
+    background: #3390ec !important;  /* 保留蓝色按钮，更醒目 */
+}
+#tg-login-error {
+    color: #ff6b6b !important;
+}
+
+/* 修复底部空隙：给登录覆盖层设置 flex 布局方向，让内容填满 */
+#tg-login-overlay {
+    display: flex;
+    align-items: stretch;
+}
+/* 移动端让输入区可滚动 */
+@media (max-width: 700px) {
+    #tg-login-overlay {
+        flex-direction: column;
+    }
+    #tg-login-form {
+        padding-bottom: 80px;
+    }
+}
+  body { background: #000 !important; }
     </style>
 </head>
 <body>
