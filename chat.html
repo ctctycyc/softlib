@@ -158,6 +158,10 @@
 <div id="app-main" class="hidden">
     <div class="top-bar">
         <h2 id="chat-title">聊天室</h2>
+        <button class="icon-btn" id="manualRefreshBtn" title="刷新消息">
+    <i class="fas fa-sync-alt"></i>
+    <span id="refreshCdText" style="font-size:0.6rem;margin-left:2px;"></span>
+        </button>
         <button class="icon-btn" id="toggleThemeBtn" title="切换暗黑模式"><i class="fas fa-moon"></i></button>
         <button class="icon-btn" id="searchBtn"><i class="fas fa-search"></i></button>
         <button class="icon-btn" id="rankBtn"><i class="fas fa-trophy"></i></button>
@@ -415,10 +419,42 @@ if (localStorage.getItem('authToken') && localStorage.getItem('authEmail')) {
         await loadCaches();
         await loadHistory();
         scrollToBottom();
-        messagePolling = setInterval(loadHistory, 30000);
+        messagePolling = setInterval(loadHistory, 9999999999);
     })();
 } else {
     document.getElementById('app-main').classList.add('hidden');
 }
-</script></body>
+// ===== 手动刷新按钮 + 冷却CD =====
+const refreshBtn = document.getElementById('manualRefreshBtn');
+const refreshCdText = document.getElementById('refreshCdText');
+let refreshCd = 0;
+let cdInterval = null;
+
+function startRefreshCd() {
+    refreshCd = 15;  // 冷却秒数，可以改成其他数字
+    refreshBtn.disabled = true;
+    refreshBtn.style.opacity = '0.5';
+    refreshCdText.textContent = refreshCd + 's';
+
+    cdInterval = setInterval(() => {
+        refreshCd--;
+        if (refreshCd <= 0) {
+            clearInterval(cdInterval);
+            cdInterval = null;
+            refreshBtn.disabled = false;
+            refreshBtn.style.opacity = '1';
+            refreshCdText.textContent = '';
+        } else {
+            refreshCdText.textContent = refreshCd + 's';
+        }
+    }, 1000);
+}
+
+refreshBtn.addEventListener('click', () => {
+    if (refreshCd > 0) return;
+    loadHistory();
+    startRefreshCd();
+});
+</script>
+</body>
 </html>
