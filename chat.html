@@ -275,7 +275,6 @@ document.getElementById('msg').addEventListener('keydown', e => { if (e.key === 
     const fileInput = document.getElementById('file-input'), fileLabel = document.querySelector('.file-label');
     fileLabel.classList.add('uploading'); const files = fileInput.files;
     if (!files.length) { fileLabel.classList.remove('uploading'); return; }
-    for (let file of files) {
         for (let file of files) {
     // ---------- 只加这两行 ----------
     const MAX_SIZE = 5 * 1024 * 1024;
