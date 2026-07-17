@@ -276,6 +276,14 @@ document.getElementById('msg').addEventListener('keydown', e => { if (e.key === 
     fileLabel.classList.add('uploading'); const files = fileInput.files;
     if (!files.length) { fileLabel.classList.remove('uploading'); return; }
     for (let file of files) {
+        for (let file of files) {
+    // ---------- 只加这两行 ----------
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) { alert(`文件 "${file.name}" 超过5MB限制，已跳过`); continue; }
+    // -----------------------------
+    const safeName = file.name.replace(...); // 原来的代码不变
+    // ...
+        }
         const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '_'), fileName = Date.now() + '_' + safeName;
         const upRes = await fetch(SUPABASE_URL + '/storage/v1/object/chat-files/' + fileName, { method: 'POST', headers: { apikey: SUPABASE_KEY, 'Content-Type': file.type }, body: file });
         if (upRes.ok) {
