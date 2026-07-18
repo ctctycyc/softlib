@@ -161,29 +161,58 @@ async function loadHistory() {
         });
     }
     box.scrollTop = box.scrollHeight;
-}// 发送消息（带禁言检查）
+}// 发送消息（带禁言检查和错误提示）
 async function checkMute(email) {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/mutes?select=*&email=eq.' + encodeURIComponent(email), {
-        headers: { 'apikey': SUPABASE_KEY }
-    });
-    const data = await res.json();
-    return (Array.isArray(data) && data.length > 0);
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/mutes?select=*&email=eq.' + encodeURIComponent(email), {
+            headers: { 'apikey': SUPABASE_KEY }
+        });
+        const data = await res.json();
+        return (Array.isArray(data) && data.length > 0);
+    } catch (e) {
+        console.error('禁言检查失败', e);
+        return false; // 出错时允许发送
+    }
 }
+
 document.getElementById('send-btn').addEventListener('click', async () => {
-    if (!currentUserEmail) return;
-    const isMuted = await checkMute(currentUserEmail);
-    if (isMuted) { alert('你已被禁言'); return; }
+    if (!currentUserEmail) {
+        alert('登录状态丢失，请刷新页面重新登录');
+        return;
+    }
+    try {
+        const isMuted = await checkMute(currentUserEmail);
+        if (isMuted) {
+            alert('你已被禁言');
+            return;
+        }
+    } catch (e) {
+        alert('禁言状态检查失败，请稍后再试');
+        return;
+    }
+
     const msg = document.getElementById('msg').value.trim();
     if (!msg) return;
-    await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-        body: JSON.stringify({ email: currentUserEmail, message: msg })
-    });
-    document.getElementById('msg').value = '';
-    loadHistory();
+
+    try {
+        await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+            body: JSON.stringify({ email: currentUserEmail, message: msg })
+        });
+        document.getElementById('msg').value = '';
+        loadHistory();
+    } catch (e) {
+        alert('发送失败，请检查网络');
+        console.error(e);
+    }
 });
+
 document.getElementById('msg').addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); document.getElementById('send-btn').click(); }
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('send-btn').click();
+    }
 });// 文件上传
 document.getElementById('file-input').addEventListener('change', async function() {
     const file = this.files[0];
