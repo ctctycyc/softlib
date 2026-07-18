@@ -164,22 +164,40 @@ async function loadHistory() {
         box.scrollTop = box.scrollHeight;
     } catch (e) { console.error('加载消息失败', e); }
 }// 发送消息（最简最稳版）
+d// 发送消息（带认证头，绝对可靠）
 document.getElementById('send-btn').addEventListener('click', async () => {
     if (!currentUserEmail) { alert('请先登录'); return; }
     const msg = document.getElementById('msg').value.trim();
     if (!msg) return;
+
+    const token = localStorage.getItem('authToken');
+    if (!token) { alert('登录状态丢失，请刷新页面重新登录'); return; }
+
     try {
         const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_KEY,
+                'Authorization': 'Bearer ' + token
+            },
             body: JSON.stringify({ email: currentUserEmail, message: msg })
         });
-        if (!res.ok) throw new Error('发送失败');
-        document.getElementById('msg').value = '';
-        loadHistory();
+
+        if (res.ok) {
+            document.getElementById('msg').value = '';
+            // 直接添加到页面，确保立即可见
+            const box = document.getElementById('chat-box');
+            const div = document.createElement('div');
+            div.className = 'msg-row self';
+            div.innerHTML = `<div class="avatar">${currentUserEmail[0].toUpperCase()}</div><div class="bubble">${msg}</div>`;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        } else {
+            alert('发送失败，请检查网络');
+        }
     } catch (e) {
-        alert('发送失败，请重试');
-        console.error(e);
+        alert('网络错误，请检查连接');
     }
 });
 
