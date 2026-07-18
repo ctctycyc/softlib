@@ -104,16 +104,11 @@
                     err.textContent = data.error_description || '邮箱或密码错误';
                 }
             } catch (e) { err.textContent = '网络错误'; }
-        });      // 加载消息历史（支持群组和公共大厅）
+        });      // 加载消息历史（加载所有消息，确保不会遗漏）
 async function loadHistory() {
     try {
-        let url = SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50';
-        // 如果当前有选中的群组，只加载该群消息；否则加载公共大厅
-        if (currentGroupId) {
-            url += '&group_id=eq.' + currentGroupId;
-        } else {
-            url += '&group_id=is.null';
-        }
+        // 暂时忽略群组过滤，加载全部消息
+        const url = SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50';
         const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY } });
         const msgs = await res.json();
         const box = document.getElementById('chat-box');
@@ -130,7 +125,7 @@ async function loadHistory() {
     } catch (e) {
         console.error('加载消息失败:', e);
     }
-        }
+}
         // 发送消息（直接添加到页面）
 document.getElementById('send-btn').addEventListener('click', async () => {
     const msg = document.getElementById('msg').value.trim();
