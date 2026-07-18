@@ -24,11 +24,11 @@
         .msg-row.self { align-self: flex-end; flex-direction: row-reverse; }
         .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; }
         .bubble { padding: 8px 14px; border-radius: 12px; background: var(--bubble-other); border: 1px solid var(--border); }
-        .self .bubble { background: var(--accent); color: white; }
-        .input-area { padding: 10px; background: var(--card); border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: flex-end; }
+        .self .bubble { background: var(--accent); color: white; }        .input-area { padding: 10px; background: var(--card); border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: flex-end; }
         .input-area textarea { flex: 1; border: 1px solid var(--border); border-radius: 20px; padding: 8px 14px; resize: none; background: var(--bg); color: var(--text); min-height: 38px; }
         .send-btn { background: var(--accent); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1rem; cursor: pointer; }
-        .file-label { cursor: pointer; padding: 6px; color: var(--sub); }        .admin-panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: var(--card); padding: 20px; border-radius: 12px; z-index: 200; width: 320px; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+        .file-label { cursor: pointer; padding: 6px; color: var(--sub); }
+        .admin-panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: var(--card); padding: 20px; border-radius: 12px; z-index: 200; width: 320px; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
         .admin-panel input { width: 100%; padding: 8px; margin: 6px 0; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); }
         .admin-panel button { width: 100%; padding: 10px; margin-top: 6px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
         .login-overlay { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 999; }
@@ -43,7 +43,7 @@
     <!-- 登录界面 -->
     <div id="login-overlay" class="login-overlay">
         <div class="login-box">
-            <h2>Telegram Lite</h2>
+            <h2>聊天室</h2>
             <input id="login-email" type="email" placeholder="邮箱">
             <input id="login-password" type="password" placeholder="密码">
             <button id="login-btn">登录</button>
@@ -53,7 +53,7 @@
     </div><!-- 主界面 -->
 <div id="app-main" class="hidden">
     <div class="top-bar">
-        <h2 id="chat-title">公共大厅</h2>
+        <h2 id="chat-title">聊天室</h2>
         <button class="icon-btn" id="theme-toggle"><i class="fas fa-moon"></i></button>
         <button class="icon-btn" id="refresh-btn" title="刷新（15秒CD）"><i class="fas fa-sync-alt"></i><span id="refresh-cd" style="font-size:0.7rem;margin-left:2px;"></span></button>
     </div>
@@ -87,7 +87,7 @@ const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
 let currentUserEmail = '';
 let isAdmin = false;
 
-// 主题
+// 主题切换
 const themeBtn = document.getElementById('theme-toggle');
 const savedTheme = localStorage.getItem('theme') || 'light';
 document.documentElement.setAttribute('data-theme', savedTheme);
@@ -146,68 +146,44 @@ document.getElementById('register-btn').addEventListener('click', async () => {
 
 // 消息加载
 async function loadHistory() {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50', {
-        headers: { 'apikey': SUPABASE_KEY }
-    });
-    const msgs = await res.json();
-    const box = document.getElementById('chat-box');
-    box.innerHTML = '';
-    if (Array.isArray(msgs)) {
-        msgs.forEach(m => {
-            const div = document.createElement('div');
-            div.className = 'msg-row ' + (m.email === currentUserEmail ? 'self' : 'other');
-            div.innerHTML = `<div class="avatar">${m.email[0].toUpperCase()}</div><div class="bubble">${m.message}</div>`;
-            box.appendChild(div);
-        });
-    }
-    box.scrollTop = box.scrollHeight;
-}// 发送消息（带禁言检查和错误提示）
-async function checkMute(email) {
     try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/mutes?select=*&email=eq.' + encodeURIComponent(email), {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50', {
             headers: { 'apikey': SUPABASE_KEY }
         });
-        const data = await res.json();
-        return (Array.isArray(data) && data.length > 0);
-    } catch (e) {
-        console.error('禁言检查失败', e);
-        return false; // 出错时允许发送
-    }
-}
-
-document.getElementById('send-btn').addEventListener('click', async () => {
-    if (!currentUserEmail) {
-        alert('登录状态丢失，请刷新页面重新登录');
-        return;
-    }
-    try {
-        const isMuted = await checkMute(currentUserEmail);
-        if (isMuted) {
-            alert('你已被禁言');
-            return;
+        const msgs = await res.json();
+        const box = document.getElementById('chat-box');
+        box.innerHTML = '';
+        if (Array.isArray(msgs)) {
+            msgs.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'msg-row ' + (m.email === currentUserEmail ? 'self' : 'other');
+                div.innerHTML = `<div class="avatar">${m.email[0].toUpperCase()}</div><div class="bubble">${m.message}</div>`;
+                box.appendChild(div);
+            });
         }
-    } catch (e) {
-        alert('禁言状态检查失败，请稍后再试');
-        return;
-    }
-
+        box.scrollTop = box.scrollHeight;
+    } catch (e) { console.error('加载消息失败', e); }
+}// 发送消息（最简最稳版）
+document.getElementById('send-btn').addEventListener('click', async () => {
+    if (!currentUserEmail) { alert('请先登录'); return; }
     const msg = document.getElementById('msg').value.trim();
     if (!msg) return;
-
     try {
-        await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
             body: JSON.stringify({ email: currentUserEmail, message: msg })
         });
+        if (!res.ok) throw new Error('发送失败');
         document.getElementById('msg').value = '';
         loadHistory();
     } catch (e) {
-        alert('发送失败，请检查网络');
+        alert('发送失败，请重试');
         console.error(e);
     }
 });
 
+// 回车发送
 document.getElementById('msg').addEventListener('keydown', e => {
     if (e.key === 'Enter') {
         e.preventDefault();
@@ -219,18 +195,20 @@ document.getElementById('file-input').addEventListener('change', async function(
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) { alert('文件超过5MB'); return; }
     const fileName = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.]/g, '_');
-    const upRes = await fetch(SUPABASE_URL + '/storage/v1/object/chat-files/' + fileName, {
-        method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Content-Type': file.type }, body: file
-    });
-    if (upRes.ok) {
-        const url = SUPABASE_URL + '/storage/v1/object/public/chat-files/' + fileName;
-        await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-            body: JSON.stringify({ email: currentUserEmail, message: url })
+    try {
+        const upRes = await fetch(SUPABASE_URL + '/storage/v1/object/chat-files/' + fileName, {
+            method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Content-Type': file.type }, body: file
         });
-        loadHistory();
-    } else alert('上传失败');
-});// 手动刷新按钮（15秒冷却）
+        if (upRes.ok) {
+            const url = SUPABASE_URL + '/storage/v1/object/public/chat-files/' + fileName;
+            await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+                body: JSON.stringify({ email: currentUserEmail, message: url })
+            });
+            loadHistory();
+        } else { alert('上传失败'); }
+    } catch (e) { alert('网络错误'); }
+});// 手动刷新按钮（15秒CD）
 const refreshBtn = document.getElementById('refresh-btn');
 const refreshCdText = document.getElementById('refresh-cd');
 let refreshCd = 0, cdInterval = null;
@@ -264,6 +242,7 @@ document.getElementById('chat-title').addEventListener('click', () => {
     }
     setTimeout(() => titleClicks = 0, 2000);
 });
+// 点击空白处关闭管理面板
 document.getElementById('admin-panel').addEventListener('click', function(e) {
     if (e.target === this) this.style.display = 'none';
 });
