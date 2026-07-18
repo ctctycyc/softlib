@@ -144,7 +144,79 @@
         </div>
     </div>
 </div><script>
-const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
+// ===== 独立登录模块（放在所有代码之前） =====
+(function() {
+    // 等待页面完全加载
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initLogin);
+    } else {
+        initLogin();
+    }
+
+    function initLogin() {
+        const loginBtn = document.getElementById('login-btn');
+        if (!loginBtn) {
+            console.error('找不到登录按钮 #login-btn');
+            return;
+        }
+
+        loginBtn.addEventListener('click', async () => {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            const err = document.getElementById('login-error');
+            
+            if (!email || !password) {
+                err.textContent = '请输入邮箱和密码';
+                return;
+            }
+
+            err.textContent = '正在登录...';
+
+            try {
+                const res = await fetch('https://rgekpmuujozhkkctpdup.supabase.co/auth/v1/token?grant_type=password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+
+                if (data.access_token) {
+                    // 登录成功
+                    localStorage.setItem('authToken', data.access_token);
+                    localStorage.setItem('authEmail', email);
+                    
+                    // 更新全局变量（如果存在）
+                    if (typeof currentUserEmail !== 'undefined') {
+                        currentUserEmail = email;
+                    }
+
+                    // 隐藏登录界面
+                    document.getElementById('login-overlay').style.display = 'none';
+                    // 显示主界面
+                    document.getElementById('app-main').classList.remove('hidden');
+                    
+                    // 调用初始化函数（如果存在）
+                    if (typeof loadGroups === 'function') await loadGroups();
+                    if (typeof loadCaches === 'function') await loadCaches();
+                    if (typeof loadHistory === 'function') loadHistory();
+                    
+                    // 确保body可滚动
+                    document.body.style.overflow = 'auto';
+                } else {
+                    err.textContent = data.error_description || '邮箱或密码错误';
+                }
+            } catch (e) {
+                err.textContent = '网络错误，请检查连接';
+                console.error('登录错误:', e);
+            }
+        });
+    }
+})();
+    const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
 const SUPER_ADMIN_EMAIL = 'dghkkppp@qq.com';
 const MAINTENANCE_MODE = false;
