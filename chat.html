@@ -55,11 +55,50 @@
         .group-list-item:hover { background: var(--border); }
         .group-list-item.active { background: var(--accent); color: white; }
         .group-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; margin-right: 10px; flex-shrink: 0; }
+    /* ===== 高级版登录界面样式 ===== */
+#login-overlay {
+    background: var(--bg) !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+}
+#login-overlay > div:first-child {
+    background: var(--card) !important;
+    max-width: 360px !important;
+    text-align: left !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
+}
+#login-overlay h2 {
+    font-size: 1.4rem !important;
+    margin-bottom: 8px !important;
+    color: var(--text) !important;
+}
+#login-overlay .form-input {
+    background: var(--bg) !important;
+    margin-bottom: 12px !important;
+}
+#login-btn {
+    background: var(--accent) !important;
+    transition: 0.2s !important;
+    margin-top: 4px !important;
+}
+#register-btn {
+    background: #64748b !important;
+    transition: 0.2s !important;
+}
     </style>
 </head>
 <body>
 <div id="login-overlay" style="position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;">
-    <div style="background:var(--card);padding:30px;border-radius:12px;width:90%;max-width:360px;text-align:center;">
+    <!-- 宣传语轮播 -->
+    <div style="max-width:360px;width:90%;text-align:center;margin-bottom:20px;color:var(--text);">
+        <div id="tg-intro-slides" style="position:relative;height:80px;overflow:hidden;">
+            <div class="tg-slide active" style="position:absolute;width:100%;transition:0.5s;opacity:1;">⚡ <strong>Fast</strong> · 比任何应用都快</div>
+            <div class="tg-slide" style="position:absolute;width:100%;transition:0.5s;opacity:0;">💬 <strong>Free</strong> · 无限云储存</div>
+            <div class="tg-slide" style="position:absolute;width:100%;transition:0.5s;opacity:0;">🔒 <strong>Secure</strong> · 保护你的信息</div>
+        </div>
+    </div>
+
+    <!-- 登录框本体 -->
+    <div style="background:var(--card);padding:30px;border-radius:12px;width:90%;max-width:360px;text-align:left;">
         <h2 style="margin-bottom:20px;">Telegram Lite</h2>
         <input class="form-input" id="login-email" type="email" placeholder="邮箱">
         <input class="form-input" id="login-password" type="password" placeholder="密码">
@@ -400,6 +439,17 @@ if (localStorage.getItem('authToken') && localStorage.getItem('authEmail')) {
     currentUserEmail = localStorage.getItem('authEmail');
     (async () => { await loadGroups(); await loadCaches(); loadHistory(); })();
 }
+// 登录页宣传语轮播
+(function() {
+    const slides = document.querySelectorAll('.tg-slide');
+    if (slides.length === 0) return;
+    let current = 0;
+    setInterval(() => {
+        slides[current].style.opacity = '0';
+        current = (current + 1) % slides.length;
+        slides[current].style.opacity = '1';
+    }, 3000);
+})();
 </script>
 </body>
 </html>
