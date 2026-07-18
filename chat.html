@@ -147,6 +147,46 @@
             document.getElementById('app-main').classList.remove('hidden');
             loadHistory();
         }
+    // ========== 群组功能 ==========
+let currentGroupId = null;
+let groups = [];
+
+async function loadGroups() {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/chat_groups?select=*&order=created_at.asc', {
+        headers: { 'apikey': SUPABASE_KEY }
+    });
+    groups = (await res.json()) || [];
+}
+
+// 在顶栏加群组按钮
+document.querySelector('.top-bar').insertAdjacentHTML('afterbegin', '<button class="icon-btn" id="group-btn"><i class="fas fa-bars"></i></button>');
+document.getElementById('group-btn').addEventListener('click', async () => {
+    await loadGroups();
+    let html = '<h3>群组列表</h3>';
+    groups.forEach(g => {
+        html += `<p><a href="#" onclick="switchGroup(${g.id},'${g.name}')">${g.name}</a></p>`;
+    });
+    html += '<button onclick="createGroup()">新建群组</button>';
+    alert(html); // 暂时用弹窗显示，后面再改成抽屉
+});
+
+async function switchGroup(id, name) {
+    currentGroupId = id;
+    document.getElementById('chat-title').textContent = name;
+    loadHistory();
+}
+
+async function createGroup() {
+    const name = prompt('群组名称：');
+    if (!name) return;
+    const token = localStorage.getItem('authToken');
+    await fetch(SUPABASE_URL + '/rest/v1/chat_groups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ name, owner_email: currentUserEmail })
+    });
+    alert('创建成功！点击群组按钮刷新列表');
+}
     </script>
 </body>
 </html>
