@@ -12,18 +12,17 @@
         :root {
             --bg: #e8ecef; --card: #ffffff; --text: #222222; --sub: #707579; --border: #d0d5da;
             --accent: #3390ec; --accent-light: #4da3f5; --bubble-self: #3390ec; --bubble-other: #ffffff;
-            --shadow: 0 1px 2px rgba(0,0,0,0.04); --shadow-md: 0 1px 3px rgba(0,0,0,0.06); --radius: 10px;
-            --msg-self-text: #ffffff; --msg-other-text: #222222; --sidebar-bg: #ffffff;
+            --shadow: 0 1px 2px rgba(0,0,0,0.04); --msg-self-text: #ffffff; --msg-other-text: #222222;
         }
         [data-theme="dark"] {
             --bg: #1a1d21; --card: #24272c; --text: #e8eaed; --sub: #9aa0a6; --border: #3c4043;
             --accent: #5b9bd5; --accent-light: #7cb3e8; --bubble-self: #5b9bd5; --bubble-other: #2d3136;
-            --shadow: 0 1px 2px rgba(0,0,0,0.3); --shadow-md: 0 1px 3px rgba(0,0,0,0.5); --sidebar-bg: #24272c;
+            --shadow: 0 1px 2px rgba(0,0,0,0.3); --msg-self-text: #ffffff; --msg-other-text: #e8eaed;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow-y: auto; transition: background 0.3s, color 0.3s; font-size: 15px; }
         .top-bar { background: var(--card); padding: 8px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
-        .top-bar h2 { font-size: 1.1rem; font-weight: 600; margin-right: auto; cursor: pointer; color: var(--text); }
+        .top-bar h2 { font-size: 1.1rem; font-weight: 600; margin-right: auto; cursor: pointer; }
         .icon-btn { background: none; border: none; font-size: 1.1rem; color: var(--sub); cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .icon-btn:hover { background: var(--border); color: var(--text); }
         .message-list { padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
@@ -35,7 +34,7 @@
         .bubble { padding: 8px 12px; border-radius: 8px; font-size: 0.95rem; line-height: 1.45; word-break: break-word; position: relative; box-shadow: var(--shadow); }
         .self .bubble { background: var(--bubble-self); color: var(--msg-self-text); border-bottom-right-radius: 2px; }
         .other .bubble { background: var(--bubble-other); color: var(--msg-other-text); border: 1px solid var(--border); border-bottom-left-radius: 2px; }
-        .msg-meta { font-size: 0.7rem; color: var(--sub); margin-bottom: 2px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+        .msg-meta { font-size: 0.7rem; color: var(--sub); margin-bottom: 2px; display: flex; align-items: center; gap: 4px; }
         .user-name { font-weight: 600; cursor: pointer; color: var(--accent); font-size: 0.75rem; }
         .level-badge { padding: 1px 6px; border-radius: 10px; font-size: 0.6rem; font-weight: 600; color: white; }
         .title-badge { background: #c07e2e; color: white; border-radius: 10px; padding: 1px 6px; font-size: 0.6rem; }
@@ -44,7 +43,7 @@
         .input-area textarea { flex: 1; border: 1px solid var(--border); border-radius: 18px; padding: 8px 14px; outline: none; resize: none; font-size: 0.95rem; background: var(--bg); color: var(--text); max-height: 100px; min-height: 38px; }
         .send-btn { background: var(--accent); color: white; border: none; border-radius: 50%; width: 38px; height: 38px; font-size: 1rem; cursor: pointer; }
         .file-label { cursor: pointer; font-size: 1.3rem; color: var(--sub); padding: 6px; }
-        .drawer { position: fixed; right: -320px; top: 0; height: 100%; width: 300px; background: var(--sidebar-bg); box-shadow: -2px 0 6px rgba(0,0,0,0.1); transition: right 0.25s ease; z-index: 100; padding: 18px; overflow-y: auto; border-left: 1px solid var(--border); }
+        .drawer { position: fixed; right: -320px; top: 0; height: 100%; width: 300px; background: var(--card); box-shadow: -2px 0 6px rgba(0,0,0,0.1); transition: right 0.25s ease; z-index: 100; padding: 18px; overflow-y: auto; border-left: 1px solid var(--border); }
         .drawer.open { right: 0; }
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.2); z-index: 99; display: none; }
         .overlay.show { display: block; }
@@ -56,7 +55,6 @@
         .group-list-item:hover { background: var(--border); }
         .group-list-item.active { background: var(--accent); color: white; }
         .group-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; margin-right: 10px; flex-shrink: 0; }
-        .group-name { font-weight: 600; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -65,55 +63,56 @@
         <h2 style="margin-bottom:20px;">Telegram Lite</h2>
         <input class="form-input" id="login-email" type="email" placeholder="邮箱">
         <input class="form-input" id="login-password" type="password" placeholder="密码">
-        <button class="btn-primary" onclick="handleLogin()" style="margin-top:10px;">登录</button>
-        <button class="btn-primary" onclick="handleRegister()" style="background:#64748b;">注册</button>
+        <button class="btn-primary" id="login-btn">登录</button>
+        <button class="btn-primary" id="register-btn" style="background:#64748b;">注册</button>
         <div id="login-error" style="color:red;margin-top:10px;"></div>
     </div>
 </div>
+
 <div id="app-main" class="hidden">
     <div class="top-bar">
-        <button class="icon-btn" onclick="openGroupList()"><i class="fas fa-bars"></i></button>
-        <h2 id="chat-title" onclick="openGroupSettings()">公共大厅</h2>
+        <button class="icon-btn" id="group-list-btn"><i class="fas fa-bars"></i></button>
+        <h2 id="chat-title">公共大厅</h2>
         <button class="icon-btn" id="theme-btn"><i class="fas fa-moon"></i></button>
-        <button class="icon-btn" onclick="openDrawerContent('search')"><i class="fas fa-search"></i></button>
+        <button class="icon-btn" id="search-btn"><i class="fas fa-search"></i></button>
         <button class="icon-btn" id="refresh-btn"><i class="fas fa-sync-alt"></i></button>
     </div>
     <div class="message-list" id="chat-box"></div>
     <div class="input-area">
         <label class="file-label" for="file-input"><i class="fas fa-paperclip"></i></label>
-        <input type="file" id="file-input" accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" style="display:none;" onchange="uploadFile()">
+        <input type="file" id="file-input" accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" style="display:none;">
         <textarea id="msg" placeholder="输入消息... (Enter 发送)" rows="1"></textarea>
         <button class="icon-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fas fa-arrow-up"></i></button>
         <button class="send-btn" id="send-btn"><i class="fas fa-paper-plane"></i></button>
     </div>
     <div class="overlay" id="overlay"></div>
     <div id="drawer" class="drawer">
-        <button class="drawer-close icon-btn" onclick="closeDrawer()" style="float:right;"><i class="fas fa-times"></i></button>
+        <button class="drawer-close icon-btn" style="float:right;" onclick="closeDrawer()"><i class="fas fa-times"></i></button>
         <div id="drawer-content"></div>
     </div>
     <div id="admin-modal" class="hidden" style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--card); padding:20px; border-radius:12px; z-index:200; width:350px;">
         <h3>管理面板</h3>
         <input class="form-input" id="admin-key" placeholder="管理员密钥">
-        <button class="btn-primary" onclick="verifyAdmin()">验证</button>
+        <button class="btn-primary" id="verify-admin-btn">验证</button>
         <div id="admin-error" style="color:red;"></div>
         <div id="admin-content" style="display:none;">
             <input class="form-input" id="target-email" placeholder="用户邮箱">
             <input class="form-input" id="new-title" placeholder="头衔">
-            <button class="btn-primary btn-sm" onclick="setTitle()">设置头衔</button>
-            <button class="btn-primary btn-sm" onclick="clearTitle()">清除头衔</button>
+            <button class="btn-primary btn-sm" id="set-title-btn">设置头衔</button>
+            <button class="btn-primary btn-sm" id="clear-title-btn">清除头衔</button>
             <input class="form-input" id="mute-email" placeholder="禁言邮箱">
-            <button class="btn-primary btn-sm" onclick="muteUser()">禁言</button>
-            <button class="btn-primary btn-sm" onclick="unmuteUser()">解禁</button>
+            <button class="btn-primary btn-sm" id="mute-btn">禁言</button>
+            <button class="btn-primary btn-sm" id="unmute-btn">解禁</button>
             <hr>
-            <button class="btn-primary btn-sm" onclick="listAllGroups()">管理群组</button>
+            <button class="btn-primary btn-sm" id="list-all-groups-btn">管理所有群组</button>
         </div>
     </div>
-</div>
-<script>
+</div><script>
 const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
 const SUPER_ADMIN_EMAIL = 'dghkkppp@qq.com';
-let MAINTENANCE_MODE = false;
+const MAINTENANCE_MODE = false;
+
 let currentUserEmail = localStorage.getItem('authEmail') || '';
 let isAdmin = false;
 let currentGroupId = null, currentGroupName = '公共大厅', groups = [];
@@ -122,6 +121,7 @@ let titleCache = {}, scoreCache = {};
 const getEmail = () => currentUserEmail;
 const isSuperAdmin = () => currentUserEmail === SUPER_ADMIN_EMAIL;
 
+// 主题
 const themeBtn = document.getElementById('theme-btn');
 const savedTheme = localStorage.getItem('theme') || 'light';
 document.documentElement.setAttribute('data-theme', savedTheme);
@@ -133,28 +133,31 @@ themeBtn.addEventListener('click', () => {
     themeBtn.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
 });
 
-function openDrawer(content) { document.getElementById('drawer-content').innerHTML = content; document.getElementById('drawer').classList.add('open'); document.getElementById('overlay').classList.add('show'); }
+// 抽屉
+function openDrawer(html) { document.getElementById('drawer-content').innerHTML = html; document.getElementById('drawer').classList.add('open'); document.getElementById('overlay').classList.add('show'); }
 function closeDrawer() { document.getElementById('drawer').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
 document.getElementById('overlay').addEventListener('click', closeDrawer);
 
+// 加载缓存
 async function loadCaches() {
     const [sRes, tRes] = await Promise.all([
-        fetch(SUPABASE_URL + '/rest/v1/user_scores?select=*', { headers: { 'apikey': SUPABASE_KEY } }),
-        fetch(SUPABASE_URL + '/rest/v1/user_titles?select=*', { headers: { 'apikey': SUPABASE_KEY } })
+        fetch(SUPABASE_URL + '/rest/v1/user_scores?select=*', { headers: { apikey: SUPABASE_KEY } }),
+        fetch(SUPABASE_URL + '/rest/v1/user_titles?select=*', { headers: { apikey: SUPABASE_KEY } })
     ]);
     const scores = await sRes.json(), titles = await tRes.json();
     if (Array.isArray(scores)) scores.forEach(r => scoreCache[r.email] = r.score || 0);
     if (Array.isArray(titles)) titles.forEach(r => titleCache[r.email] = r.title);
-}async function addScore(email) {
+}
+
+async function addScore(email) {
     scoreCache[email] = (scoreCache[email] || 0) + 1;
     await fetch(SUPABASE_URL + '/rest/v1/user_scores', {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'resolution=merge-duplicates' },
         body: JSON.stringify({ email, score: scoreCache[email] })
     });
-}
-
+}// 群组
 async function loadGroups() {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/chat_groups?select=*&order=created_at.asc', { headers: { 'apikey': SUPABASE_KEY } });
+    const res = await fetch(SUPABASE_URL + '/rest/v1/chat_groups?select=*&order=created_at.asc', { headers: { apikey: SUPABASE_KEY } });
     groups = (await res.json()) || [];
     if (!groups.find(g => g.id === null)) groups.unshift({ id: null, name: '公共大厅', owner_email: SUPER_ADMIN_EMAIL });
 }
@@ -162,12 +165,21 @@ async function loadGroups() {
 function openGroupList() {
     let html = '<h3>群组列表</h3>';
     groups.forEach(g => {
-        html += `<div class="group-list-item${g.id === currentGroupId ? ' active' : ''}" onclick="switchGroup(${g.id === null ? 'null' : g.id}, '${g.name.replace(/'/g, "\\'")}')"><div class="group-avatar">${g.name.charAt(0)}</div><div class="group-name">${g.name}</div></div>`;
+        html += `<div class="group-list-item${g.id === currentGroupId ? ' active' : ''}" data-id="${g.id}" data-name="${g.name}"><div class="group-avatar">${g.name.charAt(0)}</div><div class="group-name">${g.name}</div></div>`;
     });
-    html += '<hr><button class="btn-primary btn-sm" onclick="createGroup()">新建群组</button>';
-    if (isSuperAdmin()) html += '<button class="btn-primary btn-sm" style="background:#ff4d4d;" onclick="listAllGroups()">管理群组</button>';
+    html += '<hr><button class="btn-primary btn-sm" id="create-group-btn">新建群组</button>';
+    if (isSuperAdmin()) html += '<button class="btn-primary btn-sm" style="background:#ff4d4d;" id="list-all-groups-btn2">管理群组</button>';
     openDrawer(html);
+    document.querySelectorAll('.group-list-item').forEach(el => {
+        el.addEventListener('click', () => switchGroup(el.dataset.id === 'null' ? null : parseInt(el.dataset.id), el.dataset.name));
+    });
+    const createBtn = document.getElementById('create-group-btn');
+    if (createBtn) createBtn.addEventListener('click', createGroup);
+    const listBtn = document.getElementById('list-all-groups-btn2');
+    if (listBtn) listBtn.addEventListener('click', listAllGroups);
 }
+
+document.getElementById('group-list-btn').addEventListener('click', openGroupList);
 
 async function switchGroup(groupId, groupName) {
     currentGroupId = groupId; currentGroupName = groupName;
@@ -193,19 +205,27 @@ async function createGroup() {
         await loadGroups();
         switchGroup(newGroup.id, newGroup.name);
     } else alert('创建失败');
-    }async function openGroupSettings() {
+}
+
+async function openGroupSettings() {
     if (currentGroupId === null) return;
-    const members = await (await fetch(SUPABASE_URL + '/rest/v1/group_members?group_id=eq.' + currentGroupId + '&select=*', { headers: { 'apikey': SUPABASE_KEY } })).json();
+    const members = await (await fetch(SUPABASE_URL + '/rest/v1/group_members?group_id=eq.' + currentGroupId + '&select=*', { headers: { apikey: SUPABASE_KEY } })).json();
     const isOwner = members.some(m => m.email === getEmail() && m.role === 'owner');
     let html = `<h3>${currentGroupName} 设置</h3>`;
     members.forEach(m => {
         html += `<p>${m.email} (${m.role})`;
-        if (isOwner && m.email !== getEmail() && m.role !== 'owner') html += ` <button class="btn-sm" onclick="kickMember('${m.email}')">踢出</button>`;
+        if (isOwner && m.email !== getEmail() && m.role !== 'owner') html += ` <button class="btn-sm kick-btn" data-email="${m.email}">踢出</button>`;
     });
-    if (isOwner) html += '<hr><button class="btn-primary btn-sm" onclick="inviteLink()">邀请链接</button> <button class="btn-primary btn-sm" style="background:#ff4d4d;" onclick="dissolveGroup()">解散</button>';
+    if (isOwner) html += '<hr><button class="btn-primary btn-sm" id="invite-btn">邀请链接</button> <button class="btn-primary btn-sm" style="background:#ff4d4d;" id="dissolve-btn">解散</button>';
     openDrawer(html);
+    document.querySelectorAll('.kick-btn').forEach(b => b.addEventListener('click', () => kickMember(b.dataset.email)));
+    const inviteBtn = document.getElementById('invite-btn');
+    if (inviteBtn) inviteBtn.addEventListener('click', () => prompt('邀请链接：', location.origin + location.pathname + '?join=' + currentGroupId));
+    const dissolveBtn = document.getElementById('dissolve-btn');
+    if (dissolveBtn) dissolveBtn.addEventListener('click', dissolveGroup);
 }
-function inviteLink() { prompt('邀请链接：', location.origin + location.pathname + '?join=' + currentGroupId); }
+document.getElementById('chat-title').addEventListener('click', openGroupSettings);
+
 async function kickMember(email) {
     const token = localStorage.getItem('authToken');
     await fetch(SUPABASE_URL + '/rest/v1/group_members?group_id=eq.' + currentGroupId + '&email=eq.' + encodeURIComponent(email), { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token } });
@@ -219,23 +239,25 @@ async function dissolveGroup() {
     document.getElementById('chat-title').textContent = '公共大厅'; closeDrawer(); loadHistory();
 }
 async function listAllGroups() {
-    const allGroups = await (await fetch(SUPABASE_URL + '/rest/v1/chat_groups?select=*', { headers: { 'apikey': SUPABASE_KEY } })).json();
-    let html = '<h3>所有群组</h3>';
-    allGroups.forEach(g => html += `<p>${g.name} <button class="btn-sm" onclick="dissolveGroupById(${g.id})">解散</button></p>`);
+    const allGroups = await (await fetch(SUPABASE_URL + '/rest/v1/chat_groups?select=*', { headers: { apikey: SUPABASE_KEY } })).json();
+    let html = '<h3>所有群组</h3>';    allGroups.forEach(g => html += `<p>${g.name} <button class="btn-sm dissolve-btn" data-id="${g.id}">解散</button></p>`);
     openDrawer(html);
+    document.querySelectorAll('.dissolve-btn').forEach(b => b.addEventListener('click', () => dissolveGroupById(parseInt(b.dataset.id))));
 }
 async function dissolveGroupById(id) {
+    if (!confirm('确定解散？')) return;
     const token = localStorage.getItem('authToken');
     await fetch(SUPABASE_URL + '/rest/v1/chat_groups?id=eq.' + id, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token } });
     await loadGroups(); closeDrawer();
 }
 
+// 消息
 async function loadHistory() {
     if (MAINTENANCE_MODE || !getEmail()) return;
     let url = SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50';
     if (currentGroupId !== null) url += '&group_id=eq.' + currentGroupId;
     else url += '&group_id=is.null';
-    const data = await (await fetch(url, { headers: { 'apikey': SUPABASE_KEY } })).json();
+    const data = await (await fetch(url, { headers: { apikey: SUPABASE_KEY } })).json();
     if (Array.isArray(data)) renderMessages(data);
     window.scrollTo(0, document.body.scrollHeight);
 }
@@ -249,220 +271,129 @@ function renderMessages(msgs) {
         row.innerHTML = `<div class="avatar">${m.email.charAt(0).toUpperCase()}</div><div class="bubble"><div class="msg-meta"><span class="user-name">${m.email}</span><span class="level-badge">${level}</span>${titleHtml}<span class="msg-time">${new Date(m.created_at).toLocaleTimeString()}</span></div><div>${m.message}</div></div>`;
         box.appendChild(row);
     });
-    }async function sendMessage() {
+}
+
+async function sendMessage() {
     if (MAINTENANCE_MODE) return;
     const msg = document.getElementById('msg').value.trim();
     if (!msg) return;
-    const email = getEmail();
-    if (!email) { alert('请先登录'); return; }
-    const body = { email, message: msg };
+    if (!getEmail()) { alert('请先登录'); return; }
+    const body = { email: getEmail(), message: msg };
     if (currentGroupId !== null) body.group_id = currentGroupId;
     const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify(body) });
-    if (res.ok) { document.getElementById('msg').value = ''; await addScore(email); loadHistory(); }
+    if (res.ok) { document.getElementById('msg').value = ''; await addScore(getEmail()); loadHistory(); }
     else alert('发送失败');
 }
 document.getElementById('send-btn').addEventListener('click', sendMessage);
-document.getElementById('msg').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } });
-
-async function uploadFile() {
-    if (MAINTENANCE_MODE) return;
-    const email = getEmail(); if (!email) return;
-    const file = document.getElementById('file-input').files[0];
+document.getElementById('msg').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } });// 文件上传
+document.getElementById('file-input').addEventListener('change', async function() {
+    const file = this.files[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) { alert('文件超过5MB'); return; }
     const fileName = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.]/g, '_');
     const upRes = await fetch(SUPABASE_URL + '/storage/v1/object/chat-files/' + fileName, { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Content-Type': file.type }, body: file });
     if (upRes.ok) {
         const url = SUPABASE_URL + '/storage/v1/object/public/chat-files/' + fileName;
-        const body = { email, message: url };
+        const body = { email: getEmail(), message: url };
         if (currentGroupId !== null) body.group_id = currentGroupId;
         await fetch(SUPABASE_URL + '/rest/v1/chat_messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify(body) });
-        await addScore(email);
+        await addScore(getEmail());
         loadHistory();
     } else alert('上传失败');
-    }async function handleLogin() {
-    c// 独立的登录处理函数
-async function handleLogin() {
-    // 获取元素
-    const emailInput = document.getElementById('login-email');
-    const passwordInput = document.getElementById('login-password');
-    const errorDiv = document.getElementById('login-error');
-    
-    // 检查元素是否存在
-    if (!emailInput || !passwordInput || !errorDiv) {
-        alert('登录界面加载不完整，请刷新页面');
-        return;
-    }
+});
 
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-
-    if (!email || !password) {
-        errorDiv.textContent = '请输入邮箱和密码';
-        return;
-    }
-
-    errorDiv.textContent = '正在登录...';
-
-    try {
-        const response = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'apikey': SUPABASE_KEY
-            },
-            body: JSON.stringify({ email, password })
-        });
-
-        const data = await response.json();
-
-        if (data.access_token) {
-            // 登录成功
-            localStorage.setItem('authToken', data.access_token);
-            localStorage.setItem('authEmail', email);
-            currentUserEmail = email;
-            
-            // 隐藏登录界面
-            document.getElementById('login-overlay').style.display = 'none';
-            // 显示主界面
-            document.getElementById('app-main').classList.remove('hidden');
-            
-            // 初始化聊天室
-            await loadGroups();
-            await loadCaches();
-            loadHistory();
-        } else {
-            // 登录失败
-            errorDiv.textContent = data.error_description || '邮箱或密码错误';
-        }
-    } catch (error) {
-        errorDiv.textContent = '网络错误，请检查连接';
-        console.error('登录出错:', error);
-    }
-}
-
-// 独立的注册处理函数
-async function handleRegister() {
-    const emailInput = document.getElementById('login-email');
-    const passwordInput = document.getElementById('login-password');
-    const errorDiv = document.getElementById('login-error');
-
-    if (!emailInput || !passwordInput || !errorDiv) {
-        alert('注册界面加载不完整，请刷新页面');
-        return;
-    }
-
-    const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-
-    if (!email || !password) {
-        errorDiv.textContent = '请输入邮箱和密码';
-        return;
-    }
-
-    errorDiv.textContent = '正在注册...';
-
-    try {
-        const response = await fetch(SUPABASE_URL + '/auth/v1/signup', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'apikey': SUPABASE_KEY
-            },
-            body: JSON.stringify({ email, password })
-        });
-
-        const data = await response.json();
-
-        if (data.error) {
-            errorDiv.textContent = data.error_description || '注册失败';
-        } else {
-            errorDiv.textContent = '注册成功，请登录';
-        }
-    } catch (error) {
-        errorDiv.textContent = '网络错误，请检查连接';
-        console.error('注册出错:', error);
-    }
-    }
-async function handleRegister() {
+// 登录注册
+document.getElementById('login-btn').addEventListener('click', async () => {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value.trim();
     const err = document.getElementById('login-error');
-    const res = await fetch(SUPABASE_URL + '/auth/v1/signup', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-        body: JSON.stringify({ email, password })
-    });
+    if (!email || !password) { err.textContent = '请输入邮箱和密码'; return; }
+    try {
+        const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ email, password }) });
+        const data = await res.json();
+        if (data.access_token) {
+            localStorage.setItem('authToken', data.access_token); localStorage.setItem('authEmail', email);
+            currentUserEmail = email;
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('app-main').classList.remove('hidden');
+            await loadGroups(); await loadCaches(); loadHistory();
+        } else err.textContent = data.error_description || '邮箱或密码错误';
+    } catch (e) { err.textContent = '网络错误'; }
+});
+document.getElementById('register-btn').addEventListener('click', async () => {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value.trim();
+    const err = document.getElementById('login-error');
+    const res = await fetch(SUPABASE_URL + '/auth/v1/signup', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ email, password }) });
     const data = await res.json();
     err.textContent = data.error ? (data.error_description || '注册失败') : '注册成功，请登录';
-}
+});
 
-async function verifyAdmin() {
-    const key = document.getElementById('admin-key').value;
-    if (key === 'SoftLib@2024#zeruan2026') {
+// 管理
+document.getElementById('verify-admin-btn').addEventListener('click', () => {
+    if (document.getElementById('admin-key').value === 'SoftLib@2024#zeruan2026') {
         isAdmin = true;
         document.getElementById('admin-content').style.display = 'block';
-    } else {
-        document.getElementById('admin-error').textContent = '密钥错误';
-    }
-}
-async function setTitle() {
-    const email = document.getElementById('target-email').value.trim();
-    const title = document.getElementById('new-title').value.trim();
+    } else document.getElementById('admin-error').textContent = '密钥错误';
+});
+document.getElementById('set-title-btn').addEventListener('click', async () => {
+    const email = document.getElementById('target-email').value.trim(), title = document.getElementById('new-title').value.trim();
     if (!email || !title) return;
     const token = localStorage.getItem('authToken');
     await fetch(SUPABASE_URL + '/rest/v1/user_titles', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token, 'Prefer': 'resolution=merge-duplicates' }, body: JSON.stringify({ email, title }) });
-    titleCache[email] = title;
-}
-async function clearTitle() {
+    titleCache[email] = title; alert('设置成功');
+});
+document.getElementById('clear-title-btn').addEventListener('click', async () => {
     const email = document.getElementById('target-email').value.trim();
     const token = localStorage.getItem('authToken');
     await fetch(SUPABASE_URL + '/rest/v1/user_titles?email=eq.' + encodeURIComponent(email), { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token } });
-    delete titleCache[email];
-}
-async function muteUser() {
+    delete titleCache[email]; alert('已清除');
+});
+document.getElementById('mute-btn').addEventListener('click', async () => {
     const email = document.getElementById('mute-email').value.trim();
     const token = localStorage.getItem('authToken');
     await fetch(SUPABASE_URL + '/rest/v1/mutes', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ email }) });
     alert('已禁言');
-}
-async function unmuteUser() {
+});
+document.getElementById('unmute-btn').addEventListener('click', async () => {
     const email = document.getElementById('mute-email').value.trim();
     const token = localStorage.getItem('authToken');
     await fetch(SUPABASE_URL + '/rest/v1/mutes?email=eq.' + encodeURIComponent(email), { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token } });
     alert('已解禁');
-}function openDrawerContent(type) {
-    if (type === 'search') {
-        openDrawer(`<h3>搜索消息</h3><input class="form-input" id="search-term" placeholder="关键词" oninput="searchMessages()"><div id="search-results"></div>`);
-    }
-}
-async function searchMessages() {
-    const term = document.getElementById('search-term').value.toLowerCase();
-    const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.desc&limit=100', { headers: { 'apikey': SUPABASE_KEY } });
-    const data = await res.json();
-    const results = Array.isArray(data) ? data.filter(m => m.message.toLowerCase().includes(term)).slice(0, 20) : [];
-    document.getElementById('search-results').innerHTML = results.length ? results.map(m => `<p><b>${m.email}:</b> ${m.message}</p>`).join('') : '无结果';
-}
+});
+document.getElementById('list-all-groups-btn').addEventListener('click', listAllGroups);
 
+// 搜索
+document.getElementById('search-btn').addEventListener('click', () => {
+    openDrawer(`<h3>搜索消息</h3><input class="form-input" id="search-term" placeholder="关键词"><div id="search-results"></div>`);
+    document.getElementById('search-term').addEventListener('input', async () => {
+        const term = document.getElementById('search-term').value.toLowerCase();
+        const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.desc&limit=100', { headers: { apikey: SUPABASE_KEY } });
+        const data = await res.json();
+        const results = Array.isArray(data) ? data.filter(m => m.message.toLowerCase().includes(term)).slice(0, 20) : [];
+        document.getElementById('search-results').innerHTML = results.length ? results.map(m => `<p><b>${m.email}:</b> ${m.message}</p>`).join('') : '无结果';
+    });
+});
+
+// 管理员入口
 let titleClicks = 0;
-document.getElementById('chat-title').addEventListener('click', () => {
+document.getElementById('chat-title').addEventListener('click', function(e) {
     titleClicks++;
-    if (titleClicks >= 5) {
-        document.getElementById('admin-modal').classList.remove('hidden');
-        titleClicks = 0;
-    }
+    if (titleClicks >= 5) { document.getElementById('admin-modal').classList.remove('hidden'); titleClicks = 0; }
     setTimeout(() => titleClicks = 0, 2000);
 });
 
+// 刷新按钮
 document.getElementById('refresh-btn').addEventListener('click', loadHistory);
 
+// 加入群组
 const joinId = new URLSearchParams(location.search).get('join');
 if (joinId && localStorage.getItem('authToken')) {
-    fetch(SUPABASE_URL + '/rest/v1/group_members', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + localStorage.getItem('authToken') },
-        body: JSON.stringify({ group_id: parseInt(joinId), email: getEmail(), role: 'member' })
-    }).then(() => { loadGroups(); switchGroup(parseInt(joinId), '新群组'); });
+    fetch(SUPABASE_URL + '/rest/v1/group_members', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + localStorage.getItem('authToken') }, body: JSON.stringify({ group_id: parseInt(joinId), email: getEmail(), role: 'member' }) })
+    .then(() => { loadGroups(); switchGroup(parseInt(joinId), '新群组'); });
 }
 
+// 自动登录
 if (localStorage.getItem('authToken') && localStorage.getItem('authEmail')) {
     document.getElementById('login-overlay').style.display = 'none';
     document.getElementById('app-main').classList.remove('hidden');
