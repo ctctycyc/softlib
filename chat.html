@@ -55,40 +55,200 @@
         .group-list-item:hover { background: var(--border); }
         .group-list-item.active { background: var(--accent); color: white; }
         .group-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; margin-right: 10px; flex-shrink: 0; }
-    /* ===== 高级版登录界面样式 ===== */
+    /* ===== 全新 TG 风格登录界面 ===== */
 #login-overlay {
-    background: var(--bg) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    background: #fff !important;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
 }
-#login-overlay > div:first-child {
-    background: var(--card) !important;
-    max-width: 360px !important;
-    text-align: left !important;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
+
+/* 左侧蓝色面板 */
+#tg-intro-panel {
+    flex: 1 !important;
+    background: linear-gradient(135deg, #3390ec, #4da3f5) !important;
+    color: white !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 40px !important;
+    text-align: center !important;
+    position: relative !important;
+    overflow: hidden !important;
 }
-#login-overlay h2 {
-    font-size: 1.4rem !important;
-    margin-bottom: 8px !important;
-    color: var(--text) !important;
+#tg-intro-panel .tg-logo {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 22px;
+    font-weight: 700;
+    opacity: 0.9;
 }
-#login-overlay .form-input {
-    background: var(--bg) !important;
-    margin-bottom: 12px !important;
+#tg-intro-panel .tg-slides {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    height: 180px;
+    margin: 20px 0;
 }
-#login-btn {
-    background: var(--accent) !important;
-    transition: 0.2s !important;
-    margin-top: 4px !important;
+#tg-intro-panel .tg-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transform: translateY(15px);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
 }
-#register-btn {
-    background: #64748b !important;
-    transition: 0.2s !important;
+#tg-intro-panel .tg-slide.active {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
 }
+#tg-intro-panel .tg-slide .icon {
+    font-size: 50px;
+    margin-bottom: 15px;
+}
+#tg-intro-panel .tg-slide h2 {
+    font-size: 26px;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+#tg-intro-panel .tg-slide p {
+    font-size: 14px;
+    opacity: 0.85;
+    line-height: 1.5;
+    max-width: 260px;
+}
+#tg-intro-panel .tg-dots {
+    display: flex;
+    gap: 8px;
+}
+#tg-intro-panel .tg-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    transition: background 0.3s;
+}
+#tg-intro-panel .tg-dot.active {
+    background: white;
+}
+
+/* 右侧登录表单 */
+#tg-login-form {
+    flex: 1 !important;
+    background: #fff !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 40px !important;
+    min-width: 320px !important;
+}
+#tg-login-form .form-container {
+    max-width: 360px;
+    width: 100%;
+}
+#tg-login-form h2 {
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: #222;
+    font-weight: 600;
+}
+#tg-login-form .form-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d0d5da;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    font-size: 15px;
+    background: #f5f7fa;
+    color: #222;
+    outline: none;
+    transition: border-color 0.2s;
+}
+#tg-login-form .form-input:focus {
+    border-color: #3390ec;
+}
+#tg-login-form #login-btn {
+    background: #3390ec;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 8px;
+    transition: background 0.2s;
+}
+#tg-login-form #login-btn:hover {
+    background: #4da3f5;
+}
+#tg-login-form #register-btn {
+    background: #64748b;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 8px;
+    transition: background 0.2s;
+}
+#tg-login-form #register-btn:hover {
+    background: #7d8b9a;
+}
+#tg-login-form #login-error {
+    color: #e74c3c;
+    font-size: 13px;
+    margin-top: 8px;
+    text-align: center;
+}
+
+/* 移动端适配 */
+@media (max-width: 700px) {
+    #login-overlay {
+        flex-direction: column !important;
+    }
+    #tg-intro-panel {
+        padding: 30px 20px !important;
+        min-height: 260px;
+        flex: none !important;
+    }
+    #tg-login-form {
+        padding: 30px 20px !important;
+        flex: 1 !important;
+    }
+    #tg-intro-panel .tg-slides {
+        height: 140px;
+    }
+    #tg-intro-panel .tg-slide .icon {
+        font-size: 38px;
+        margin-bottom: 10px;
+    }
+    #tg-intro-panel .tg-slide h2 {
+        font-size: 20px;
+    }
+    }
     </style>
 </head>
 <body>
 <div id="login-overlay" style="position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-direction:column;">
-    <!-- 宣传语轮播 -->
+        <!-- 宣传语轮播 -->
     <div style="max-width:360px;width:90%;text-align:center;margin-bottom:20px;color:var(--text);">
         <div id="tg-intro-slides" style="position:relative;height:80px;overflow:hidden;">
             <div class="tg-slide active" style="position:absolute;width:100%;transition:0.5s;opacity:1;">⚡ <strong>Fast</strong> · 比任何应用都快</div>
@@ -107,7 +267,6 @@
         <div id="login-error" style="color:red;margin-top:10px;"></div>
     </div>
 </div>
-
 <div id="app-main" class="hidden">
     <div class="top-bar">
         <button class="icon-btn" id="group-list-btn"><i class="fas fa-bars"></i></button>
@@ -439,16 +598,48 @@ if (localStorage.getItem('authToken') && localStorage.getItem('authEmail')) {
     currentUserEmail = localStorage.getItem('authEmail');
     (async () => { await loadGroups(); await loadCaches(); loadHistory(); })();
 }
-// 登录页宣传语轮播
+
+// 登录页轮播动画
 (function() {
-    const slides = document.querySelectorAll('.tg-slide');
+    const slides = document.querySelectorAll('#tg-intro-panel .tg-slide');
+    const dots = document.querySelectorAll('#tg-intro-panel .tg-dot');
     if (slides.length === 0) return;
     let current = 0;
-    setInterval(() => {
-        slides[current].style.opacity = '0';
-        current = (current + 1) % slides.length;
-        slides[current].style.opacity = '1';
-    }, 3000);
+    const total = slides.length;
+
+    function showSlide(index) {
+        slides.forEach(s => s.classList.remove('active'));
+        dots.forEach(d => d.classList.remove('active'));
+        slides[index].classList.add('active');
+        dots[index].classList.add('active');
+    }
+
+    function nextSlide() {
+        current = (current + 1) % total;
+        showSlide(current);
+    }
+
+    let autoPlay = setInterval(nextSlide, 3500);
+
+    const slidesContainer = document.querySelector('#tg-intro-panel .tg-slides');
+    if (slidesContainer) {
+        let startX = 0;
+        slidesContainer.addEventListener('touchstart', e => {
+            startX = e.touches[0].clientX;
+            clearInterval(autoPlay);
+        });
+        slidesContainer.addEventListener('touchend', e => {
+            const endX = e.changedTouches[0].clientX;
+            if (startX - endX > 50) {
+                current = (current + 1) % total;
+                showSlide(current);
+            } else if (endX - startX > 50) {
+                current = (current - 1 + total) % total;
+                showSlide(current);
+            }
+            autoPlay = setInterval(nextSlide, 3500);
+        });
+    }
 })();
 </script>
 </body>
