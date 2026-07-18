@@ -62,7 +62,7 @@
         <label class="file-label" for="file-input"><i class="fas fa-paperclip"></i></label>
         <input type="file" id="file-input" accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" style="display:none;">
         <textarea id="msg" placeholder="输入消息..." rows="1"></textarea>
-        <button class="send-btn" id="send-btn"><i class="fas fa-paper-plane"></i></button>
+        <button class="send-btn" id="send-btn" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
     </div>
 </div>
 
@@ -320,6 +320,38 @@ document.getElementById('set-title-btn').addEventListener('click', async () => {
         });
         alert('已解禁');
     });
-    </script>
+   // 全局发送函数（保底）
+function sendMsg() {
+    var email = currentUserEmail;
+    if (!email) { alert('请先登录'); return; }
+    var msg = document.getElementById('msg').value.trim();
+    if (!msg) return;
+    var token = localStorage.getItem('authToken');
+    fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({ email: email, message: msg })
+    }).then(function(res) {
+        if (res.ok) {
+            document.getElementById('msg').value = '';
+            // 直接加到页面上
+            var box = document.getElementById('chat-box');
+            var div = document.createElement('div');
+            div.className = 'msg-row self';
+            div.innerHTML = '<div class="avatar">' + email[0].toUpperCase() + '</div><div class="bubble">' + msg + '</div>';
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        } else {
+            alert('发送失败，请重试');
+        }
+    }).catch(function() {
+        alert('网络错误');
+    });
+            }
+</script>
 </body>
 </html>
