@@ -74,6 +74,11 @@
         #tg-login-form #register-btn { background: #64748b; color: white; border: none; padding: 12px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 8px; transition: background 0.2s; }
         #tg-login-form #login-error { color: #e74c3c; font-size: 13px; margin-top: 8px; text-align: center; }
         @media (max-width: 700px) { #login-overlay { flex-direction: column !important; } #tg-intro-panel { padding: 30px 20px !important; min-height: 280px; flex: none !important; } #tg-login-form { padding: 30px 20px !important; flex: 1 !important; } #tg-intro-panel .tg-slides { height: 160px; } #tg-intro-panel .tg-slide .icon { font-size: 40px; margin-bottom: 10px; } #tg-intro-panel .tg-slide h2 { font-size: 22px; } }
+    #login-btn {
+    position: relative;
+    z-index: 99999;
+    pointer-events: auto !important;
+    }
     </style>
 </head>
 <body>
@@ -330,12 +335,12 @@ document.getElementById('file-input').addEventListener('change', async function(
     } else alert('上传失败');
 });
 
-// 登录按钮 - 安全绑定
+// 独立版登录 - 直接绑定，不依赖其他变量
 (function() {
-    const loginBtn = document.getElementById('login-btn');
-    if (!loginBtn) return; // 如果按钮不存在就忽略
+    const btn = document.getElementById('login-btn');
+    if (!btn) return;
 
-    loginBtn.addEventListener('click', async () => {
+    btn.addEventListener('click', async () => {
         const email = document.getElementById('login-email').value.trim();
         const password = document.getElementById('login-password').value.trim();
         const err = document.getElementById('login-error');
@@ -348,11 +353,16 @@ document.getElementById('file-input').addEventListener('change', async function(
         err.textContent = '正在登录...';
 
         try {
-            const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+            // 直接硬编码 Supabase 地址，确保不被其他变量覆盖
+            const res = await fetch('https://rgekpmuujozhkkctpdup.supabase.co/auth/v1/token?grant_type=password', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr'
+                },
                 body: JSON.stringify({ email, password })
             });
+
             const data = await res.json();
 
             if (data.access_token) {
@@ -360,19 +370,19 @@ document.getElementById('file-input').addEventListener('change', async function(
                 localStorage.setItem('authEmail', email);
                 currentUserEmail = email;
 
-                // 隐藏登录界面，显示主界面
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('app-main').classList.remove('hidden');
 
-                // 初始化聊天室
-                await loadGroups();
-                await loadCaches();
-                loadHistory();
+                // 确保这些函数存在再调用
+                if (typeof loadGroups === 'function') await loadGroups();
+                if (typeof loadCaches === 'function') await loadCaches();
+                if (typeof loadHistory === 'function') loadHistory();
             } else {
                 err.textContent = data.error_description || '邮箱或密码错误';
             }
         } catch (e) {
             err.textContent = '网络错误，请检查连接';
+            console.error('登录出错:', e);
         }
     });
 })();
