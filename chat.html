@@ -422,11 +422,11 @@ if (joinId && localStorage.getItem('authToken')) {
     }
 })();
 </script><!-- 终极极简登录绑定 -->
+<script><!-- 终极强制界面切换 -->
 <script>
 setTimeout(function() {
     var loginBtn = document.getElementById('login-btn');
     if (!loginBtn) return;
-    // 彻底移除旧绑定
     var newBtn = loginBtn.cloneNode(true);
     loginBtn.parentNode.replaceChild(newBtn, loginBtn);
 
@@ -447,28 +447,31 @@ setTimeout(function() {
             if (data.access_token) {
                 localStorage.setItem('authToken', data.access_token);
                 localStorage.setItem('authEmail', email);
-                // 只做界面切换，不调用任何可能出错的函数
-                document.getElementById('login-overlay').style.display = 'none';
-                document.getElementById('app-main').classList.remove('hidden');
-                document.body.style.overflow = 'auto';
-                // 如果全局变量存在，更新它
                 if (typeof currentUserEmail !== 'undefined') currentUserEmail = email;
-                // 手动提示用户点击刷新按钮加载消息
-                err.textContent = '';
+
+                // 强制隐藏登录界面
+                var loginOverlay = document.getElementById('login-overlay');
+                if (loginOverlay) {
+                    loginOverlay.setAttribute('style', 'display:none !important;');
+                }
+                // 显示主界面
+                var appMain = document.getElementById('app-main');
+                if (appMain) {
+                    appMain.classList.remove('hidden');
+                    // 确保主界面可见
+                    appMain.setAttribute('style', 'display:flex; flex-direction:column;');
+                }
+                document.body.style.overflow = 'auto';
+
+                // 稍后加载消息（不阻塞界面显示）
                 setTimeout(function() {
-                    if (document.getElementById('chat-box').children.length === 0) {
-                        // 如果没消息，提示点刷新
-                        var hint = document.createElement('div');
-                        hint.style.cssText = 'text-align:center;padding:20px;color:var(--sub);';
-                        hint.textContent = '点击右上角刷新按钮加载消息';
-                        document.getElementById('chat-box').appendChild(hint);
-                    }
-                }, 1000);
+                    if (typeof loadHistory === 'function') loadHistory();
+                }, 300);
             } else {
                 err.textContent = data.error_description || '邮箱或密码错误';
             }
         } catch(e) {
-            err.textContent = '网络错误，请检查连接（' + e.message + '）';
+            err.textContent = '网络错误，请检查连接';
         }
     });
 }, 500);
