@@ -281,30 +281,109 @@ async function uploadFile() {
         loadHistory();
     } else alert('上传失败');
     }async function handleLogin() {
-    const email = document.getElementById('login-email').value.trim();
-    const password = document.getElementById('login-password').value.trim();
-    const err = document.getElementById('login-error');
-    if (!email || !password) { err.textContent = '请输入邮箱和密码'; return; }
+    c// 独立的登录处理函数
+async function handleLogin() {
+    // 获取元素
+    const emailInput = document.getElementById('login-email');
+    const passwordInput = document.getElementById('login-password');
+    const errorDiv = document.getElementById('login-error');
+    
+    // 检查元素是否存在
+    if (!emailInput || !passwordInput || !errorDiv) {
+        alert('登录界面加载不完整，请刷新页面');
+        return;
+    }
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!email || !password) {
+        errorDiv.textContent = '请输入邮箱和密码';
+        return;
+    }
+
+    errorDiv.textContent = '正在登录...';
+
     try {
-        const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        const response = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_KEY
+            },
             body: JSON.stringify({ email, password })
         });
-        const data = await res.json();
+
+        const data = await response.json();
+
         if (data.access_token) {
+            // 登录成功
             localStorage.setItem('authToken', data.access_token);
             localStorage.setItem('authEmail', email);
             currentUserEmail = email;
+            
+            // 隐藏登录界面
             document.getElementById('login-overlay').style.display = 'none';
+            // 显示主界面
             document.getElementById('app-main').classList.remove('hidden');
+            
+            // 初始化聊天室
             await loadGroups();
             await loadCaches();
             loadHistory();
         } else {
-            err.textContent = data.error_description || '邮箱或密码错误';
+            // 登录失败
+            errorDiv.textContent = data.error_description || '邮箱或密码错误';
         }
-    } catch (e) { err.textContent = '网络错误'; }
+    } catch (error) {
+        errorDiv.textContent = '网络错误，请检查连接';
+        console.error('登录出错:', error);
+    }
 }
+
+// 独立的注册处理函数
+async function handleRegister() {
+    const emailInput = document.getElementById('login-email');
+    const passwordInput = document.getElementById('login-password');
+    const errorDiv = document.getElementById('login-error');
+
+    if (!emailInput || !passwordInput || !errorDiv) {
+        alert('注册界面加载不完整，请刷新页面');
+        return;
+    }
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!email || !password) {
+        errorDiv.textContent = '请输入邮箱和密码';
+        return;
+    }
+
+    errorDiv.textContent = '正在注册...';
+
+    try {
+        const response = await fetch(SUPABASE_URL + '/auth/v1/signup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_KEY
+            },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+            errorDiv.textContent = data.error_description || '注册失败';
+        } else {
+            errorDiv.textContent = '注册成功，请登录';
+        }
+    } catch (error) {
+        errorDiv.textContent = '网络错误，请检查连接';
+        console.error('注册出错:', error);
+    }
+    }
 async function handleRegister() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value.trim();
