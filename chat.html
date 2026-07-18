@@ -82,29 +82,7 @@
     </style>
 </head>
 <body>
-<div id="login-overlay" style="position:fixed;inset:0;z-index:9999;">
-    <div id="tg-intro-panel">
-        <div class="tg-logo">Telegram Lite</div>
-        <div class="tg-slides">
-            <div class="tg-slide active"><div class="icon">⚡</div><h2>Fast</h2><p>Telegram Lite delivers messages faster than any other application.</p></div>
-            <div class="tg-slide"><div class="icon">💬</div><h2>Free</h2><p>Telegram Lite provides free unlimited cloud storage for chats and media.</p></div>
-            <div class="tg-slide"><div class="icon">🚀</div><h2>Powerful</h2><p>Telegram Lite has no limits on the size of your media and chats.</p></div>
-            <div class="tg-slide"><div class="icon">🔒</div><h2>Secure</h2><p>Telegram Lite keeps your messages safe from hacker attacks.</p></div>
-            <div class="tg-slide"><div class="icon">☁️</div><h2>Cloud-Based</h2><p>Telegram Lite lets you access your messages from multiple devices.</p></div>
-        </div>
-        <div class="tg-dots"><span class="tg-dot active"></span><span class="tg-dot"></span><span class="tg-dot"></span><span class="tg-dot"></span><span class="tg-dot"></span></div>
-    </div>
-    <div id="tg-login-form">
-        <div class="form-container">
-            <h2>Your Email</h2>
-            <input class="form-input" id="login-email" type="email" placeholder="you@example.com">
-            <input class="form-input" id="login-password" type="password" placeholder="Your password">
-            <button id="login-btn">Start Messaging</button>
-            <button id="register-btn">Create Account</button>
-            <div id="login-error"></div>
-        </div>
-    </div>
-</div><div id="app-main" class="hidden">
+<div id="app-main" class="hidden">
     <div class="top-bar">
         <button class="icon-btn" id="group-list-btn"><i class="fas fa-bars"></i></button>
         <h2 id="chat-title">公共大厅</h2>
@@ -143,7 +121,8 @@
             <button class="btn-primary btn-sm" id="list-all-groups-btn">管理所有群组</button>
         </div>
     </div>
-</div><script>
+</div>
+<script>
 if (!localStorage.getItem('authToken')) { window.location.href = 'chat-login.html'; }
     const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
