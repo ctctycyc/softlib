@@ -217,22 +217,34 @@ async function createGroup() {
     const name = prompt('请输入群组名称：');
     if (!name) return;
     const email = getEmail();
+    const token = localStorage.getItem('authToken');   // 获取登录token
     const res = await fetch(SUPABASE_URL + '/rest/v1/chat_groups', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=representation' },
+        headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + token,          // 新增这一行
+            'Prefer': 'return=representation'
+        },
         body: JSON.stringify({ name, owner_email: email })
     });
     if (res.ok) {
         const [newGroup] = await res.json();
         await fetch(SUPABASE_URL + '/rest/v1/group_members', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_KEY,
+                'Authorization': 'Bearer ' + token       // 新增这一行
+            },
             body: JSON.stringify({ group_id: newGroup.id, email, role: 'owner' })
         });
         await loadGroups();
         switchGroup(newGroup.id, newGroup.name);
-    } else { alert('创建失败'); }
-}
+    } else {
+        alert('创建失败，请检查网络或重新登录');
+    }
+    }
 
 // 打开群设置（点击标题）
 async function openGroupSettings() {
