@@ -123,19 +123,32 @@
             box.scrollTop = box.scrollHeight;
         }
 
-        // 发送消息
-        document.getElementById('send-btn').addEventListener('click', async () => {
-  const msg = document.getElementById('msg').value.trim();
-            if (!msg || !currentUserEmail) return;
-            await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-                body: JSON.stringify({ email: currentUserEmail, message: msg })
-            });
-            document.getElementById('msg').value = '';
-            loadHistory();
+        // 发送消息（增强版）
+document.getElementById('send-btn').addEventListener('click', async () => {
+    const msg = document.getElementById('msg').value.trim();
+    if (!msg) return;
+    if (!currentUserEmail) {
+        alert('登录状态丢失，请刷新页面重新登录');
+        return;
+    }
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+            body: JSON.stringify({ email: currentUserEmail, message: msg })
         });
-
+        if (res.ok) {
+            document.getElementById('msg').value = '';
+            // 重新加载消息列表
+            await loadHistory();
+        } else {
+            const err = await res.json();
+            alert('发送失败：' + (err.message || '未知错误'));
+        }
+    } catch (e) {
+        alert('网络错误，请检查连接');
+    }
+});
         // 回车发送
         document.getElementById('msg').addEventListener('keydown', e => {
             if (e.key === 'Enter') { e.preventDefault(); document.getElementById('send-btn').click(); }
