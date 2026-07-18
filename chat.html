@@ -127,6 +127,7 @@ async function loadHistory() {
     }
 }
         // 发送消息（直接添加到页面）
+document// 发送消息（直接添加到页面，并保证刷新后能加载）
 document.getElementById('send-btn').addEventListener('click', async () => {
     const msg = document.getElementById('msg').value.trim();
     if (!msg) return;
@@ -135,6 +136,7 @@ document.getElementById('send-btn').addEventListener('click', async () => {
         return;
     }
     try {
+        // 发送时不带 group_id，让消息进入公共大厅
         const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
