@@ -24,7 +24,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; overflow-y: auto; transition: background 0.3s, color 0.3s; font-size: 15px; }
         .top-bar { background: var(--card); padding: 8px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); box-shadow: none; }
-        .top-bar h2 { font-size: 1.2rem; font-weight: 600; margin-right: auto; cursor: default; color: var(--text); }
+        .top-bar h2 { font-size: 1.1rem; font-weight: 600; margin-right: auto; cursor: pointer; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
         .icon-btn { background: none; border: none; font-size: 1.1rem; color: var(--sub); cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s; }
         .icon-btn:hover { background: var(--border); color: var(--text); }.message-list { padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
 .msg-row { display: flex; gap: 8px; max-width: 72%; animation: bubbleIn 0.15s ease-out both; }
@@ -67,6 +67,11 @@
         .tg-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.4); transition: background 0.3s; } .tg-dot.active { background: white; }
         #tg-start-btn { background: var(--accent); color: white; border: none; padding: 12px; border-radius: 10px; font-size: 16px; font-weight: 600; width: 100%; margin-top: 24px; cursor: pointer; transition: background 0.2s, transform 0.1s; }
         #tg-start-btn:hover { background: var(--accent-light); } #tg-start-btn:active { transform: scale(0.97); }
+        .group-list-item { display: flex; align-items: center; padding: 10px; border-radius: 8px; margin-bottom: 4px; cursor: pointer; transition: background 0.15s; }
+        .group-list-item:hover { background: var(--border); }
+        .group-list-item.active { background: var(--accent); color: white; }
+        .group-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; margin-right: 10px; flex-shrink: 0; }
+        .group-info { flex: 1; } .group-name { font-weight: 600; font-size: 0.9rem; } .group-meta { font-size: 0.7rem; color: var(--sub); }
         @media (max-width: 700px) { #tg-login-overlay { flex-direction: column; overflow-y: auto; } #tg-intro-panel { padding: 20px; min-height: 240px; flex: 0 0 auto; } #tg-login-form { padding: 20px; flex: 1; } .tg-slide h2 { font-size: 22px !important; } }
     </style>
 </head>
@@ -99,7 +104,8 @@
 
 <div id="app-main" class="hidden">
     <div class="top-bar">
-        <h2 id="chat-title">聊天室</h2>
+        <button class="icon-btn" id="groupListBtn" title="群组列表"><i class="fas fa-bars"></i></button>
+        <h2 id="chat-title" onclick="openGroupSettings()">公共大厅</h2>
         <button class="icon-btn" id="toggleThemeBtn" title="切换暗黑模式"><i class="fas fa-moon"></i></button>
         <button class="icon-btn" id="searchBtn"><i class="fas fa-search"></i></button>
         <button class="icon-btn" id="rankBtn"><i class="fas fa-trophy"></i></button>
@@ -135,16 +141,23 @@
             <input class="form-input" id="mute-email" placeholder="禁言邮箱">
             <button class="btn-primary btn-sm" onclick="muteUser()">禁言</button>
             <button class="btn-primary btn-sm" onclick="unmuteUser()">解禁</button>
+            <hr>
+            <button class="btn-primary btn-sm" onclick="listAllGroups()">列出所有群组</button>
         </div>
     </div>
 </div><script>
 // ===== 维护模式开关 =====
-const MAINTENANCE_MODE = false; // 改成 true 即可关闭聊天室，显示维护提示
+const MAINTENANCE_MODE = false; // 改成 true 即可关闭聊天室
 
 const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
+const SUPER_ADMIN_EMAIL = 'dghkkppp@qq.com'; // 您的邮箱，全局管理员
+
 let isAdmin = false, titleCache = {}, scoreCache = {}, currentUserEmail = localStorage.getItem('authEmail') || '', messagePolling = null;
+let currentGroupId = null, currentGroupName = '公共大厅', groups = [];
+
 const getEmail = () => currentUserEmail;
+const isSuperAdmin = () => currentUserEmail === SUPER_ADMIN_EMAIL;
 const getLevel = (score) => {
     if (score >= 1000) return { name: '王者', color: '#ef4444' };
     if (score >= 500) return { name: '钻石', color: '#3b82f6' };
@@ -152,6 +165,8 @@ const getLevel = (score) => {
     if (score >= 50) return { name: '白银', color: '#64748b' };
     return { name: '青铜', color: '#78716c' };
 };
+
+// 主题
 const savedTheme = localStorage.getItem('theme') || 'light';
 document.documentElement.setAttribute('data-theme', savedTheme);
 const themeIcon = document.getElementById('toggleThemeBtn').querySelector('i');
@@ -165,20 +180,153 @@ const drawer = document.getElementById('drawer'), overlay = document.getElementB
 function openDrawer(html) { drawerContent.innerHTML = html; drawer.classList.add('open'); overlay.classList.add('show'); }
 function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('show'); }
 document.getElementById('drawerClose').addEventListener('click', closeDrawer);
-overlay.addEventListener('click', closeDrawer);async function loadCaches() {
-    const [sRes, tRes] = await Promise.all([
-        fetch(SUPABASE_URL + '/rest/v1/user_scores?select=*', { headers: { apikey: SUPABASE_KEY } }),
-        fetch(SUPABASE_URL + '/rest/v1/user_titles?select=*', { headers: { apikey: SUPABASE_KEY } })
-    ]);
-    const scores = await sRes.json(), titles = await tRes.json();
-    if (Array.isArray(scores)) scores.forEach(r => scoreCache[r.email] = r.score || 0);
-    if (Array.isArray(titles)) titles.forEach(r => titleCache[r.email] = r.title);
+overlay.addEventListener('click', closeDrawer);// 加载群组列表
+async function loadGroups() {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/chat_groups?select=*&order=created_at.asc', { headers: { apikey: SUPABASE_KEY } });
+    groups = (await res.json()) || [];
+    // 确保公共大厅存在
+    if (!groups.find(g => g.id === null)) groups.unshift({ id: null, name: '公共大厅', owner_email: SUPER_ADMIN_EMAIL });
+    if (currentGroupId === null) {
+        currentGroupName = '公共大厅';
+        document.getElementById('chat-title').textContent = '公共大厅';
+    }
 }
-async function addScore(email) {
-    scoreCache[email] = (scoreCache[email] || 0) + 1;
-    await fetch(SUPABASE_URL + '/rest/v1/user_scores', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'resolution=merge-duplicates' }, body: JSON.stringify({ email, score: scoreCache[email] }) });
+function renderGroupList() {
+    let html = '<h3>群组列表</h3>';
+    groups.forEach(g => {
+        const isActive = (g.id === currentGroupId);
+        html += `<div class="group-list-item${isActive ? ' active' : ''}" onclick="switchGroup(${g.id === null ? 'null' : g.id}, '${g.name.replace(/'/g, "\\'")}')">
+            <div class="group-avatar">${g.name.charAt(0)}</div>
+            <div class="group-info"><div class="group-name">${g.name}</div></div>
+        </div>`;
+    });
+    html += '<hr><button class="btn-primary btn-sm" onclick="createGroup()">新建群组</button>';
+    if (isSuperAdmin()) html += '<button class="btn-primary btn-sm" style="background:#ff4d4d;" onclick="listAllGroups()">管理群组</button>';
+    openDrawer(html);
 }
-function scrollToBottom() { window.scrollTo(0, document.body.scrollHeight); }function renderMessages(msgs) {
+document.getElementById('groupListBtn').addEventListener('click', renderGroupList);
+
+async function switchGroup(groupId, groupName) {
+    currentGroupId = groupId;
+    currentGroupName = groupName;
+    document.getElementById('chat-title').textContent = groupName;
+    closeDrawer();
+    await loadHistory();
+    }// 创建群组
+async function createGroup() {
+    const name = prompt('请输入群组名称：');
+    if (!name) return;
+    const email = getEmail();
+    const res = await fetch(SUPABASE_URL + '/rest/v1/chat_groups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=representation' },
+        body: JSON.stringify({ name, owner_email: email })
+    });
+    if (res.ok) {
+        const [newGroup] = await res.json();
+        await fetch(SUPABASE_URL + '/rest/v1/group_members', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+            body: JSON.stringify({ group_id: newGroup.id, email, role: 'owner' })
+        });
+        await loadGroups();
+        switchGroup(newGroup.id, newGroup.name);
+    } else { alert('创建失败'); }
+}
+
+// 打开群设置（点击标题）
+async function openGroupSettings() {
+    if (currentGroupId === null) { alert('公共大厅没有设置'); return; }
+    const email = getEmail();
+    const membersRes = await fetch(SUPABASE_URL + '/rest/v1/group_members?group_id=eq.' + currentGroupId + '&select=*', { headers: { apikey: SUPABASE_KEY } });
+    const members = await membersRes.json();
+    const isOwner = members.some(m => m.email === email && m.role === 'owner');
+    const isGroupAdmin = members.some(m => m.email === email && m.role === 'admin');
+    let html = `<h3>${currentGroupName} - 群设置</h3><h4>成员</h4>`;
+    members.forEach(m => {
+        html += `<p>${m.email} (${m.role})`;
+        if ((isOwner || isGroupAdmin) && m.email !== email && m.role !== 'owner') {
+            html += ` <button class="btn-sm" onclick="setAdmin('${m.email}')">设为管理</button>`;
+            html += ` <button class="btn-sm" onclick="kickMember('${m.email}')">踢出</button>`;
+        }
+        html += '</p>';
+    });
+    if (isOwner) {
+        html += '<hr><button class="btn-primary btn-sm" onclick="inviteLink()">生成邀请链接</button>';
+        html += '<button class="btn-primary btn-sm" style="background:#ff4d4d;" onclick="dissolveGroup()">解散群组</button>';
+    }
+    if (isSuperAdmin() && !isOwner) {
+        html += '<hr><button class="btn-primary btn-sm" style="background:#ff4d4d;" onclick="dissolveGroup()">解散群组 (全局管理)</button>';
+    }
+    openDrawer(html);
+    }function inviteLink() {
+    prompt('复制邀请链接发给好友：', `https://ctctycyc.github.io/softlib/chat.html?join=${currentGroupId}`);
+}
+async function joinGroup(groupId) {
+    const email = getEmail();
+    if (!email) return;
+    await fetch(SUPABASE_URL + '/rest/v1/group_members', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ group_id: groupId, email, role: 'member' })
+    });
+    await loadGroups();
+    switchGroup(groupId, '...');
+}
+async function setAdmin(targetEmail) {
+    await fetch(SUPABASE_URL + '/rest/v1/group_members?group_id=eq.' + currentGroupId + '&email=eq.' + encodeURIComponent(targetEmail), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ role: 'admin' })
+    });
+    openGroupSettings();
+}
+async function kickMember(targetEmail) {
+    await fetch(SUPABASE_URL + '/rest/v1/group_members?group_id=eq.' + currentGroupId + '&email=eq.' + encodeURIComponent(targetEmail), {
+        method: 'DELETE',
+        headers: { 'apikey': SUPABASE_KEY }
+    });
+    openGroupSettings();
+}
+async function dissolveGroup() {
+    if (!confirm('确定解散该群组吗？')) return;
+    await fetch(SUPABASE_URL + '/rest/v1/chat_groups?id=eq.' + currentGroupId, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } });
+    await loadGroups();
+    currentGroupId = null; currentGroupName = '公共大厅';
+    document.getElementById('chat-title').textContent = '公共大厅';
+    closeDrawer();
+    loadHistory();
+}
+async function listAllGroups() {
+    if (!isSuperAdmin()) return;
+    const res = await fetch(SUPABASE_URL + '/rest/v1/chat_groups?select=*', { headers: { 'apikey': SUPABASE_KEY } });
+    const allGroups = await res.json();
+    let html = '<h3>所有群组 (全局管理)</h3>';
+    allGroups.forEach(g => {
+        html += `<p>${g.name} (群主: ${g.owner_email}) <button class="btn-sm" onclick="dissolveGroupById(${g.id})">解散</button></p>`;
+    });
+    openDrawer(html);
+}
+async function dissolveGroupById(groupId) {
+    if (!confirm('解散该群组？')) return;
+    await fetch(SUPABASE_URL + '/rest/v1/chat_groups?id=eq.' + groupId, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } });
+    await loadGroups();
+    closeDrawer();
+}// 消息加载（按群组过滤）
+async function loadHistory() {
+    if (MAINTENANCE_MODE) return;
+    if (!getEmail()) return;
+    try {
+        let url = SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50';
+        if (currentGroupId !== null) url += '&group_id=eq.' + currentGroupId;
+        else url += '&group_id=is.null';
+        const res = await fetch(url, { headers: { apikey: SUPABASE_KEY } });
+        const data = await res.json();
+        if (Array.isArray(data)) renderMessages(data);
+        scrollToBottom();
+    } catch (e) { console.error(e); }
+}
+function renderMessages(msgs) {
     const box = document.getElementById('chat-box'); box.innerHTML = '';
     msgs.forEach(m => {
         const row = document.createElement('div'); const isSelf = m.email === getEmail();
@@ -197,26 +345,22 @@ function scrollToBottom() { window.scrollTo(0, document.body.scrollHeight); }fun
         box.appendChild(row);
     });
     scrollToBottom();
-}async function loadHistory() {
-    if (MAINTENANCE_MODE) return;
-    if (!getEmail()) return;
-    try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50', { headers: { apikey: SUPABASE_KEY } });
-        const data = await res.json(); if (Array.isArray(data)) renderMessages(data);
-    } catch (e) { console.error(e); }
-}
-async function sendMessage() {
+}async function sendMessage() {
     if (MAINTENANCE_MODE) return;
     const msgEl = document.getElementById('msg'), msg = msgEl.value.trim(); if (!msg) return;
     const email = getEmail(); if (!email) { alert('请先登录'); return; }
     const muteRes = await fetch(SUPABASE_URL + '/rest/v1/mutes?select=*&email=eq.' + encodeURIComponent(email), { headers: { apikey: SUPABASE_KEY } });
     if ((await muteRes.json()).length) { alert('你已被禁言'); return; }
-    const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=minimal' }, body: JSON.stringify({ email, message: msg }) });
+    const body = { email, message: msg };
+    if (currentGroupId !== null) body.group_id = currentGroupId;
+    const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=minimal' }, body: JSON.stringify(body) });
     if (res.ok) { msgEl.value = ''; msgEl.style.height = 'auto'; await addScore(email); loadHistory(); }
     else alert('发送失败');
 }
 document.getElementById('sendBtn').addEventListener('click', sendMessage);
-document.getElementById('msg').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });async function uploadFile() {
+document.getElementById('msg').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+
+async function uploadFile() {
     if (MAINTENANCE_MODE) return;
     const email = getEmail(); if (!email) { alert('请先登录'); return; }
     const fileInput = document.getElementById('file-input'), fileLabel = document.querySelector('.file-label');
@@ -229,7 +373,9 @@ document.getElementById('msg').addEventListener('keydown', e => { if (e.key === 
         const upRes = await fetch(SUPABASE_URL + '/storage/v1/object/chat-files/' + fileName, { method: 'POST', headers: { apikey: SUPABASE_KEY, 'Content-Type': file.type }, body: file });
         if (upRes.ok) {
             const url = SUPABASE_URL + '/storage/v1/object/public/chat-files/' + fileName;
-            await fetch(SUPABASE_URL + '/rest/v1/chat_messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=minimal' }, body: JSON.stringify({ email, message: url }) });
+            const body = { email, message: url };
+            if (currentGroupId !== null) body.group_id = currentGroupId;
+            await fetch(SUPABASE_URL + '/rest/v1/chat_messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=minimal' }, body: JSON.stringify(body) });
             await addScore(email);
         } else alert('上传失败');
     }
@@ -291,7 +437,8 @@ async function changePassword() {
     const token = localStorage.getItem('authToken');
     const upd = await fetch(SUPABASE_URL + '/auth/v1/user', { method: 'PUT', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ password: newPwd }) });
     msg.textContent = upd.ok ? '修改成功' : '修改失败';
-}async function verifyAdmin() {
+}
+async function verifyAdmin() {
     const key = document.getElementById('admin-key').value, errDiv = document.getElementById('admin-error');
     if (!errDiv) { alert('错误：缺少 admin-error 元素'); return; }
     if (key === 'SoftLib@2024#zeruan2026') { isAdmin = true; document.getElementById('admin-content').style.display = 'block'; errDiv.textContent = ''; loadHistory(); }
@@ -306,16 +453,21 @@ window.searchMessages = async function() {
     const term = document.getElementById('searchTerm')?.value.trim().toLowerCase();
     if (!term) { document.getElementById('searchResults').innerHTML = ''; return; }
     const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.desc&limit=100', { headers: { apikey: SUPABASE_KEY } });
-    const data = await res.json(); const results = Array.isArray(data) ? data.filter(m => m.message.toLowerCase().includes(term)).slice(0, 20) : [];
-    const container = document.getElementById('searchResults');
+    const data = await res.json();
+    const results = Array.isArray(data) ? data.filter(m => m.message.toLowerCase().includes(term)).slice(0, 20) : []; const container = document.getElementById('searchResults');
     if (container) container.innerHTML = results.length ? results.map(m => `<p><b>${m.email}:</b> ${m.message}</p>`).join('') : '无结果';
 };
 let titleClicks = 0;
 document.getElementById('chat-title').addEventListener('click', () => {
-    titleClicks++; if (titleClicks >= 5) { document.getElementById('toggleAdminBtn').style.display = 'inline-block'; titleClicks = 0; }
+    titleClicks++;
+    if (titleClicks >= 5) {
+        document.getElementById('toggleAdminBtn').style.display = 'inline-block';
+        titleClicks = 0;
+    }
     setTimeout(() => titleClicks = 0, 2000);
-});
-document.getElementById('toggleAdminBtn').addEventListener('click', () => document.getElementById('adminModal').classList.toggle('hidden'));// 手动刷新按钮 CD
+});document.getElementById('toggleAdminBtn').addEventListener('click', () => document.getElementById('adminModal').classList.toggle('hidden'));
+
+// 手动刷新按钮 CD
 const refreshBtn = document.getElementById('manualRefreshBtn');
 const refreshCdText = document.getElementById('refreshCdText');
 let refreshCd = 0, cdInterval = null;
@@ -326,8 +478,7 @@ function startRefreshCd() {
         if (refreshCd <= 0) { clearInterval(cdInterval); cdInterval = null; refreshBtn.disabled = false; refreshBtn.style.opacity = '1'; refreshCdText.textContent = ''; }
         else refreshCdText.textContent = refreshCd + 's';
     }, 1000);
-}
-refreshBtn.addEventListener('click', () => { if (refreshCd > 0) return; loadHistory(); startRefreshCd(); });
+}refreshBtn.addEventListener('click', () => { if (refreshCd > 0) return; loadHistory(); startRefreshCd(); });
 
 // 登录轮播与密码验证
 (function() {
@@ -338,15 +489,14 @@ refreshBtn.addEventListener('click', () => { if (refreshCd > 0) return; loadHist
     const prevSlide = () => { current = (current - 1 + slides.length) % slides.length; updateSlide(current); };
     let autoPlay = setInterval(nextSlide, 3500);
     const slidesContainer = document.getElementById('tg-intro-slides');
-    slidesContainer.addEventListener('touchstart', e => { startX = e.touches[0].clientX; clearInterval(autoPlay); });
+slidesContainer.addEventListener('touchstart', e => { startX = e.touches[0].clientX; clearInterval(autoPlay); });
     slidesContainer.addEventListener('touchend', e => {
         endX = e.changedTouches[0].clientX;
         if (startX - endX > 50) nextSlide(); else if (endX - startX > 50) prevSlide();
         autoPlay = setInterval(nextSlide, 3500);
     });
 
-    document.getElementById('tg-start-btn').addEventListener('click', async function() {
-        const email = document.getElementById('tg-email').value.trim();
+    document.getElementById('tg-start-btn').addEventListener('click', async function() {   const email = document.getElementById('tg-email').value.trim();
         const password = document.getElementById('tg-password').value.trim();
         const errEl = document.getElementById('tg-login-error');
         if (!email || !password) { errEl.textContent = 'Please enter both email and password.'; return; }
@@ -356,36 +506,25 @@ refreshBtn.addEventListener('click', () => { if (refreshCd > 0) return; loadHist
             const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
                 method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
                 body: JSON.stringify({ email, password })
-            });
-            const data = await res.json();
+            }); const data = await res.json();
             if (data.access_token) {
                 localStorage.setItem('authToken', data.access_token);
                 localStorage.setItem('authEmail', email);
                 document.getElementById('tg-login-overlay').style.display = 'none';
-                if (MAINTENANCE_MODE) {
-                    document.getElementById('app-main').classList.remove('hidden');
-                    document.getElementById('app-main').innerHTML = '<div style="text-align:center;padding:60px 20px;"><h2>聊天室维护中</h2><p>暂时关闭，请稍后再来</p></div>';
-                } else {
-                    document.getElementById('app-main').classList.remove('hidden');
-                    document.body.style.overflow = 'auto';
-                    currentUserEmail = email;
-                    loadCaches().then(loadHistory).then(scrollToBottom);
-                }
+                document.getElementById('app-main').classList.remove('hidden');
+                document.body.style.overflow = 'auto';
+                currentUserEmail = email;
+                loadCaches().then(loadHistory).then(scrollToBottom);
             } else { errEl.textContent = data.error_description || 'Invalid email or password.'; }
         } catch (e) { errEl.textContent = 'Network error.'; }
     });
-})();// 自动登录检查
+})();// 自动登录
 if (localStorage.getItem('authToken') && localStorage.getItem('authEmail')) {
     document.getElementById('tg-login-overlay').style.display = 'none';
-    if (MAINTENANCE_MODE) {
-        document.getElementById('app-main').classList.remove('hidden');
-        document.getElementById('app-main').innerHTML = '<div style="text-align:center;padding:60px 20px;"><h2>聊天室维护中</h2><p>暂时关闭，请稍后再来</p></div>';
-    } else {
-        document.getElementById('app-main').classList.remove('hidden');
-        document.body.style.overflow = 'auto';
-        currentUserEmail = localStorage.getItem('authEmail');
-        (async () => { await loadCaches(); await loadHistory(); scrollToBottom(); })();
-    }
+    document.getElementById('app-main').classList.remove('hidden');
+    document.body.style.overflow = 'auto';
+    currentUserEmail = localStorage.getItem('authEmail');
+    (async () => { await loadCaches(); await loadHistory(); scrollToBottom(); })();
 } else {
     document.getElementById('app-main').classList.add('hidden');
 }
