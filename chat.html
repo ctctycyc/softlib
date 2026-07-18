@@ -144,7 +144,8 @@
         </div>
     </div>
 </div><script>
-const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
+if (!localStorage.getItem('authToken')) { window.location.href = 'login.html'; }
+    const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
 const SUPER_ADMIN_EMAIL = 'dghkkppp@qq.com';
 const MAINTENANCE_MODE = false;
@@ -489,7 +490,9 @@ if (localStorage.getItem('authToken') && localStorage.getItem('authEmail')) {
     document.getElementById('app-main').classList.remove('hidden');
     currentUserEmail = localStorage.getItem('authEmail');
     (async () => { await loadGroups(); await loadCaches(); loadHistory(); })();
-} else { document.getElementById('app-main').classList.add('hidden'); }// 登录页轮播动画（唯一的定时器，不涉及消息刷新）
+} else {
+    window.location.href = 'login.html';
+}// 登录页轮播动画（唯一的定时器，不涉及消息刷新）
 (function() {
     const slides = document.querySelectorAll('#tg-intro-panel .tg-slide');
     const dots = document.querySelectorAll('#tg-intro-panel .tg-dot');
