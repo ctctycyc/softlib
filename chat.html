@@ -509,4 +509,45 @@ if (localStorage.getItem('authToken') && localStorage.getItem('authEmail')) {
 })();
 </script>
 </body>
+<script>
+// 终极登录修复：强制绑定，延迟执行确保元素存在
+setTimeout(function() {
+    var btn = document.getElementById('login-btn');
+    if (!btn) return;
+    // 移除之前的所有点击事件（简单粗暴地替换节点）
+    var newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+    
+    newBtn.addEventListener('click', async function() {
+        var email = document.getElementById('login-email').value.trim();
+        var password = document.getElementById('login-password').value.trim();
+        var err = document.getElementById('login-error');
+        if (!email || !password) { err.textContent = '请输入邮箱和密码'; return; }
+        err.textContent = '正在登录...';
+        try {
+            var res = await fetch('https://rgekpmuujozhkkctpdup.supabase.co/auth/v1/token?grant_type=password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr' },
+                body: JSON.stringify({ email: email, password: password })
+            });
+            var data = await res.json();
+            if (data.access_token) {
+                localStorage.setItem('authToken', data.access_token);
+                localStorage.setItem('authEmail', email);
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('app-main').classList.remove('hidden');
+                document.body.style.overflow = 'auto';
+                // 触发初始化（如果函数存在）
+                if (typeof loadGroups === 'function') loadGroups();
+                if (typeof loadCaches === 'function') loadCaches();
+                if (typeof loadHistory === 'function') loadHistory();
+            } else {
+                err.textContent = data.error_description || '邮箱或密码错误';
+            }
+        } catch(e) {
+            err.textContent = '网络错误，请检查连接';
+        }
+    });
+}, 500);
+</script>
 </html>
