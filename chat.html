@@ -34,6 +34,13 @@
         .login-box { width: 100%; max-width: 400px; padding: 30px; }
         .login-box input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; }
         .login-btn { width: 100%; padding: 12px; background: #3390ec; color: white; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+   .drawer { position: fixed; right: -320px; top: 0; height: 100%; width: 300px; background: var(--card); box-shadow: -2px 0 6px rgba(0,0,0,0.1); transition: right 0.25s ease; z-index: 100; padding: 18px; overflow-y: auto; border-left: 1px solid var(--border); }
+.drawer.open { right: 0; }
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.2); z-index: 99; display: none; }
+.overlay.show { display: block; }
+.group-item { padding: 10px; border-radius: 8px; margin-bottom: 4px; cursor: pointer; }
+.group-item:hover { background: var(--border); }
+.group-item.active { background: var(--accent); color: white; }
     </style>
 </head>
 <body>
@@ -60,6 +67,11 @@
             <textarea id="msg" placeholder="输入消息..." rows="1"></textarea>
             <button class="send-btn" id="send-btn"><i class="fas fa-paper-plane"></i></button>
         </div>
+        <div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<div id="drawer" class="drawer">
+    <button class="icon-btn" style="float:right;" onclick="closeDrawer()"><i class="fas fa-times"></i></button>
+    <div id="drawer-content"></div>
+</div>
     </div>
 
     <script>
@@ -148,32 +160,33 @@
             loadHistory();
         }
     
-        // ========== 群组功能 ==========
+        // ========== 群组功能（抽屉版）==========
 let currentGroupId = null;
 let groups = [];
 
+function openDrawer(html) { document.getElementById('drawer-content').innerHTML = html; document.getElementById('drawer').classList.add('open'); document.getElementById('overlay').classList.add('show'); }
+function closeDrawer() { document.getElementById('drawer').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
+
 async function loadGroups() {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/chat_groups?select=*&order=created_at.asc', {
-        headers: { 'apikey': SUPABASE_KEY }
-    });
+    const res = await fetch(SUPABASE_URL + '/rest/v1/chat_groups?select=*&order=created_at.asc', { headers: { 'apikey': SUPABASE_KEY } });
     groups = (await res.json()) || [];
 }
 
-// 在顶栏加群组按钮
 document.querySelector('.top-bar').insertAdjacentHTML('afterbegin', '<button class="icon-btn" id="group-btn"><i class="fas fa-bars"></i></button>');
 document.getElementById('group-btn').addEventListener('click', async () => {
     await loadGroups();
     let html = '<h3>群组列表</h3>';
     groups.forEach(g => {
-        html += `<p><a href="#" onclick="switchGroup(${g.id},'${g.name}')">${g.name}</a></p>`;
+        html += `<div class="group-item" onclick="switchGroup(${g.id},'${g.name}')">${g.name}</div>`;
     });
-    html += '<button onclick="createGroup()">新建群组</button>';
-    alert(html); // 暂时用弹窗显示，后面再改成抽屉
+    html += '<hr><button class="login-btn" onclick="createGroup()" style="margin-top:8px;">新建群组</button>';
+    openDrawer(html);
 });
 
 async function switchGroup(id, name) {
     currentGroupId = id;
     document.getElementById('chat-title').textContent = name;
+    closeDrawer();
     loadHistory();
 }
 
@@ -186,8 +199,9 @@ async function createGroup() {
         headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token },
         body: JSON.stringify({ name, owner_email: currentUserEmail })
     });
-    alert('创建成功！点击群组按钮刷新列表');
-}
+    closeDrawer();
+    alert('创建成功！再次点击群组按钮查看。');
+        }
     </script>
 </body>
 </html>
