@@ -210,25 +210,68 @@ function renderMessages(msgs) {
 async function loadHistory() {
     try {
         let url = SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50';
-        if (currentGroupId !== null) url += '&group_id=eq.' + currentGroupId;
-        else url += '&group_id=is.null';
-        const res = await fetch(url, { headers: { apikey: SUPABASE_KEY } });
+        // 暂时不加群组过滤，先让公共大厅的消息都能显示
+        // if (currentGroupId !== null) url += '&group_id=eq.' + currentGroupId;
+        // else url += '&group_id=is.null';
+        
+        const res = await fetch(url, { headers: { 'apikey': SUPABASE_KEY } });
+        if (!res.ok) {
+            alert('加载消息失败，HTTP状态码：' + res.status);
+            return;
+        }
         const data = await res.json();
-        if (Array.isArray(data)) renderMessages(data);
+        if (!Array.isArray(data)) {
+            alert('返回数据格式异常');
+            return;
+        }
+        renderMessages(data);
         window.scrollTo(0, document.body.scrollHeight);
-    } catch (e) { console.error(e); }
+    } catch (e) {
+        alert('加载消息时发生网络错误：' + e.message);
+        console.error(e);
+    }
 }
 
 async function sendMessage() {
     const msgEl = document.getElementById('msg'), msg = msgEl.value.trim();
     if (!msg) return;
-    const email = getEmail(); if (!email) { alert('请先登录'); return; }
+    const email = getEmail();
+    if (!email) { alert('请先登录'); return; }
     const body = { email, message: msg };
-    if (currentGroupId !== null) body.group_id = currentGroupId;
-    const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify(body) });
-    if (res.ok) { msgEl.value = ''; msgEl.style.height = 'auto'; await addScore(email); loadHistory(); }
-    else alert('发送失败');
-}
+    // 暂时注释掉群组ID，让消息进入公共大厅
+    // if (currentGroupId !== null) body.group_id = currentGroupId;
+
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+            body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+            alert('发送失败，请稍后再试');
+            return;
+        }
+
+        // 清空输入框
+        msgEl.value = '';
+        msgEl.style.height = 'auto';
+
+        // 立即在页面上显示刚发的消息
+        const box = document.getElementById('chat-box');
+        const div = document.createElement('div');
+        div.className = 'msg-row self';
+        const avatarLetter = email.charAt(0).toUpperCase();
+        div.innerHTML = `<div class="avatar">${avatarLetter}</div><div class="bubble">${msg}</div>`;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+
+        // 加分并后台刷新（会更新积分、头衔等装饰，不影响已经显示的消息）
+        await addScore(email);
+        loadHistory();
+    } catch (e) {
+        alert('网络错误，请检查连接');
+    }
+              }
 document.getElementById('sendBtn').addEventListener('click', sendMessage);
 document.getElementById('msg').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 
