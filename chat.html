@@ -449,8 +449,6 @@ setTimeout(function() {
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('app-main').classList.remove('hidden');
                 document.body.style.overflow = 'auto';
-                if (typeof loadGroups === 'function') loadGroups();
-                if (typeof loadCaches === 'function') loadCaches();
                 if (typeof loadHistory === 'function') loadHistory();
             } else {
                 err.textContent = data.error_description || '邮箱或密码错误';
