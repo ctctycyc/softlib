@@ -40,18 +40,16 @@
     </style>
 </head>
 <body>
-    <!-- 登录界面 -->
     <div id="login-overlay" class="login-overlay">
         <div class="login-box">
             <h2>聊天室</h2>
             <input id="login-email" type="email" placeholder="邮箱">
             <input id="login-password" type="password" placeholder="密码">
-            <button id="login-btn">登录</button>
-            <button id="register-btn" style="background:#64748b;">注册</button>
+            <button onclick="handleLogin()">登录</button>
+            <button onclick="handleRegister()" style="background:#64748b;">注册</button>
             <div id="login-error" class="error"></div>
         </div>
-    </div><!-- 主界面 -->
-<div id="app-main" class="hidden">
+    </div><div id="app-main" class="hidden">
     <div class="top-bar">
         <h2 id="chat-title">聊天室</h2>
         <button class="icon-btn" id="theme-toggle"><i class="fas fa-moon"></i></button>
@@ -62,24 +60,22 @@
         <label class="file-label" for="file-input"><i class="fas fa-paperclip"></i></label>
         <input type="file" id="file-input" accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" style="display:none;">
         <textarea id="msg" placeholder="输入消息..." rows="1"></textarea>
-        <button class="send-btn" id="send-btn" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
+        <button class="send-btn" onclick="sendMsg()"><i class="fas fa-paper-plane"></i></button>
     </div>
 </div>
-
-<!-- 管理面板 -->
 <div id="admin-panel" class="admin-panel">
     <h3 style="margin-bottom:10px;">管理面板</h3>
     <input id="admin-key" placeholder="管理员密钥">
-    <button id="verify-admin-btn">验证</button>
+    <button onclick="verifyAdmin()">验证</button>
     <div id="admin-error" style="color:red;margin-top:4px;"></div>
     <div id="admin-content" style="display:none;">
         <input id="target-email" placeholder="用户邮箱">
         <input id="new-title" placeholder="头衔">
-        <button id="set-title-btn">设置头衔</button>
-        <button id="clear-title-btn">清除头衔</button>
+        <button onclick="setTitle()">设置头衔</button>
+        <button onclick="clearTitle()">清除头衔</button>
         <input id="mute-email" placeholder="禁言邮箱">
-        <button id="mute-btn">禁言</button>
-        <button id="unmute-btn">解禁</button>
+        <button onclick="muteUser()">禁言</button>
+        <button onclick="unmuteUser()">解禁</button>
     </div>
 </div><script>
 const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
@@ -87,17 +83,17 @@ const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
 let currentUserEmail = '';
 let isAdmin = false;
 
-// 主题切换
+// 主题
 const themeBtn = document.getElementById('theme-toggle');
 const savedTheme = localStorage.getItem('theme') || 'light';
 document.documentElement.setAttribute('data-theme', savedTheme);
 themeBtn.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-themeBtn.addEventListener('click', () => {
+themeBtn.onclick = () => {
     const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('theme', next);
     themeBtn.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-});
+};
 
 // 自动登录
 if (localStorage.getItem('authToken') && localStorage.getItem('authEmail')) {
@@ -105,10 +101,8 @@ if (localStorage.getItem('authToken') && localStorage.getItem('authEmail')) {
     document.getElementById('app-main').classList.remove('hidden');
     currentUserEmail = localStorage.getItem('authEmail');
     loadHistory();
-}
-
-// 登录
-document.getElementById('login-btn').addEventListener('click', async () => {
+}// 登录函数
+async function handleLogin() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value.trim();
     const err = document.getElementById('login-error');
@@ -131,8 +125,10 @@ document.getElementById('login-btn').addEventListener('click', async () => {
             err.textContent = data.error_description || '邮箱或密码错误';
         }
     } catch (e) { err.textContent = '网络错误'; }
-});// 注册
-document.getElementById('register-btn').addEventListener('click', async () => {
+}
+
+// 注册函数
+async function handleRegister() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value.trim();
     const err = document.getElementById('login-error');
@@ -142,9 +138,7 @@ document.getElementById('register-btn').addEventListener('click', async () => {
     });
     const data = await res.json();
     err.textContent = data.error ? (data.error_description || '注册失败') : '注册成功，请登录';
-});
-
-// 消息加载
+}// 消息加载
 async function loadHistory() {
     try {
         const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50', {
@@ -163,30 +157,22 @@ async function loadHistory() {
         }
         box.scrollTop = box.scrollHeight;
     } catch (e) { console.error('加载消息失败', e); }
-}// 发送消息（最简最稳版）
-d// 发送消息（带认证头，绝对可靠）
-document.getElementById('send-btn').addEventListener('click', async () => {
+}
+
+// 发送消息（全局函数，onclick 绑定）
+async function sendMsg() {
     if (!currentUserEmail) { alert('请先登录'); return; }
     const msg = document.getElementById('msg').value.trim();
     if (!msg) return;
-
     const token = localStorage.getItem('authToken');
-    if (!token) { alert('登录状态丢失，请刷新页面重新登录'); return; }
-
     try {
         const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'apikey': SUPABASE_KEY,
-                'Authorization': 'Bearer ' + token
-            },
+            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token },
             body: JSON.stringify({ email: currentUserEmail, message: msg })
         });
-
         if (res.ok) {
             document.getElementById('msg').value = '';
-            // 直接添加到页面，确保立即可见
             const box = document.getElementById('chat-box');
             const div = document.createElement('div');
             div.className = 'msg-row self';
@@ -194,21 +180,16 @@ document.getElementById('send-btn').addEventListener('click', async () => {
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
         } else {
-            alert('发送失败，请检查网络');
+            alert('发送失败，状态码：' + res.status);
         }
-    } catch (e) {
-        alert('网络错误，请检查连接');
-    }
+    } catch (e) { alert('网络错误'); }
+    }// 回车发送
+document.getElementById('msg').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); sendMsg(); }
 });
 
-// 回车发送
-document.getElementById('msg').addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        document.getElementById('send-btn').click();
-    }
-});// 文件上传
-document.getElementById('file-input').addEventListener('change', async function() {
+// 文件上传
+document.getElementById('file-input').onchange = async function() {
     const file = this.files[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) { alert('文件超过5MB'); return; }
@@ -220,53 +201,35 @@ document.getElementById('file-input').addEventListener('change', async function(
         if (upRes.ok) {
             const url = SUPABASE_URL + '/storage/v1/object/public/chat-files/' + fileName;
             await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
-                method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+                method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + localStorage.getItem('authToken') },
                 body: JSON.stringify({ email: currentUserEmail, message: url })
             });
             loadHistory();
         } else { alert('上传失败'); }
     } catch (e) { alert('网络错误'); }
-});// 手动刷新按钮（15秒CD）
+};// 手动刷新（15秒CD）
 const refreshBtn = document.getElementById('refresh-btn');
 const refreshCdText = document.getElementById('refresh-cd');
 let refreshCd = 0, cdInterval = null;
 function startRefreshCd() {
-    refreshCd = 15;
-    refreshBtn.disabled = true;
-    refreshBtn.style.opacity = '0.5';
-    refreshCdText.textContent = refreshCd + 's';
+    refreshCd = 15; refreshBtn.disabled = true; refreshBtn.style.opacity = '0.5'; refreshCdText.textContent = refreshCd + 's';
     cdInterval = setInterval(() => {
         refreshCd--;
-        if (refreshCd <= 0) {
-            clearInterval(cdInterval); cdInterval = null;
-            refreshBtn.disabled = false; refreshBtn.style.opacity = '1';
-            refreshCdText.textContent = '';
-        } else {
-            refreshCdText.textContent = refreshCd + 's';
-        }
+        if (refreshCd <= 0) { clearInterval(cdInterval); cdInterval = null; refreshBtn.disabled = false; refreshBtn.style.opacity = '1'; refreshCdText.textContent = ''; }
+        else refreshCdText.textContent = refreshCd + 's';
     }, 1000);
 }
-refreshBtn.addEventListener('click', () => {
-    if (refreshCd > 0) return;
-    loadHistory();
-    startRefreshCd();
-});// 管理员入口（点击标题5次）
-let titleClicks = 0;
-document.getElementById('chat-title').addEventListener('click', () => {
-    titleClicks++;
-    if (titleClicks >= 5) {
-        document.getElementById('admin-panel').style.display = 'block';
-        titleClicks = 0;
-    }
-    setTimeout(() => titleClicks = 0, 2000);
-});
-// 点击空白处关闭管理面板
-document.getElementById('admin-panel').addEventListener('click', function(e) {
-    if (e.target === this) this.style.display = 'none';
-});
+refreshBtn.onclick = () => { if (refreshCd > 0) return; loadHistory(); startRefreshCd(); };
 
-// 验证管理员
-document.getElementById('verify-admin-btn').addEventListener('click', () => {
+// 管理员入口
+let titleClicks = 0;
+document.getElementById('chat-title').onclick = () => {
+    titleClicks++;
+    if (titleClicks >= 5) { document.getElementById('admin-panel').style.display = 'block'; titleClicks = 0; }
+    setTimeout(() => titleClicks = 0, 2000);
+};
+document.getElementById('admin-panel').onclick = function(e) { if (e.target === this) this.style.display = 'none'; };// 管理功能
+function verifyAdmin() {
     if (document.getElementById('admin-key').value === 'SoftLib@2024#zeruan2026') {
         isAdmin = true;
         document.getElementById('admin-content').style.display = 'block';
@@ -274,10 +237,8 @@ document.getElementById('verify-admin-btn').addEventListener('click', () => {
     } else {
         document.getElementById('admin-error').textContent = '密钥错误';
     }
-});
-
-// 设置头衔
-document.getElementById('set-title-btn').addEventListener('click', async () => {
+}
+async function setTitle() {
     const email = document.getElementById('target-email').value.trim();
     const title = document.getElementById('new-title').value.trim();
     if (!email || !title) return;
@@ -287,71 +248,34 @@ document.getElementById('set-title-btn').addEventListener('click', async () => {
         body: JSON.stringify({ email, title })
     });
     alert('设置成功');
-});    // 清除头衔
-    document.getElementById('clear-title-btn').addEventListener('click', async () => {
-        const email = document.getElementById('target-email').value.trim();
-        if (!email) return;
-        const token = localStorage.getItem('authToken');
-        await fetch(SUPABASE_URL + '/rest/v1/user_titles?email=eq.' + encodeURIComponent(email), {
-            method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token }
-        });
-        alert('已清除');
+}
+async function clearTitle() {
+    const email = document.getElementById('target-email').value.trim();
+    if (!email) return;
+    const token = localStorage.getItem('authToken');
+    await fetch(SUPABASE_URL + '/rest/v1/user_titles?email=eq.' + encodeURIComponent(email), {
+        method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token }
     });
-
-    // 禁言
-    document.getElementById('mute-btn').addEventListener('click', async () => {
-        const email = document.getElementById('mute-email').value.trim();
-        if (!email) return;
-        const token = localStorage.getItem('authToken');
-        await fetch(SUPABASE_URL + '/rest/v1/mutes', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token },
-            body: JSON.stringify({ email })
-        });
-        alert('已禁言');
+    alert('已清除');
+}
+async function muteUser() {
+    const email = document.getElementById('mute-email').value.trim();
+    if (!email) return;
+    const token = localStorage.getItem('authToken');
+    await fetch(SUPABASE_URL + '/rest/v1/mutes', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ email })
     });
-
-    // 解禁
-    document.getElementById('unmute-btn').addEventListener('click', async () => {
-        const email = document.getElementById('mute-email').value.trim();
-        if (!email) return;
-        const token = localStorage.getItem('authToken');
-        await fetch(SUPABASE_URL + '/rest/v1/mutes?email=eq.' + encodeURIComponent(email), {
-            method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token }
-        });
-        alert('已解禁');
+    alert('已禁言');
+}
+async function unmuteUser() {
+    const email = document.getElementById('mute-email').value.trim();
+    if (!email) return;
+    const token = localStorage.getItem('authToken');
+    await fetch(SUPABASE_URL + '/rest/v1/mutes?email=eq.' + encodeURIComponent(email), {
+        method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + token }
     });
-   // 全局发送函数（保底）
-function sendMsg() {
-    var email = currentUserEmail;
-    if (!email) { alert('请先登录'); return; }
-    var msg = document.getElementById('msg').value.trim();
-    if (!msg) return;
-    var token = localStorage.getItem('authToken');
-    fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_KEY,
-            'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({ email: email, message: msg })
-    }).then(function(res) {
-        if (res.ok) {
-            document.getElementById('msg').value = '';
-            // 直接加到页面上
-            var box = document.getElementById('chat-box');
-            var div = document.createElement('div');
-            div.className = 'msg-row self';
-            div.innerHTML = '<div class="avatar">' + email[0].toUpperCase() + '</div><div class="bubble">' + msg + '</div>';
-            box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
-        } else {
-            alert('发送失败，请重试');
-        }
-    }).catch(function() {
-        alert('网络错误');
-    });
-            }
-</script>
+    alert('已解禁');
+}    </script>
 </body>
 </html>
