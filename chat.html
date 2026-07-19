@@ -117,21 +117,30 @@ async function loadHistory() {
     } catch (e) {
         alert('加载消息时网络错误：' + e.message);
     }
-}// 发送消息（立即上屏 + 延迟同步，保证能看到）
+}// 发送消息（强制带 Token，失败有明确提示）
 async function sendMsg() {
     if (!currentUserEmail) { alert('请先登录'); return; }
     const msg = document.getElementById('msg').value.trim();
     if (!msg) return;
+
+    // 强制获取 Token，如果没有就提示重新登录
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        alert('登录状态丢失，请刷新页面重新登录');
+        return;
+    }
+
     try {
         const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'apikey': SUPABASE_KEY,
-                'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                'Authorization': 'Bearer ' + token
             },
             body: JSON.stringify({ email: currentUserEmail, message: msg })
         });
+
         if (res.ok) {
             document.getElementById('msg').value = '';
             // 立即显示（先看到再说）
@@ -141,13 +150,17 @@ async function sendMsg() {
             div.innerHTML = `<div class="avatar">${currentUserEmail[0].toUpperCase()}</div><div class="bubble">${msg}</div>`;
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
-            // 0.5秒后同步服务器数据，确保刷新不丢
-            setTimeout(() => loadHistory(), 500);
+            // 1 秒后刷新，确保数据同步
+            setTimeout(() => loadHistory(), 1000);
         } else {
-            alert('发送失败，状态码：' + res.status);
+            // 显示具体错误状态码
+            const errText = await res.text();
+            alert('发送失败！状态码：' + res.status + '\n错误信息：' + errText);
         }
-    } catch (e) { alert('网络错误'); }
-}        // 主题切换
+    } catch (e) {
+        alert('网络错误：' + e.message);
+    }
+    }       // 主题切换
         function toggleTheme() {
             const current = document.documentElement.getAttribute('data-theme') || 'light';
             const next = current === 'dark' ? 'light' : 'dark';
