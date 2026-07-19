@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>诊断</title>
+    <style>
+        body { font-family: system-ui; padding: 20px; background: #f5f5f5; }
+        .step { background: #fff; margin: 10px 0; padding: 15px; border-radius: 8px; border-left: 4px solid #ccc; }
+        .ok { border-left-color: #4caf50; }
+        .fail { border-left-color: #f44336; }
+        button { width: 100%; padding: 14px; background: #3390ec; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+        input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 6px; }
+    </style>
+</head>
+<body>
+    <h2>聊天室诊断工具</h2>
+    <p>输入邮箱密码，点击按钮后查看每一步的结果。</p>
+    <input id="email" type="email" placeholder="邮箱">
+    <input id="password" type="password" placeholder="密码">
+    <button onclick="runDiag()">开始诊断</button>
+    <div id="results"></div>
+
+    <script>
+        const URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
+        const KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
+
+        async function runDiag() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const results = document.getElementById('results');
+            results.innerHTML = '';
+
+            // 第一步：登录
+            let step = document.createElement('div');
+            step.className = 'step';
+            step.innerHTML = '<strong>步骤1：登录</strong><br>正在验证邮箱密码...';
+            results.appendChild(step);
+
+            let token = '';
+            try {
+                const res = await fetch(URL + '/auth/v1/token?grant_type=password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': KEY },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                if (data.access_token) {
+                    token = data.access_token;
+                    step.classList.add('ok');
+                    step.innerHTML = '<strong>步骤1：登录</strong><br>✅ 成功！已获取 Token。';
+                } else {
+                    step.classList.add('fail');
+                    step.innerHTML = '<strong>步骤1：登录</strong><br>❌ 失败：' + (data.error_description || '邮箱或密码错误');
+                    return;
+                }
+            } catch (e) {
+                step.classList.add('fail');
+                step.innerHTML = '<strong>步骤1：登录</strong><br>❌ 网络错误：' + e.message;
+                return;
+            }
+
+            // 第二步：读取消息列表
+            step = document.createElement('div');
+            step.className = 'step';
+            step.innerHTML = '<strong>步骤2：读取消息</strong><br>正在加载历史消息...';
+            results.appendChild(step);
+
+            try {
+                const res = await fetch(URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=5', {
+                    headers: { 'apikey': KEY }
+                });
+                const msgs = await res.json();
+                step.classList.add('ok');
+                step.innerHTML = '<strong>步骤2：读取消息</strong><br>✅ 成功！最新 5 条消息：<br>' + JSON.stringify(msgs).replace(/,/g, ',<br>');
+            } catch (e) {
+                step.classList.add('fail');
+                step.innerHTML = '<strong>步骤2：读取消息</strong><br>❌ 网络错误：' + e.message;
+            }
+
+            // 第三步：发送测试消息
+            step = document.createElement('div');
+            step.className = 'step';
+            step.innerHTML = '<strong>步骤3：发送消息</strong><br>正在发送测试消息...';
+            results.appendChild(step);
+
+            try {
+                const res = await fetch(URL + '/rest/v1/chat_messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': KEY,
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        message: '诊断测试 ' + new Date().toLocaleTimeString()
+                    })
+                });
+
+                if (res.ok) {
+                    step.classList.add('ok');
+                    step.innerHTML = '<strong>步骤3：发送消息</strong><br>✅ 成功！消息已写入数据库。';
+                } else {
+                    const errText = await res.text();
+                    step.classList.add('fail');
+                    step.innerHTML = '<strong>步骤3：发送消息</strong><br>❌ 失败！HTTP ' + res.status + '：' + errText;
+                }
+            } catch (e) {
+                step.classList.add('fail');
+                step.innerHTML = '<strong>步骤3：发送消息</strong><br>❌ 网络错误：' + e.message;
+            }
+
+            // 结论
+            step = document.createElement('div');
+            step.className = 'step';
+            step.style.fontWeight = 'bold';
+                        if (document.querySelectorAll('.fail').length === 0) {
+                step.classList.add('ok');
+                step.innerHTML = '🎉 诊断结论：后端一切正常！问题出在前端 chat.html 文件。请重新部署我发给您的最终版代码，并用无痕模式测试。';
+            } else {
+                step.classList.add('fail');
+                step.innerHTML = '⚠️ 诊断结论：有步骤失败，请查看上方红色项目，截图发给我。';
+            }
+            results.appendChild(step);
+        }
+    </script>
+</body>
+</html>
