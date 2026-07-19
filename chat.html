@@ -15,8 +15,8 @@
         .message-list { flex: 1; overflow-y: auto; padding: 10px 15px; display: flex; flex-direction: column; gap: 8px; }
         .msg-row { display: flex; gap: 8px; max-width: 80%; }
         .msg-row.self { align-self: flex-end; flex-direction: row-reverse; }
-        .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; }
-        .bubble { padding: 8px 14px; border-radius: 12px; background: #fff; border: 1px solid #ddd; }
+        .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; flex-shrink: 0; }
+        .bubble { padding: 8px 14px; border-radius: 12px; background: #fff; border: 1px solid #ddd; word-break: break-word; }
         .self .bubble { background: var(--accent); color: white; }
         .input-area { padding: 10px; background: var(--card); border-top: 1px solid #ccc; display: flex; gap: 8px; align-items: flex-end; }
         .input-area textarea { flex: 1; border: 1px solid #ccc; border-radius: 20px; padding: 8px 14px; resize: none; background: var(--bg); color: var(--text); min-height: 38px; }
@@ -37,59 +37,78 @@
             <button onclick="handleLogin()">登录</button>
             <p id="login-error" style="color:red;margin-top:8px;"></p>
         </div>
+    </div><div id="app-main" class="hidden">
+    <div class="top-bar">
+        <h2>聊天室</h2>
+        <button class="icon-btn" onclick="loadHistory()">🔄</button>
+        <button class="icon-btn" onclick="toggleTheme()">🌓</button>
     </div>
-    <div id="app-main" class="hidden">
-        <div class="top-bar">
-            <h2>聊天室</h2>
-            <button class="icon-btn" onclick="loadHistory()">🔄</button>
-            <button class="icon-btn" onclick="toggleTheme()">🌓</button>
-        </div>
-        <div class="message-list" id="chat-box"></div>
-        <div class="input-area">
-            <textarea id="msg" placeholder="输入消息..." rows="1"></textarea>
-            <button class="send-btn" onclick="sendMsg()">➤</button>
-        </div>
+    <div class="message-list" id="chat-box"></div>
+    <div class="input-area">
+        <textarea id="msg" placeholder="输入消息..." rows="1"></textarea>
+        <button class="send-btn" onclick="sendMsg()">➤</button>
     </div>
-    <script>
-        const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
-        let currentUserEmail = '';
+</div>
+<script>
+    const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
+    let currentUserEmail = '';// 自动登录
+if (localStorage.getItem('authToken') && localStorage.getItem('authEmail')) {
+    document.getElementById('login-overlay').classList.add('hidden');
+    document.getElementById('app-main').classList.remove('hidden');
+    currentUserEmail = localStorage.getItem('authEmail');
+    loadHistory();
+}
 
-        // 自动登录
-        if (localStorage.getItem('authToken') && localStorage.getItem('authEmail')) {
+// 登录
+async function handleLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value.trim();
+    const err = document.getElementById('login-error');
+    if (!email || !password) { err.textContent = '请输入邮箱和密码'; return; }
+    err.textContent = '正在登录...';
+    try {
+        const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (data.access_token) {
+            localStorage.setItem('authToken', data.access_token);
+            localStorage.setItem('authEmail', email);
             document.getElementById('login-overlay').classList.add('hidden');
             document.getElementById('app-main').classList.remove('hidden');
-            currentUserEmail = localStorage.getItem('authEmail');
+            currentUserEmail = email;
             loadHistory();
+        } else {
+            err.textContent = data.error_description || '邮箱或密码错误';
         }
-
-        // 登录
-        async function handleLogin() {
-            const email = document.getElementById('login-email').value.trim();
-            const password = document.getElementById('login-password').value.trim();
-            const err = document.getElementById('login-error');
-            if (!email || !password) { err.textContent = '请输入邮箱和密码'; return; }
-            err.textContent = '正在登录...';
-            try {
-                const res = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-                    body: JSON.stringify({ email, password })
-                });
-                const data = await res.json();
-                if (data.access_token) {
-                    localStorage.setItem('authToken', data.access_token);
-                                        localStorage.setItem('authEmail', email);
-                    document.getElementById('login-overlay').classList.add('hidden');
-                    document.getElementById('app-main').classList.remove('hidden');
-                    currentUserEmail = email;
-                    loadHistory();
-                } else {
-                    err.textContent = data.error_description || '邮箱或密码错误';
-                }
-            } catch (e) { err.textContent = '网络错误'; }
+    } catch (e) { err.textContent = '网络错误'; }
+    }// 加载消息（最稳版本）
+async function loadHistory() {
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50', {
+            headers: { 'apikey': SUPABASE_KEY }
+        });
+        const msgs = await res.json();
+        const box = document.getElementById('chat-box');
+        box.innerHTML = '';
+        if (Array.isArray(msgs)) {
+            msgs.forEach(m => {
+                try {
+                    const div = document.createElement('div');
+                    const isSelf = (m.email === currentUserEmail);
+                    div.className = 'msg-row ' + (isSelf ? 'self' : 'other');
+                    const avatarLetter = (m.email ? m.email[0].toUpperCase() : '?');
+                    const msgText = (m.message || '');
+                    div.innerHTML = `<div class="avatar">${avatarLetter}</div><div class="bubble">${msgText}</div>`;
+                    box.appendChild(div);
+                } catch (e) { /* 单条消息解析失败，跳过 */ }
+            });
         }
-
- // 发送消息（立即显示 + 后台刷新）
+        box.scrollTop = box.scrollHeight;
+    } catch (e) { console.error('加载消息失败', e); }
+}// 发送消息（立即显示 + 延迟刷新）
 async function sendMsg() {
     if (!currentUserEmail) { alert('请先登录'); return; }
     const msg = document.getElementById('msg').value.trim();
@@ -102,46 +121,20 @@ async function sendMsg() {
         });
         if (res.ok) {
             document.getElementById('msg').value = '';
-            // 立即在页面上显示新消息
+            // 立即显示
             const box = document.getElementById('chat-box');
             const div = document.createElement('div');
             div.className = 'msg-row self';
             div.innerHTML = `<div class="avatar">${currentUserEmail[0].toUpperCase()}</div><div class="bubble">${msg}</div>`;
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
-            // 后台静默刷新，确保数据同步
+            // 0.5秒后刷新，确保与服务器同步
             setTimeout(() => loadHistory(), 500);
         } else {
             alert('发送失败，状态码：' + res.status);
         }
     } catch (e) { alert('网络错误'); }
-}
-
-// 加载消息（带保护）
-async function loadHistory() {
-    try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50', {
-            headers: { 'apikey': SUPABASE_KEY }
-        });
-        if (!res.ok) return;
-        const msgs = await res.json();
-        if (!Array.isArray(msgs)) return;
-        const box = document.getElementById('chat-box');
-        // 不要用 innerHTML = '' 清空，改用 removeChild 逐个移除，避免闪烁
-        while (box.firstChild) box.removeChild(box.firstChild);
-        msgs.forEach(m => {
-            const div = document.createElement('div');
-            div.className = 'msg-row ' + (m.email === currentUserEmail ? 'self' : 'other');
-            // 确保 message 字段存在
-            const msgText = m.message || '';
-            div.innerHTML = `<div class="avatar">${m.email[0].toUpperCase()}</div><div class="bubble">${msgText}</div>`;
-            box.appendChild(div);
-        });
-        box.scrollTop = box.scrollHeight;
-    } catch (e) { console.error('加载失败', e); }
-}
-
-        // 主题切换
+        }        // 主题切换
         function toggleTheme() {
             const current = document.documentElement.getAttribute('data-theme') || 'light';
             const next = current === 'dark' ? 'light' : 'dark';
@@ -155,4 +148,4 @@ async function loadHistory() {
         });
     </script>
 </body>
-</html>
+</html>7
