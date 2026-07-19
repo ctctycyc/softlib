@@ -86,9 +86,14 @@ async function handleLogin() {
     } catch (e) { err.textContent = '网络错误'; }
 }// 加载消息（无弹窗，直接渲染）
 async function loadHistory() {
+async function loadHistory() {
     try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50', {
-            headers: { 'apikey': SUPABASE_KEY }
+        // 强制拉取最新 100 条，确保覆盖到刚发的消息
+        const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=100', {
+            headers: { 
+                'apikey': SUPABASE_KEY,
+                'Authorization': 'Bearer ' + (localStorage.getItem('authToken') || '')
+            }
         });
         const msgs = await res.json();
         const box = document.getElementById('chat-box');
@@ -110,7 +115,7 @@ async function loadHistory() {
     } catch (e) {
         console.error('加载失败', e);
     }
-}
+    }
 
 // 发送消息（写入成功后立即刷新列表）
 async function sendMsg() {
