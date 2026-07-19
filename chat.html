@@ -5,12 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>聊天室</title>
     <style>
-        :root {
-            --bg: #e8ecef; --card: #ffffff; --text: #222; --accent: #3390ec;
-        }
-        [data-theme="dark"] {
-            --bg: #1a1d21; --card: #24272c; --text: #e8eaed; --accent: #5b9bd5;
-        }
+        :root { --bg: #e8ecef; --card: #fff; --text: #222; --accent: #3390ec; }
+        [data-theme="dark"] { --bg: #1a1d21; --card: #24272c; --text: #e8eaed; --accent: #5b9bd5; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: system-ui; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; }
         .top-bar { background: var(--card); padding: 10px 15px; border-bottom: 1px solid #ccc; display: flex; gap: 10px; align-items: center; }
@@ -42,11 +38,10 @@
             <p id="login-error" style="color:red;margin-top:8px;"></p>
         </div>
     </div>
-
     <div id="app-main" class="hidden">
         <div class="top-bar">
             <h2>聊天室</h2>
-            <button class="icon-btn" id="theme-toggle">🌓</button>
+            <button class="icon-btn" onclick="loadHistory()">🔄</button>
         </div>
         <div class="message-list" id="chat-box"></div>
         <div class="input-area">
@@ -54,25 +49,11 @@
             <button class="send-btn" onclick="sendMsg()">➤</button>
         </div>
     </div>
-
     <script>
         const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
         let currentUserEmail = '';
 
-        // 主题
-        const themeBtn = document.getElementById('theme-toggle');
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌓';
-        themeBtn.onclick = () => {
-            const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
-            themeBtn.textContent = next === 'dark' ? '☀️' : '🌓';
-        };
-
-        // 自动登录
         if (localStorage.getItem('authToken') && localStorage.getItem('authEmail')) {
             document.getElementById('login-overlay').classList.add('hidden');
             document.getElementById('app-main').classList.remove('hidden');
@@ -80,7 +61,6 @@
             loadHistory();
         }
 
-        // 登录
         async function handleLogin() {
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value.trim();
@@ -106,53 +86,41 @@
             } catch (e) { err.textContent = '网络错误'; }
         }
 
-        // 加载消息
         async function loadHistory() {
-    try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50', {
-            headers: { 'apikey': SUPABASE_KEY }
-        });
-        const msgs = await res.json();
-        const box = document.getElementById('chat-box');
-        box.innerHTML = '';
-        if (Array.isArray(msgs)) {
-            msgs.forEach(m => {
-                const div = document.createElement('div');
-                div.className = 'msg-row ' + (m.email === currentUserEmail ? 'self' : 'other');
-                div.innerHTML = `<div class="avatar">${m.email[0].toUpperCase()}</div><div class="bubble">${m.message}</div>`;
-                box.appendChild(div);
+            const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50', {
+                headers: { 'apikey': SUPABASE_KEY }
             });
-        }
-        box.scrollTop = box.scrollHeight;
-    } catch (e) {
-        console.error('加载消息失败', e);
-    }
+            const msgs = await res.json();
+            const box = document.getElementById('chat-box');
+            box.innerHTML = '';
+            if (Array.isArray(msgs)) {
+                msgs.forEach(m => {
+                    const div = document.createElement('div');
+                    div.className = 'msg-row ' + (m.email === currentUserEmail ? 'self' : 'other');
+                    div.innerHTML = `<div class="avatar">${m.email[0].toUpperCase()}</div><div class="bubble">${m.message}</div>`;
+                    box.appendChild(div);
+                });
+            }
+            box.scrollTop = box.scrollHeight;
         }
 
-        // 发送消息
         async function sendMsg() {
             if (!currentUserEmail) { alert('请先登录'); return; }
             const msg = document.getElementById('msg').value.trim();
             if (!msg) return;
-            try {
-                const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + localStorage.getItem('authToken') },
-                    body: JSON.stringify({ email: currentUserEmail, message: msg })
-                });
-                if (res.ok) {
-    document.getElementById('msg').value = '';
-    // 直接添加到页面，立即可见
-    const box = document.getElementById('chat-box');
-    const div = document.createElement('div');
-    div.className = 'msg-row self';
-    div.innerHTML = `<div class="avatar">${currentUserEmail[0].toUpperCase()}</div><div class="bubble">${msg}</div>`;
-    box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
-    // 后台刷新，同步积分等信息
-    loadHistory();
+            const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + localStorage.getItem('authToken') },
+                body: JSON.stringify({ email: currentUserEmail, message: msg })
+            });
+            if (res.ok) {
+                document.getElementById('msg').value = '';
+                loadHistory();
+            } else {
+                alert('发送失败');
+            }
         }
-        // 回车发送
+
         document.getElementById('msg').addEventListener('keydown', e => {
             if (e.key === 'Enter') { e.preventDefault(); sendMsg(); }
         });
