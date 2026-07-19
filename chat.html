@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>聊天室 · 稳定版</title>
+    <title>聊天室</title>
     <style>
         :root { --bg: #e8ecef; --card: #fff; --text: #222; --accent: #3390ec; }
         [data-theme="dark"] { --bg: #1a1d21; --card: #24272c; --text: #e8eaed; --accent: #5b9bd5; }
@@ -84,16 +84,20 @@ async function handleLogin() {
             err.textContent = data.error_description || '邮箱或密码错误';
         }
     } catch (e) { err.textContent = '网络错误'; }
-}// 加载消息（每一条都有保护，绝不会整页崩溃）
+}// 加载消息（带诊断，会弹出消息数量）
 async function loadHistory() {
     try {
         const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50', {
             headers: { 'apikey': SUPABASE_KEY }
         });
         const msgs = await res.json();
+        
+        // 诊断：弹窗显示从数据库拉取到的消息数量
+        alert('数据库返回了 ' + (Array.isArray(msgs) ? msgs.length : 0) + ' 条消息');
+        
         const box = document.getElementById('chat-box');
         box.innerHTML = '';
-        if (Array.isArray(msgs)) {
+        if (Array.isArray(msgs) && msgs.length > 0) {
             msgs.forEach(m => {
                 try {
                     const div = document.createElement('div');
@@ -103,11 +107,16 @@ async function loadHistory() {
                     const msgText = (m.message || '');
                     div.innerHTML = `<div class="avatar">${avatarLetter}</div><div class="bubble">${msgText}</div>`;
                     box.appendChild(div);
-                } catch (e) { /* 单条数据损坏跳过 */ }
+                } catch (e) {}
             });
+        } else {
+            // 如果一条消息都没有，显示提示
+            box.innerHTML = '<div style="text-align:center;color:var(--text);padding:20px;">暂无消息，发一条试试</div>';
         }
         box.scrollTop = box.scrollHeight;
-    } catch (e) { console.error('加载历史失败', e); }
+    } catch (e) {
+        alert('加载消息时网络错误：' + e.message);
+    }
 }// 发送消息（立即上屏 + 延迟同步，保证能看到）
 async function sendMsg() {
     if (!currentUserEmail) { alert('请先登录'); return; }
