@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>聊天室</title>
+    <title>测试聊天室</title>
     <style>
         :root { --bg: #e8ecef; --card: #fff; --text: #222; --accent: #3390ec; }
         [data-theme="dark"] { --bg: #1a1d21; --card: #24272c; --text: #e8eaed; --accent: #5b9bd5; }
@@ -78,7 +78,7 @@
                 const data = await res.json();
                 if (data.access_token) {
                     localStorage.setItem('authToken', data.access_token);
-                    localStorage.setItem('authEmail', email);
+                                        localStorage.setItem('authEmail', email);
                     document.getElementById('login-overlay').classList.add('hidden');
                     document.getElementById('app-main').classList.remove('hidden');
                     currentUserEmail = email;
