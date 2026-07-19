@@ -133,6 +133,8 @@ async function loadHistory() {
             },
             body: JSON.stringify({ email: currentUserEmail, message: msg })
         });
+        const text = await res.text();
+        alert('状态码：' + res.status + '\n返回内容：' + text);
         if (res.ok) {
             document.getElementById('msg').value = '';
             const box = document.getElementById('chat-box');
@@ -142,9 +144,6 @@ async function loadHistory() {
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
             setTimeout(() => loadHistory(), 1000);
-        } else {
-            const errText = await res.text();
-            alert('发送失败！状态码：' + res.status + '\n错误信息：' + errText);
         }
     } catch (e) { alert('网络错误：' + e.message); }
 }
