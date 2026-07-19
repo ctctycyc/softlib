@@ -84,40 +84,36 @@ async function handleLogin() {
             err.textContent = data.error_description || '邮箱或密码错误';
         }
     } catch (e) { err.textContent = '网络错误'; }
-}// 加载消息（带诊断，会弹出消息数量）
+}// 加载消息（无弹窗，直接渲染）
 async function loadHistory() {
     try {
         const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50', {
             headers: { 'apikey': SUPABASE_KEY }
         });
         const msgs = await res.json();
-        
-        // 诊断：弹窗显示从数据库拉取到的消息数量
-        alert('数据库返回了 ' + (Array.isArray(msgs) ? msgs.length : 0) + ' 条消息');
-        
         const box = document.getElementById('chat-box');
         box.innerHTML = '';
         if (Array.isArray(msgs) && msgs.length > 0) {
             msgs.forEach(m => {
-                try {
-                    const div = document.createElement('div');
-                    const isSelf = (m.email === currentUserEmail);
-                    div.className = 'msg-row ' + (isSelf ? 'self' : 'other');
-                    const avatarLetter = (m.email ? m.email[0].toUpperCase() : '?');
-                    const msgText = (m.message || '');
-                    div.innerHTML = `<div class="avatar">${avatarLetter}</div><div class="bubble">${msgText}</div>`;
-                    box.appendChild(div);
-                } catch (e) {}
+                if (!m.message || m.message.trim() === '') return;
+                const div = document.createElement('div');
+                const isSelf = (m.email === currentUserEmail);
+                div.className = 'msg-row ' + (isSelf ? 'self' : 'other');
+                const avatarLetter = (m.email ? m.email[0].toUpperCase() : '?');
+                div.innerHTML = `<div class="avatar">${avatarLetter}</div><div class="bubble">${m.message}</div>`;
+                box.appendChild(div);
             });
         } else {
-            // 如果一条消息都没有，显示提示
-            box.innerHTML = '<div style="text-align:center;color:var(--text);padding:20px;">暂无消息，发一条试试</div>';
+            box.innerHTML = '<div style="text-align:center;color:var(--text);padding:20px;">暂无消息</div>';
         }
         box.scrollTop = box.scrollHeight;
     } catch (e) {
-        alert('加载消息时网络错误：' + e.message);
+        console.error('加载失败', e);
     }
-}async function sendMsg() {
+}
+
+// 发送消息（写入成功后立即刷新列表）
+async function sendMsg() {
     if (!currentUserEmail) { alert('请先登录'); return; }
     const msg = document.getElementById('msg').value.trim();
     if (!msg) return;
@@ -133,21 +129,25 @@ async function loadHistory() {
             },
             body: JSON.stringify({ email: currentUserEmail, message: msg })
         });
-        const text = await res.text();
-        alert('状态码：' + res.status + '\n返回内容：' + text);
         if (res.ok) {
             document.getElementById('msg').value = '';
+            // 先立即显示本地气泡
             const box = document.getElementById('chat-box');
             const div = document.createElement('div');
             div.className = 'msg-row self';
             div.innerHTML = `<div class="avatar">${currentUserEmail[0].toUpperCase()}</div><div class="bubble">${msg}</div>`;
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
-            setTimeout(() => loadHistory(), 1000);
+            // 然后立即从服务器加载最新消息（覆盖本地显示，确保排序正确）
+            await loadHistory();
+        } else {
+            const errText = await res.text();
+            alert('发送失败！状态码：' + res.status + '\n错误信息：' + errText);
         }
-    } catch (e) { alert('网络错误：' + e.message); }
-}
-                       // 主题切换
+    } catch (e) {
+        alert('网络错误：' + e.message);
+    }
+                }     // 主题切换
         function toggleTheme() {
             const current = document.documentElement.getAttribute('data-theme') || 'light';
             const next = current === 'dark' ? 'light' : 'dark';
