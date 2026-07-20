@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MC服务器基岩版 · 软件库</title>
+    <title>MC服务器 · 软件库</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
@@ -13,13 +13,10 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 20px; max-width: 600px; margin: 0 auto; }
-        .tool-card {
-            background: var(--card); border-radius: var(--radius); padding: 20px;
-            margin-bottom: 16px; box-shadow: var(--shadow);
-        }
+        .tool-card { background: var(--card); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); }
         .tool-card h3 { margin-bottom: 12px; font-size: 1.2rem; }
         .input-group { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-        .input-group input, .input-group select { padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; flex: 1; min-width: 120px; }
+        .input-group input, .input-group select { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; min-width: 120px; }
         .btn { background: var(--btn); color: white; border: none; padding: 10px 18px; border-radius: 6px; font-size: 14px; cursor: pointer; }
         .btn:hover { opacity: 0.9; }
         .result { margin-top: 12px; padding: 10px; background: #f5f5f5; border-radius: 6px; font-size: 14px; display: none; }
@@ -30,234 +27,300 @@
         .cmd-item code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
         .copy-btn { background: none; border: 1px solid var(--border); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; color: var(--sub); }
         .copy-btn:hover { background: var(--border); }
-        .color-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-        .color-btn { width: 40px; height: 40px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); font-weight: bold; display: flex; align-items: center; justify-content: center; }
-        .countdown-display { font-size: 2rem; text-align: center; margin: 12px 0; font-weight: bold; }
+        .hint { font-size: 12px; color: var(--sub); margin-top: 4px; }
+        .trade-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .trade-table td, .trade-table th { border: 1px solid var(--border); padding: 6px; text-align: left; }
     </style>
 </head>
 <body>
-    <h1 style="text-align:center; margin-bottom: 20px;">基岩版MC服务器查询</h1><!-- 服务器状态查询 -->
-<div class="tool-card">
-    <h3><i class="fas fa-server"></i> 服务器状态查询</h3>
-    <div class="input-group">
-        <input id="mc-ip" type="text" placeholder="例如: ****.**********.***:123456">
-        <button class="btn" onclick="checkMC()">查询</button>
+    <h1 style="text-align:center; margin-bottom: 20px;">MC服务器</h1>
+
+    <!-- 服务器状态查询 -->
+    <div class="tool-card">
+        <h3><i class="fas fa-server"></i> 服务器状态查询</h3>
+        <div class="input-group">
+            <input id="mc-ip" type="text" placeholder="例如: zecirtk.aternos.me:12345">
+            <button class="btn" onclick="checkMC()">查询</button>
+        </div>
+        <div id="mc-result" class="result"></div>
+        <p class="hint">部分服务器休眠时可能显示离线，但游戏内大概率可正常连接。</p>
     </div>
-    <div id="mc-result" class="result"></div>
-    <p style="font-size:12px;color:var(--sub);margin-top:8px;">
-        注意：部分服务器休眠时可能显示离线，但游戏内大概率可正常连接。
-    </p>
+
+    <!-- 中文指令生成器 -->
+    <div class="tool-card">
+        <h3><i class="fas fa-language"></i> 指令生成器</h3>
+        <p class="hint" style="margin-bottom:8px;">输入中文，自动生成MC指令。例：给我64个钻石 / 踢了张三 / 封禁李四 / 把Steve传送到0 70 0</p>
+        <div class="input-group">
+            <input id="zh-cmd" type="text" placeholder="例如：给我64个钻石">
+            <button class="btn" onclick="parseZhCmd()">生成指令</button>
+        </div>
+        <div id="zh-result" class="result"></div>
+    </div>
+
+    <!-- 常用指令速查 -->
+    <div class="tool-card">
+        <h3><i class="fas fa-terminal"></i> 管理员常用指令</h3>
+        <div id="cmd-list">
+            <div class="cmd-item"><code>/gamemode creative</code><button class="copy-btn" onclick="copyCmd('/gamemode creative')">复制</button></div>
+            <div class="cmd-item"><code>/gamemode survival</code><button class="copy-btn" onclick="copyCmd('/gamemode survival')">复制</button></div>
+            <div class="cmd-item"><code>/give @p diamond 64</code><button class="copy-btn" onclick="copyCmd('/give @p diamond 64')">复制</button></div>
+            <div class="cmd-item"><code>/time set day</code><button class="copy-btn" onclick="copyCmd('/time set day')">复制</button></div>
+            <div class="cmd-item"><code>/weather clear</code><button class="copy-btn" onclick="copyCmd('/weather clear')">复制</button></div>
+            <div class="cmd-item"><code>/tp @p 坐标</code><button class="copy-btn" onclick="copyCmd('/tp @p ')">复制</button></div>
+            <div class="cmd-item"><code>/kick 玩家名</code><button class="copy-btn" onclick="copyCmd('/kick ')">复制</button></div>
+            <div class="cmd-item"><code>/ban 玩家名</code><button class="copy-btn" onclick="copyCmd('/ban ')">复制</button></div>
+            <div class="cmd-item"><code>/op 玩家名</code><button class="copy-btn" onclick="copyCmd('/op ')">复制</button></div>
+        </div>
+    </div><!-- 地图种子查看器 -->
+<div class="tool-card">
+    <h3><i class="fas fa-map"></i> 地图种子查看器</h3>
+    <p class="hint">输入种子号，前往Chunkbase查看地形结构（基岩版专用）</p>
+    <div class="input-group">
+        <input id="seed-input" type="text" placeholder="输入种子号（如 123456）">
+        <button class="btn" onclick="openSeedMap()">查看地图</button>
+    </div>
+    <p class="hint">将在新窗口打开Chunkbase种子地图，可查看村庄、要塞等</p>
 </div>
 
-<!-- 常用指令速查 -->
+<!-- 村民交易查询 -->
 <div class="tool-card">
-    <h3><i class="fas fa-terminal"></i> 管理员常用指令</h3>
-    <div id="cmd-list">
-        <div class="cmd-item"><code>/gamemode creative</code><button class="copy-btn" onclick="copyCmd('/gamemode creative')">复制</button></div>
-        <div class="cmd-item"><code>/gamemode survival</code><button class="copy-btn" onclick="copyCmd('/gamemode survival')">复制</button></div>
-        <div class="cmd-item"><code>/give @p diamond 64</code><button class="copy-btn" onclick="copyCmd('/give @p diamond 64')">复制</button></div>
-        <div class="cmd-item"><code>/time set day</code><button class="copy-btn" onclick="copyCmd('/time set day')">复制</button></div>
-        <div class="cmd-item"><code>/weather clear</code><button class="copy-btn" onclick="copyCmd('/weather clear')">复制</button></div>
-        <div class="cmd-item"><code>/tp @p 坐标</code><button class="copy-btn" onclick="copyCmd('/tp @p ')">复制</button></div>
-        <div class="cmd-item"><code>/effect @p speed 99999 10 true</code><button class="copy-btn" onclick="copyCmd('/effect @p speed 99999 10 true')">复制</button></div>
-        <div class="cmd-item"><code>/gamerule keepInventory true</code><button class="copy-btn" onclick="copyCmd('/gamerule keepInventory true')">复制</button></div>
-        <div class="cmd-item"><code>/kill @e[type=zombie]</code><button class="copy-btn" onclick="copyCmd('/kill @e[type=zombie]')">复制</button></div>
-        <div class="cmd-item"><code>/kick 玩家名</code><button class="copy-btn" onclick="copyCmd('/kick ')">复制</button></div>
-        <div class="cmd-item"><code>/ban 玩家名</code><button class="copy-btn" onclick="copyCmd('/ban ')">复制</button></div>
-        <div class="cmd-item"><code>/pardon 玩家名</code><button class="copy-btn" onclick="copyCmd('/pardon ')">复制</button></div>
-        <div class="cmd-item"><code>/op 玩家名</code><button class="copy-btn" onclick="copyCmd('/op ')">复制</button></div>
-        <div class="cmd-item"><code>/deop 玩家名</code><button class="copy-btn" onclick="copyCmd('/deop ')">复制</button></div>
-        <div class="cmd-item"><code>/list</code><button class="copy-btn" onclick="copyCmd('/list')">复制</button></div>
-    </div>
-</div><!-- 指令生成器 -->
+    <h3><i class="fas fa-store"></i> 村民交易查询</h3>
+    <p class="hint">选择职业查看常见交易（基岩版）</p>
+    <select id="villager-profession" onchange="showTrades()" style="width:100%;padding:10px;border-radius:6px;margin-bottom:8px;">
+        <option value="farmer">农民 - Farmer</option>
+        <option value="librarian">图书管理员 - Librarian</option>
+        <option value="armorer">盔甲匠 - Armorer</option>
+        <option value="weaponsmith">武器匠 - Weaponsmith</option>
+        <option value="cleric">牧师 - Cleric</option>
+    </select>
+    <div id="trade-result" class="result" style="display:block;"></div>
+</div>
+
+<!-- 附魔兼容查询 -->
 <div class="tool-card">
-    <h3><i class="fas fa-magic"></i> 指令生成器</h3>
+    <h3><i class="fas fa-magic"></i> 附魔兼容查询</h3>
+    <p class="hint">选择两个附魔，查看能否共存</p>
     <div class="input-group">
-        <select id="cmd-type" onchange="updateCmdForm()">
-            <option value="give">give（给物品）</option>
-            <option value="tp">tp（传送）</option>
-            <option value="kick">kick（踢人）</option>
-            <option value="ban">ban（封禁）</option>
-            <option value="gamemode">gamemode（模式切换）</option>
+        <select id="enchant1" style="flex:1;">
+            <option value="sharpness">锋利</option><option value="smite">亡灵杀手</option><option value="bane_of_arthropods">节肢杀手</option>
+            <option value="protection">保护</option><option value="fire_protection">火焰保护</option><option value="blast_protection">爆炸保护</option>
+            <option value="projectile_protection">弹射物保护</option>
+            <option value="silk_touch">精准采集</option><option value="fortune">时运</option>
+            <option value="infinity">无限</option><option value="mending">经验修补</option>
+        </select>
+        <select id="enchant2" style="flex:1;">
+            <option value="sharpness">锋利</option><option value="smite">亡灵杀手</option><option value="bane_of_arthropods">节肢杀手</option>
+            <option value="protection">保护</option><option value="fire_protection">火焰保护</option><option value="blast_protection">爆炸保护</option>
+            <option value="projectile_protection">弹射物保护</option>
+            <option value="silk_touch">精准采集</option><option value="fortune">时运</option>
+            <option value="infinity">无限</option><option value="mending">经验修补</option>
+        </select>
+        <button class="btn" onclick="checkEnchantCompatibility()">查询兼容性</button>
+    </div>
+    <div id="enchant-result" class="result"></div>
+</div><!-- 红石信号计算 -->
+<div class="tool-card">
+    <h3><i class="fas fa-wave-square"></i> 红石信号计算</h3>
+    <p class="hint">输入距离（格），计算红石信号衰减后的强度</p>
+    <div class="input-group">
+        <input id="redstone-distance" type="number" placeholder="距离（0-15）" min="0" max="15">
+        <button class="btn" onclick="calcRedstone()">计算信号强度</button>
+    </div>
+    <div id="redstone-result" class="result"></div>
+</div>
+
+<!-- 自定义计分板生成 -->
+<div class="tool-card">
+    <h3><i class="fas fa-list-ol"></i> 自定义计分板生成</h3>
+    <p class="hint">填写参数，一键生成计分板创建和显示指令</p>
+    <div class="input-group">
+        <input id="sb-name" placeholder="计分板名称（如 money）" style="flex:1;">
+        <input id="sb-display" placeholder="显示名称（如 金币）" style="flex:1;">
+        <select id="sb-criteria" style="flex:1;">
+            <option value="dummy">dummy（虚拟，可手动修改）</option>
+            <option value="health">health（生命值）</option>
+            <option value="kills">kills（击杀数）</option>
         </select>
     </div>
-    <div id="cmd-params"></div>
-    <button class="btn" style="margin-top:8px;" onclick="generateCmd()">生成指令</button>
-    <div id="gen-result" class="result"></div>
+    <button class="btn" onclick="generateScoreboard()">生成指令</button>
+    <div id="sb-result" class="result"></div>
 </div>
 
-<!-- 定时提醒 -->
+<!-- 服务器公告模板 -->
 <div class="tool-card">
-    <h3><i class="fas fa-clock"></i> 定时提醒</h3>
+    <h3><i class="fas fa-bullhorn"></i> 服务器公告模板</h3>
+    <p class="hint">点击即可复制带颜色的公告模板，在游戏里粘贴使用</p>
+    <div class="cmd-item"><code>§a欢迎来到服务器！</code><button class="copy-btn" onclick="copyCmd('§a欢迎来到服务器！')">复制</button></div>
+    <div class="cmd-item"><code>§c请不要破坏他人建筑</code><button class="copy-btn" onclick="copyCmd('§c请不要破坏他人建筑')">复制</button></div>
+    <div class="cmd-item"><code>§e今天晚8点活动，不见不散</code><button class="copy-btn" onclick="copyCmd('§e今天晚8点活动，不见不散')">复制</button></div>
+    <div class="cmd-item"><code>§b§l服务器已更新！</code><button class="copy-btn" onclick="copyCmd('§b§l服务器已更新！')">复制</button></div>
+    <div class="cmd-item"><code>§d§o感谢大家的支持~</code><button class="copy-btn" onclick="copyCmd('§d§o感谢大家的支持~')">复制</button></div>
+</div><!-- 简易经济计算器 -->
+<div class="tool-card">
+    <h3><i class="fas fa-calculator"></i> 简易经济计算器</h3>
+    <p class="hint">用于计算商店价格：单价 × 数量 = 总价</p>
     <div class="input-group">
-        <input id="reminder-min" type="number" placeholder="分钟后" value="30" style="flex:1;">
-        <input id="reminder-msg" type="text" placeholder="提醒内容（可选）" value="该启动服务器了！" style="flex:2;">
-        <button class="btn" onclick="startReminder()">设定提醒</button>
+        <input id="price-per" type="number" placeholder="单价" style="flex:1;" value="10">
+        <input id="amount" type="number" placeholder="数量" style="flex:1;" value="1">
     </div>
-    <div class="countdown-display" id="reminder-display" style="display:none;"></div>
-    <button class="btn" style="background:#e74c3c; display:none;" id="reminder-stop-btn" onclick="stopReminder()">取消提醒</button>
-</div><!-- 颜色代码生成器 -->
-<div class="tool-card">
-    <h3><i class="fas fa-palette"></i> 颜色代码生成器（基岩版）</h3>
-    <p style="font-size:13px;color:var(--sub);margin-bottom:8px;">点击颜色复制代码，游戏中输入 § 后可粘贴</p>
-    <div class="color-grid" id="color-grid"></div>
+    <button class="btn" onclick="calcTotal()">计算总价</button>
+    <div id="calc-result" class="result"></div>
 </div>
 
-<!-- 坐标计算器 -->
+<!-- 玩家头颅获取器（Java版专用，基岩版提示） -->
 <div class="tool-card">
-    <h3><i class="fas fa-compass"></i> 坐标计算器</h3>
+    <h3><i class="fas fa-skull"></i> 玩家头颅获取器</h3>
+    <p class="hint">Java版可用，基岩版无法通过指令获取头颅</p>
     <div class="input-group">
-        <input id="coord-x1" type="number" placeholder="X1" style="flex:1;">
-        <input id="coord-z1" type="number" placeholder="Z1" style="flex:1;">
-        <input id="coord-x2" type="number" placeholder="X2" style="flex:1;">
-        <input id="coord-z2" type="number" placeholder="Z2" style="flex:1;">
+        <input id="skull-player" type="text" placeholder="玩家名（Java版有效）">
+        <button class="btn" onclick="generateSkull()">生成指令</button>
     </div>
-    <button class="btn" onclick="calcDistance()">计算距离</button>
-    <button class="btn" style="background:#4caf93;" onclick="randomCoords()">随机传送坐标</button>
-    <div id="coord-result" class="result"></div>
+    <div id="skull-result" class="result"></div>
 </div>
 
-<a href="./" class="back-link"><i class="fas fa-arrow-left"></i> 返回软件库</a>    <script>
-        // ===== 服务器状态查询 =====
-        async function checkMC() {
-            const ip = document.getElementById('mc-ip').value.trim();
-            const resDiv = document.getElementById('mc-result');
-            if (!ip) { resDiv.style.display = 'block'; resDiv.className = 'result error'; resDiv.textContent = '请输入服务器IP地址和端口'; return; }
-            resDiv.style.display = 'block'; resDiv.className = 'result'; resDiv.textContent = '查询中...';
-            try {
-                const resp = await fetch(`https://api.mcsrvstat.us/2/${encodeURIComponent(ip)}`);
-                const data = await resp.json();
-                if (data.online) {
-                    resDiv.className = 'result success';
-                    resDiv.innerHTML = `<strong>${data.hostname || ip}</strong> 〔正常〕 在线<br>玩家: ${data.players.online}/${data.players.max}<br>版本: ${data.version}<br>延迟: ${data.debug?.ping ? data.debug.ping + 'ms' : '未知'}`;
-                } else {
-                    resDiv.className = 'result error';
-                    resDiv.textContent = '〔错误〕服务器离线或无法连接（Aternos免费服休眠时属于正常现象）';
-                }
-            } catch (e) { resDiv.className = 'result error'; resDiv.textContent = '请求失败，请检查网络'; }
-        }
-
-        function copyCmd(text) {
-            navigator.clipboard.writeText(text).then(() => alert('已复制：' + text)).catch(() => prompt('请手动复制：', text));
-        }
-
-        // ===== 指令生成器 =====
-        function updateCmdForm() {
-            const type = document.getElementById('cmd-type').value;
-            const paramsDiv = document.getElementById('cmd-params');
-            let html = '';
-            if (type === 'give') html = '目标 @p <input id="gen-target" value="@p" style="flex:1;"> 物品 <input id="gen-item" placeholder="diamond" style="flex:1;"> 数量 <input id="gen-count" type="number" value="1" style="flex:1;">';
-            else if (type === 'tp') html = '目标 @p <input id="gen-target" value="@p" style="flex:1;"> 坐标 X <input id="gen-x" type="number" placeholder="0" style="flex:1;"> Y <input id="gen-y" type="number" value="64" style="flex:1;"> Z <input id="gen-z" type="number" placeholder="0" style="flex:1;">';
-            else if (type === 'kick' || type === 'ban') html = '玩家名 <input id="gen-player" placeholder="Steve" style="flex:1;">';
-            else if (type === 'gamemode') html = '模式 <select id="gen-gamemode"><option value="creative">创造</option><option value="survival">生存</option></select> 目标 @p <input id="gen-target" value="@p" style="flex:1;">';
-            paramsDiv.innerHTML = '<div class="input-group" style="flex-wrap:wrap;">' + html + '</div>';
-        }
-        updateCmdForm();
-
-        function generateCmd() {
-            const type = document.getElementById('cmd-type').value;
-            let cmd = '';
-            if (type === 'give') {
-                const target = document.getElementById('gen-target')?.value || '@p';
-                const item = document.getElementById('gen-item')?.value || 'diamond';
-                const count = document.getElementById('gen-count')?.value || 1;
-                cmd = `/give ${target} ${item} ${count}`;
-            } else if (type === 'tp') {
-                const target = document.getElementById('gen-target')?.value || '@p';
-                const x = document.getElementById('gen-x')?.value || 0;
-                const y = document.getElementById('gen-y')?.value || 64;
-                const z = document.getElementById('gen-z')?.value || 0;
-                cmd = `/tp ${target} ${x} ${y} ${z}`;
-            } else if (type === 'kick') {
-                const player = document.getElementById('gen-player')?.value || 'Steve';
-                cmd = `/kick ${player}`;
-            } else if (type === 'ban') {
-                const player = document.getElementById('gen-player')?.value || 'Steve';
-                cmd = `/ban ${player}`;
-            } else if (type === 'gamemode') {
-                const mode = document.getElementById('gen-gamemode')?.value || 'creative';
-                const target = document.getElementById('gen-target')?.value || '@p';
-                cmd = `/gamemode ${mode} ${target}`;
+<a href="./" class="back-link"><i class="fas fa-arrow-left"></i> 返回软件库</a><script>
+    // ===== 服务器状态查询 =====
+    async function checkMC() {
+        const ip = document.getElementById('mc-ip').value.trim();
+        const resDiv = document.getElementById('mc-result');
+        if (!ip) { resDiv.style.display = 'block'; resDiv.className = 'result error'; resDiv.textContent = '请输入服务器IP地址和端口'; return; }
+        resDiv.style.display = 'block'; resDiv.className = 'result'; resDiv.textContent = '查询中...';
+        try {
+            const resp = await fetch(`https://api.mcsrvstat.us/2/${encodeURIComponent(ip)}`);
+            const data = await resp.json();
+            if (data.online) {
+                resDiv.className = 'result success';
+                resDiv.innerHTML = `<strong>${data.hostname || ip}</strong> 〔正常〕在线<br>玩家: ${data.players.online}/${data.players.max}<br>版本: ${data.version}<br>延迟: ${data.debug?.ping ? data.debug.ping + 'ms' : '未知'}`;
+            } else {
+                resDiv.className = 'result error';
+                resDiv.textContent = '〔错误〕服务器离线或无法连接（部分服务器休眠时属于正常现象）';
             }
-            const resDiv = document.getElementById('gen-result');
+        } catch (e) { resDiv.className = 'result error'; resDiv.textContent = '请求失败，请检查网络'; }
+    }
+
+    function copyCmd(text) {
+        navigator.clipboard.writeText(text).then(() => alert('已复制：' + text)).catch(() => prompt('请手动复制：', text));
+    }
+
+    // ===== 中文指令生成器 =====
+    function parseZhCmd() {
+        const input = document.getElementById('zh-cmd').value.trim();
+        const resDiv = document.getElementById('zh-result');
+        if (!input) { resDiv.style.display = 'block'; resDiv.className = 'result error'; resDiv.textContent = '请输入中文描述'; return; }
+        let cmd = '';
+        const text = input.toLowerCase();
+        const giveMatch = text.match(/(?:给|给我|给玩家)(.+?)(\d+)?个(.+)/);
+        if (giveMatch) { const target = text.includes('给玩家') ? '@a' : '@p'; const item = giveMatch[3].trim(); const count = giveMatch[2] ? parseInt(giveMatch[2]) : 1; cmd = `/give ${target} ${item} ${count}`; }
+        else if (text.includes('踢') || text.includes('踢出') || text.includes('踢了')) { const nameMatch = text.match(/(?:踢|踢出|踢了)\s*(.+)/); const name = nameMatch ? nameMatch[1].trim() : '玩家名'; cmd = `/kick ${name}`; }
+        else if (text.includes('封禁') || text.includes('封了') || text.includes('ban')) { const nameMatch = text.match(/(?:封禁|封了|ban)\s*(.+)/); const name = nameMatch ? nameMatch[1].trim() : '玩家名'; cmd = `/ban ${name}`; }
+        else if (text.includes('解封') || text.includes('pardon')) { const nameMatch = text.match(/(?:解封|pardon)\s*(.+)/); const name = nameMatch ? nameMatch[1].trim() : '玩家名'; cmd = `/pardon ${name}`; }
+        else if (text.includes('op') || text.includes('给管理') || text.includes('设为管理')) { const nameMatch = text.match(/(?:op|给管理|设为管理)\s*(.+)/); const name = nameMatch ? nameMatch[1].trim() : '玩家名'; cmd = `/op ${name}`; }
+        else if (text.includes('取消op') || text.includes('撤管理') || text.includes('deop')) { const nameMatch = text.match(/(?:取消op|撤管理|deop)\s*(.+)/); const name = nameMatch ? nameMatch[1].trim() : '玩家名'; cmd = `/deop ${name}`; }
+        else if (text.includes('传送') || text.includes('tp') || (text.includes('把') && text.includes('传送到'))) { const tpMatch = text.match(/(?:传送|tp|把.+传送到)\s*(.+?)\s+(\d+)\s+(\d+)\s+(\d+)/); if (tpMatch) cmd = `/tp ${tpMatch[1].trim()} ${tpMatch[2]} ${tpMatch[3]} ${tpMatch[4]}`; else { const simpleMatch = text.match(/(?:传送|tp)\s*(.+)/); const target = simpleMatch ? simpleMatch[1].trim() : '@p'; cmd = `/tp ${target}`; } }
+        else if (text.includes('创造') || text.includes('creative')) { cmd = `/gamemode creative @p`; }
+        else if (text.includes('生存') || text.includes('survival')) { cmd = `/gamemode survival @p`; }
+        else if (text.includes('白天') || text.includes('天亮')) { cmd = `/time set day`; }
+        else if (text.includes('黑夜') || text.includes('天黑')) { cmd = `/time set night`; }
+        else if (text.includes('晴天') || text.includes('放晴')) { cmd = `/weather clear`; }
+        else if (text.includes('下雨') || text.includes('雨天')) { cmd = `/weather rain`; }
+        else if (text.includes('死亡不掉落') || text.includes('不掉落')) { cmd = `/gamerule keepInventory true`; }
+        if (cmd) { resDiv.style.display = 'block'; resDiv.className = 'result success'; resDiv.innerHTML = `指令：<code>${cmd}</code> <button class="copy-btn" onclick="copyCmd('${cmd}')">复制</button>`; }
+        else { resDiv.style.display = 'block'; resDiv.className = 'result error'; resDiv.textContent = '无法识别，请换种说法试试。支持：给我xxx / 踢了xxx / 封禁xxx / 传送到xxx / 白天 / 晴天 等'; }
+    }// ===== 地图种子查看器 =====
+function openSeedMap() {
+    const seed = document.getElementById('seed-input').value.trim();
+    if (!seed) { alert('请输入种子号'); return; }
+    window.open(`https://www.chunkbase.com/apps/seed-map#seed=${seed}`, '_blank');
+}
+
+// ===== 村民交易查询 =====
+const trades = {
+    farmer: [['小麦', '1个绿宝石', '18-22个小麦'], ['胡萝卜/马铃薯', '1个绿宝石', '15-19个'], ['绿宝石', '1个', '3-4个面包']],
+    librarian: [['附魔书', '5-64个绿宝石', '随机附魔'], ['书架', '1个绿宝石', '3-4个书架'], ['绿宝石', '1个', '24-26个纸']],
+    armorer: [['铁头盔/胸甲/护腿/靴子', '4-9个绿宝石', '1个'], ['绿宝石', '1个', '4个铁锭']],
+    weaponsmith: [['铁剑/斧', '7-10个绿宝石', '1个'], ['绿宝石', '1个', '4个铁锭']],
+    cleric: [['经验瓶', '1个绿宝石', '1个'], ['红石粉/荧石粉/末影珍珠', '1个绿宝石', '4-7个']]
+};
+function showTrades() {
+    const profession = document.getElementById('villager-profession').value;
+    const data = trades[profession];
+    let html = '<table class="trade-table"><tr><th>物品</th><th>价格</th><th>数量</th></tr>';
+    data.forEach(row => { html += `<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td></tr>`; });
+    html += '</table>';
+    document.getElementById('trade-result').innerHTML = html;
+    document.getElementById('trade-result').style.display = 'block';
+}
+showTrades(); // 初始加载
+
+// ===== 附魔兼容查询 =====
+const conflicts = {
+    sharpness: ['smite','bane_of_arthropods'],
+    smite: ['sharpness','bane_of_arthropods'],
+    bane_of_arthropods: ['sharpness','smite'],
+    protection: ['fire_protection','blast_protection','projectile_protection'],
+    fire_protection: ['protection','blast_protection','projectile_protection'],
+    blast_protection: ['protection','fire_protection','projectile_protection'],
+    projectile_protection: ['protection','fire_protection','blast_protection'],
+    silk_touch: ['fortune'],
+    fortune: ['silk_touch'],
+    infinity: ['mending'],
+    mending: ['infinity']
+};
+const names = { sharpness:'锋利', smite:'亡灵杀手', bane_of_arthropods:'节肢杀手', protection:'保护', fire_protection:'火焰保护', blast_protection:'爆炸保护', projectile_protection:'弹射物保护', silk_touch:'精准采集', fortune:'时运', infinity:'无限', mending:'经验修补' };
+function checkEnchantCompatibility() {
+    const e1 = document.getElementById('enchant1').value;
+    const e2 = document.getElementById('enchant2').value;
+    const resDiv = document.getElementById('enchant-result');
+    if (e1 === e2) { resDiv.style.display = 'block'; resDiv.className = 'result error'; resDiv.textContent = '相同附魔无需比较'; return; }
+    const conflict = conflicts[e1]?.includes(e2);
+    resDiv.style.display = 'block';
+    if (conflict) { resDiv.className = 'result error'; resDiv.textContent = `❌ ${names[e1]} 和 ${names[e2]} 冲突，不能共存`; }
+    else { resDiv.className = 'result success'; resDiv.textContent = `✅ ${names[e1]} 和 ${names[e2]} 可以共存`; }
+}// ===== 红石信号计算 =====
+function calcRedstone() {
+    const distance = parseInt(document.getElementById('redstone-distance').value);
+    const resDiv = document.getElementById('redstone-result');
+    if (isNaN(distance) || distance < 0 || distance > 15) { resDiv.style.display = 'block'; resDiv.className = 'result error'; resDiv.textContent = '请输入0-15的距离'; return; }
+    const strength = Math.max(0, 15 - distance);
+    resDiv.style.display = 'block';
+    resDiv.className = 'result success';
+    resDiv.innerHTML = `距离 ${distance} 格时，红石信号强度为 <strong>${strength}</strong>`;
+}
+
+// ===== 自定义计分板生成 =====
+function generateScoreboard() {
+    const name = document.getElementById('sb-name').value.trim() || 'money';
+    const display = document.getElementById('sb-display').value.trim() || '金币';
+    const criteria = document.getElementById('sb-criteria').value;
+    const resDiv = document.getElementById('sb-result');
+    const addCmd = `/scoreboard objectives add ${name} ${criteria} "${display}"`;
+    const showCmd = `/scoreboard objectives setdisplay sidebar ${name}`;
+    resDiv.style.display = 'block';
+    resDiv.className = 'result success';
+    resDiv.innerHTML = `
+        <strong>创建计分板：</strong><code>${addCmd}</code> <button class="copy-btn" onclick="copyCmd('${addCmd}')">复制</button><br>
+        <strong>显示在侧边栏：</strong><code>${showCmd}</code> <button class="copy-btn" onclick="copyCmd('${showCmd}')">复制</button>
+    `;
+}
+
+// ===== 简易经济计算器 =====
+function calcTotal() {
+    const price = parseFloat(document.getElementById('price-per').value) || 0;
+    const amount = parseInt(document.getElementById('amount').value) || 0;
+    const total = price * amount;
+    const resDiv = document.getElementById('calc-result');
+    resDiv.style.display = 'block';
+    resDiv.className = 'result success';
+    resDiv.innerHTML = `单价 ${price} × 数量 ${amount} = <strong>总价 ${total}</strong>`;
+}        // ===== 玩家头颅获取器（Java版） =====
+        function generateSkull() {
+            const player = document.getElementById('skull-player').value.trim();
+            const resDiv = document.getElementById('skull-result');
+            if (!player) { resDiv.style.display = 'block'; resDiv.className = 'result error'; resDiv.textContent = '请输入玩家名'; return; }
+            const cmd = `/give @p skull 1 3 {SkullOwner:"${player}"}`;
             resDiv.style.display = 'block';
             resDiv.className = 'result success';
-            resDiv.innerHTML = `指令：<code>${cmd}</code> <button class="copy-btn" onclick="copyCmd('${cmd}')">复制</button>`;
-        }
-
-        // ===== 定时提醒 =====
-        let reminderInterval = null;
-        function startReminder() {
-            const min = parseInt(document.getElementById('reminder-min').value) || 0;
-            let totalSec = min * 60;
-            if (totalSec <= 0) return;
-            clearInterval(reminderInterval);
-            document.getElementById('reminder-display').style.display = 'block';
-            document.getElementById('reminder-stop-btn').style.display = 'inline-block';
-            const display = document.getElementById('reminder-display');
-                    reminderInterval = setInterval(() => {
-                if (totalSec <= 0) {
-                    clearInterval(reminderInterval);
-                    display.textContent = '时间到！';
-                    alert(document.getElementById('reminder-msg').value || '时间到！');
-                    return;
-                }
-                totalSec--;
-                const mins = Math.floor(totalSec / 60).toString().padStart(2, '0');
-                const secs = (totalSec % 60).toString().padStart(2, '0');
-                display.textContent = `${mins}:${secs}`;
-            }, 1000);
-        }
-        function stopReminder() {
-            clearInterval(reminderInterval);
-            document.getElementById('reminder-display').style.display = 'none';
-            document.getElementById('reminder-stop-btn').style.display = 'none';
-        }
-
-        // ===== 颜色代码生成器 =====
-        const colors = [
-            { code: '§1', hex: '#0000AA' }, { code: '§2', hex: '#00AA00' }, { code: '§3', hex: '#00AAAA' },
-            { code: '§4', hex: '#AA0000' }, { code: '§5', hex: '#AA00AA' }, { code: '§6', hex: '#FFAA00' },
-            { code: '§7', hex: '#AAAAAA' }, { code: '§8', hex: '#555555' }, { code: '§9', hex: '#5555FF' },
-            { code: '§a', hex: '#55FF55' }, { code: '§b', hex: '#55FFFF' }, { code: '§c', hex: '#FF5555' },
-            { code: '§d', hex: '#FF55FF' }, { code: '§e', hex: '#FFFF55' }, { code: '§f', hex: '#FFFFFF' }
-        ];
-        const grid = document.getElementById('color-grid');
-        colors.forEach(c => {
-            const btn = document.createElement('button');
-            btn.className = 'color-btn';
-            btn.style.backgroundColor = c.hex;
-            btn.textContent = c.code;
-            btn.title = '复制 ' + c.code;
-            btn.onclick = () => copyCmd(c.code);
-            grid.appendChild(btn);
-        });
-
-        // ===== 坐标计算器 =====
-        function calcDistance() {
-            const x1 = parseFloat(document.getElementById('coord-x1').value) || 0;
-            const z1 = parseFloat(document.getElementById('coord-z1').value) || 0;
-            const x2 = parseFloat(document.getElementById('coord-x2').value) || 0;
-            const z2 = parseFloat(document.getElementById('coord-z2').value) || 0;
-            const dist = Math.round(Math.sqrt((x2-x1)**2 + (z2-z1)**2));
-            const resDiv = document.getElementById('coord-result');
-            resDiv.style.display = 'block';
-            resDiv.className = 'result success';
-            resDiv.innerHTML = `两点距离：<strong>${dist}</strong> 格`;
-        }
-        function randomCoords() {
-            const x1 = parseFloat(document.getElementById('coord-x1').value) || -1000;
-            const z1 = parseFloat(document.getElementById('coord-z1').value) || -1000;
-            const x2 = parseFloat(document.getElementById('coord-x2').value) || 1000;
-            const z2 = parseFloat(document.getElementById('coord-z2').value) || 1000;
-            const xMin = Math.min(x1, x2), xMax = Math.max(x1, x2);
-            const zMin = Math.min(z1, z2), zMax = Math.max(z1, z2);
-            const x = Math.floor(Math.random() * (xMax - xMin + 1)) + xMin;
-            const z = Math.floor(Math.random() * (zMax - zMin + 1)) + zMin;
-            const resDiv = document.getElementById('coord-result');
-            resDiv.style.display = 'block';
-            resDiv.className = 'result success';
-            resDiv.innerHTML = `随机坐标：<strong>${x}, 64, ${z}</strong> <br>指令：<code>/tp @p ${x} 64 ${z}</code> <button class="copy-btn" onclick="copyCmd('/tp @p ${x} 64 ${z}')">复制</button>`;
+            resDiv.innerHTML = `<strong>Java版指令：</strong><code>${cmd}</code> <button class="copy-btn" onclick="copyCmd('${cmd}')">复制</button><br><span class="hint">基岩版不支持此指令，仅限Java版使用</span>`;
         }
     </script>
 </body>
