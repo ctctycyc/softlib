@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>工具箱 · 软件库</title>
+    <title>MC服务器控制台 · 软件库</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
@@ -26,47 +26,48 @@
         .result.success { border-left: 4px solid #4caf50; }
         .result.error { border-left: 4px solid #e74c3c; }
         .back-link { display: block; text-align: center; margin-top: 20px; color: var(--accent); text-decoration: none; }
+        .cmd-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .cmd-item code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
+        .copy-btn { background: none; border: 1px solid var(--border); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; color: var(--sub); }
+        .copy-btn:hover { background: var(--border); }
     </style>
 </head>
 <body>
-    <h1 style="text-align:center; margin-bottom: 20px;">实用工具箱</h1>
+    <h1 style="text-align:center; margin-bottom: 20px;">MC服务器控制台</h1>
 
-    <!-- MC服务器状态查询 -->
+    <!-- 服务器状态查询 -->
     <div class="tool-card">
-        <h3><i class="fas fa-server"></i> MC服务器状态查询</h3>
+        <h3><i class="fas fa-server"></i> 服务器状态查询</h3>
         <div class="input-group">
-            <input id="mc-ip" type="text" placeholder="例如: play.hypixel.net:25565">
+            <input id="mc-ip" type="text" placeholder="例如: zecirtk.aternos.me:12345">
             <button class="btn" onclick="checkMC()">查询</button>
         </div>
         <div id="mc-result" class="result"></div>
+        <p style="font-size:12px;color:var(--sub);margin-top:8px;">
+            注意：Aternos免费服休眠时可能显示离线，但游戏内可正常连接。
+        </p>
     </div>
 
-    <!-- 短链接生成器 -->
+    <!-- 常用指令速查 -->
     <div class="tool-card">
-        <h3><i class="fas fa-link"></i> 短链接生成器</h3>
-        <div class="input-group">
-            <input id="long-url" type="url" placeholder="粘贴长链接...">
-            <button class="btn" onclick="shortenUrl()">生成</button>
+        <h3><i class="fas fa-terminal"></i> 管理员常用指令</h3>
+        <div id="cmd-list">
+            <div class="cmd-item"><code>/gamemode creative</code><button class="copy-btn" onclick="copyCmd('/gamemode creative')">复制</button></div>
+            <div class="cmd-item"><code>/gamemode survival</code><button class="copy-btn" onclick="copyCmd('/gamemode survival')">复制</button></div>
+            <div class="cmd-item"><code>/give @p diamond 64</code><button class="copy-btn" onclick="copyCmd('/give @p diamond 64')">复制</button></div>
+            <div class="cmd-item"><code>/time set day</code><button class="copy-btn" onclick="copyCmd('/time set day')">复制</button></div>
+            <div class="cmd-item"><code>/weather clear</code><button class="copy-btn" onclick="copyCmd('/weather clear')">复制</button></div>
+            <div class="cmd-item"><code>/tp @p 坐标</code><button class="copy-btn" onclick="copyCmd('/tp @p ')">复制</button></div>
+            <div class="cmd-item"><code>/effect @p speed 99999 10 true</code><button class="copy-btn" onclick="copyCmd('/effect @p speed 99999 10 true')">复制</button></div>
+            <div class="cmd-item"><code>/gamerule keepInventory true</code><button class="copy-btn" onclick="copyCmd('/gamerule keepInventory true')">复制</button></div>
+            <div class="cmd-item"><code>/kill @e[type=zombie]</code><button class="copy-btn" onclick="copyCmd('/kill @e[type=zombie]')">复制</button></div>
+            <div class="cmd-item"><code>/kick 玩家名</code><button class="copy-btn" onclick="copyCmd('/kick ')">复制</button></div>
+            <div class="cmd-item"><code>/ban 玩家名</code><button class="copy-btn" onclick="copyCmd('/ban ')">复制</button></div>
+            <div class="cmd-item"><code>/pardon 玩家名</code><button class="copy-btn" onclick="copyCmd('/pardon ')">复制</button></div>
+            <div class="cmd-item"><code>/op 玩家名</code><button class="copy-btn" onclick="copyCmd('/op ')">复制</button></div>
+            <div class="cmd-item"><code>/deop 玩家名</code><button class="copy-btn" onclick="copyCmd('/deop ')">复制</button></div>
+            <div class="cmd-item"><code>/list</code><button class="copy-btn" onclick="copyCmd('/list')">复制</button></div>
         </div>
-        <div id="short-result" class="result"></div>
-    </div>
-
-    <!-- 留言墙 -->
-    <div class="tool-card">
-        <h3><i class="fas fa-comments"></i> 留言墙</h3>
-        <div class="input-group">
-            <input id="wall-msg" type="text" placeholder="说点什么...">
-            <button class="btn" onclick="postWall()">发布</button>
-        </div>
-        <div id="wall-messages" style="max-height:200px;overflow-y:auto;font-size:14px;"></div>
-    </div>
-
-    <!-- 在线剪贴板 -->
-    <div class="tool-card">
-        <h3><i class="fas fa-clipboard"></i> 在线剪贴板</h3>
-        <textarea id="clip-text" style="width:100%;height:80px;padding:10px;border:1px solid var(--border);border-radius:6px;" placeholder="粘贴文本，生成分享链接..."></textarea>
-        <button class="btn" style="margin-top:8px;" onclick="createClip()">生成分享链接</button>
-        <div id="clip-result" class="result"></div>
     </div>
 
     <a href="./" class="back-link"><i class="fas fa-arrow-left"></i> 返回软件库</a>
@@ -76,7 +77,7 @@
         async function checkMC() {
             const ip = document.getElementById('mc-ip').value.trim();
             const resDiv = document.getElementById('mc-result');
-            if (!ip) { resDiv.style.display = 'block'; resDiv.className = 'result error'; resDiv.textContent = '请输入服务器IP地址'; return; }
+            if (!ip) { resDiv.style.display = 'block'; resDiv.className = 'result error'; resDiv.textContent = '请输入服务器IP地址和端口'; return; }
             resDiv.style.display = 'block';
             resDiv.className = 'result';
             resDiv.textContent = '查询中...';
@@ -93,7 +94,7 @@
                     `;
                 } else {
                     resDiv.className = 'result error';
-                    resDiv.textContent = '❌ 服务器离线或无法连接';
+                    resDiv.textContent = '❌ 服务器离线或无法连接（Aternos免费服休眠时属于正常现象）';
                 }
             } catch (e) {
                 resDiv.className = 'result error';
@@ -101,75 +102,14 @@
             }
         }
 
-        // ===== 短链接生成（使用Supabase）=====
-        async function shortenUrl() {
-            const longUrl = document.getElementById('long-url').value.trim();
-            const resDiv = document.getElementById('short-result');
-            if (!longUrl) { resDiv.style.display = 'block'; resDiv.className = 'result error'; resDiv.textContent = '请输入链接'; return; }
-            const shortCode = Math.random().toString(36).substring(2, 8);
-            try {
-                const resp = await fetch('https://rgekpmuujozhkkctpdup.supabase.co/rest/v1/short_links', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apikey': 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr' },
-                    body: JSON.stringify({ short_code: shortCode, long_url: longUrl })
-                });
-                if (resp.ok) {
-                    const shortUrl = `https://ctctycyc.github.io/softlib/s.html?c=${shortCode}`;
-                    resDiv.style.display = 'block';
-                    resDiv.className = 'result success';
-                    resDiv.innerHTML = `短链接：<a href="${shortUrl}" target="_blank">${shortUrl}</a>`;
-                } else {
-                    resDiv.style.display = 'block';
-                    resDiv.className = 'result error';
-                    resDiv.textContent = '生成失败，请重试';
-                }
-            } catch (e) {
-                resDiv.className = 'result error';
-                resDiv.textContent = '网络错误';
-            }
+        // ===== 复制指令到剪贴板 =====
+        function copyCmd(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('已复制：' + text);
+            }).catch(() => {
+                prompt('请手动复制以下指令：', text);
+            });
         }
-
-        // ===== 留言墙（存储在localStorage，简单实现）=====
-        function postWall() {
-            const msgInput = document.getElementById('wall-msg');
-            const msg = msgInput.value.trim();
-            if (!msg) return;
-            const msgs = JSON.parse(localStorage.getItem('wall_msgs') || '[]');
-            msgs.push({ text: msg, time: new Date().toLocaleTimeString() });
-            localStorage.setItem('wall_msgs', JSON.stringify(msgs));
-            msgInput.value = '';
-            renderWall();
-        }
-        function renderWall() {
-            const msgs = JSON.parse(localStorage.getItem('wall_msgs') || '[]');
-            const container = document.getElementById('wall-messages');
-            container.innerHTML = msgs.map(m => `<div style="border-bottom:1px solid #eee;padding:4px 0;">${m.text} <span style="color:#999;font-size:12px;">${m.time}</span></div>`).join('');
-        }
-        renderWall();
-
-        // ===== 在线剪贴板（同样使用localStorage简化）=====
-        function createClip() {
-            const text = document.getElementById('clip-text').value.trim();
-            const resDiv = document.getElementById('clip-result');
-            if (!text) { resDiv.style.display = 'block'; resDiv.className = 'result error'; resDiv.textContent = '请输入文本'; return; }
-            const id = Math.random().toString(36).substring(2, 8);
-            localStorage.setItem('clip_' + id, text);
-            const url = `${location.origin}${location.pathname}?clip=${id}`;
-            resDiv.style.display = 'block';
-            resDiv.className = 'result success';
-            resDiv.innerHTML = `分享链接：<a href="${url}" target="_blank">${url}</a>`;
-        }
-        // 加载剪贴板参数
-        (function() {
-            const params = new URLSearchParams(location.search);
-            const clipId = params.get('clip');
-            if (clipId) {
-                const text = localStorage.getItem('clip_' + clipId);
-                if (text) {
-                    document.body.innerHTML = `<pre style="padding:20px;white-space:pre-wrap;">${text}</pre>`;
-                }
-            }
-        })();
     </script>
 </body>
 </html>
