@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工具箱 · 软件库</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --bg: #f0f2f5; --card: #ffffff; --text: #1a1a1a; --sub: #555;
+            --border: #e0e0e0; --accent: #1e3c72; --btn: #3390ec;
+            --radius: 8px; --shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); padding: 20px; max-width: 600px; margin: 0 auto; }
+        .tool-card {
+            background: var(--card); border-radius: var(--radius); padding: 20px;
+            margin-bottom: 16px; box-shadow: var(--shadow);
+        }
+        .tool-card h3 { margin-bottom: 12px; font-size: 1.2rem; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 12px; }
+        .input-group input { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
+        .btn { background: var(--btn); color: white; border: none; padding: 10px 18px; border-radius: 6px; font-size: 14px; cursor: pointer; }
+        .btn:hover { opacity: 0.9; }
+        .result { margin-top: 12px; padding: 10px; background: #f5f5f5; border-radius: 6px; font-size: 14px; display: none; }
+        .result.success { border-left: 4px solid #4caf50; }
+        .result.error { border-left: 4px solid #e74c3c; }
+        .back-link { display: block; text-align: center; margin-top: 20px; color: var(--accent); text-decoration: none; }
+    </style>
+</head>
+<body>
+    <h1 style="text-align:center; margin-bottom: 20px;">实用工具箱</h1>
+
+    <!-- MC服务器状态查询 -->
+    <div class="tool-card">
+        <h3><i class="fas fa-server"></i> MC服务器状态查询</h3>
+        <div class="input-group">
+            <input id="mc-ip" type="text" placeholder="例如: play.hypixel.net:25565">
+            <button class="btn" onclick="checkMC()">查询</button>
+        </div>
+        <div id="mc-result" class="result"></div>
+    </div>
+
+    <!-- 短链接生成器 -->
+    <div class="tool-card">
+        <h3><i class="fas fa-link"></i> 短链接生成器</h3>
+        <div class="input-group">
+            <input id="long-url" type="url" placeholder="粘贴长链接...">
+            <button class="btn" onclick="shortenUrl()">生成</button>
+        </div>
+        <div id="short-result" class="result"></div>
+    </div>
+
+    <!-- 留言墙 -->
+    <div class="tool-card">
+        <h3><i class="fas fa-comments"></i> 留言墙</h3>
+        <div class="input-group">
+            <input id="wall-msg" type="text" placeholder="说点什么...">
+            <button class="btn" onclick="postWall()">发布</button>
+        </div>
+        <div id="wall-messages" style="max-height:200px;overflow-y:auto;font-size:14px;"></div>
+    </div>
+
+    <!-- 在线剪贴板 -->
+    <div class="tool-card">
+        <h3><i class="fas fa-clipboard"></i> 在线剪贴板</h3>
+        <textarea id="clip-text" style="width:100%;height:80px;padding:10px;border:1px solid var(--border);border-radius:6px;" placeholder="粘贴文本，生成分享链接..."></textarea>
+        <button class="btn" style="margin-top:8px;" onclick="createClip()">生成分享链接</button>
+        <div id="clip-result" class="result"></div>
+    </div>
+
+    <a href="./" class="back-link"><i class="fas fa-arrow-left"></i> 返回软件库</a>
+
+    <script>
+        // ===== MC服务器状态查询 =====
+        async function checkMC() {
+            const ip = document.getElementById('mc-ip').value.trim();
+            const resDiv = document.getElementById('mc-result');
+            if (!ip) { resDiv.style.display = 'block'; resDiv.className = 'result error'; resDiv.textContent = '请输入服务器IP地址'; return; }
+            resDiv.style.display = 'block';
+            resDiv.className = 'result';
+            resDiv.textContent = '查询中...';
+            try {
+                const resp = await fetch(`https://api.mcsrvstat.us/2/${encodeURIComponent(ip)}`);
+                const data = await resp.json();
+                if (data.online) {
+                    resDiv.className = 'result success';
+                    resDiv.innerHTML = `
+                        <strong>${data.hostname || ip}</strong> ✅ 在线<br>
+                        玩家: ${data.players.online}/${data.players.max}<br>
+                        版本: ${data.version}<br>
+                        延迟: ${data.debug?.ping ? data.debug.ping + 'ms' : '未知'}
+                    `;
+                } else {
+                    resDiv.className = 'result error';
+                    resDiv.textContent = '❌ 服务器离线或无法连接';
+                }
+            } catch (e) {
+                resDiv.className = 'result error';
+                resDiv.textContent = '请求失败，请检查网络';
+            }
+        }
+
+        // ===== 短链接生成（使用Supabase）=====
+        async function shortenUrl() {
+            const longUrl = document.getElementById('long-url').value.trim();
+            const resDiv = document.getElementById('short-result');
+            if (!longUrl) { resDiv.style.display = 'block'; resDiv.className = 'result error'; resDiv.textContent = '请输入链接'; return; }
+            const shortCode = Math.random().toString(36).substring(2, 8);
+            try {
+                const resp = await fetch('https://rgekpmuujozhkkctpdup.supabase.co/rest/v1/short_links', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr' },
+                    body: JSON.stringify({ short_code: shortCode, long_url: longUrl })
+                });
+                if (resp.ok) {
+                    const shortUrl = `https://ctctycyc.github.io/softlib/s.html?c=${shortCode}`;
+                    resDiv.style.display = 'block';
+                    resDiv.className = 'result success';
+                    resDiv.innerHTML = `短链接：<a href="${shortUrl}" target="_blank">${shortUrl}</a>`;
+                } else {
+                    resDiv.style.display = 'block';
+                    resDiv.className = 'result error';
+                    resDiv.textContent = '生成失败，请重试';
+                }
+            } catch (e) {
+                resDiv.className = 'result error';
+                resDiv.textContent = '网络错误';
+            }
+        }
+
+        // ===== 留言墙（存储在localStorage，简单实现）=====
+        function postWall() {
+            const msgInput = document.getElementById('wall-msg');
+            const msg = msgInput.value.trim();
+            if (!msg) return;
+            const msgs = JSON.parse(localStorage.getItem('wall_msgs') || '[]');
+            msgs.push({ text: msg, time: new Date().toLocaleTimeString() });
+            localStorage.setItem('wall_msgs', JSON.stringify(msgs));
+            msgInput.value = '';
+            renderWall();
+        }
+        function renderWall() {
+            const msgs = JSON.parse(localStorage.getItem('wall_msgs') || '[]');
+            const container = document.getElementById('wall-messages');
+            container.innerHTML = msgs.map(m => `<div style="border-bottom:1px solid #eee;padding:4px 0;">${m.text} <span style="color:#999;font-size:12px;">${m.time}</span></div>`).join('');
+        }
+        renderWall();
+
+        // ===== 在线剪贴板（同样使用localStorage简化）=====
+        function createClip() {
+            const text = document.getElementById('clip-text').value.trim();
+            const resDiv = document.getElementById('clip-result');
+            if (!text) { resDiv.style.display = 'block'; resDiv.className = 'result error'; resDiv.textContent = '请输入文本'; return; }
+            const id = Math.random().toString(36).substring(2, 8);
+            localStorage.setItem('clip_' + id, text);
+            const url = `${location.origin}${location.pathname}?clip=${id}`;
+            resDiv.style.display = 'block';
+            resDiv.className = 'result success';
+            resDiv.innerHTML = `分享链接：<a href="${url}" target="_blank">${url}</a>`;
+        }
+        // 加载剪贴板参数
+        (function() {
+            const params = new URLSearchParams(location.search);
+            const clipId = params.get('clip');
+            if (clipId) {
+                const text = localStorage.getItem('clip_' + clipId);
+                if (text) {
+                    document.body.innerHTML = `<pre style="padding:20px;white-space:pre-wrap;">${text}</pre>`;
+                }
+            }
+        })();
+    </script>
+</body>
+</html>
