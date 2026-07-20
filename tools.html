@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MC服务器控制台 · 软件库</title>
+    <title>服务器 · 软件库</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
@@ -18,8 +18,8 @@
             margin-bottom: 16px; box-shadow: var(--shadow);
         }
         .tool-card h3 { margin-bottom: 12px; font-size: 1.2rem; }
-        .input-group { display: flex; gap: 8px; margin-bottom: 12px; }
-        .input-group input { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .input-group input, .input-group select { padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; flex: 1; min-width: 120px; }
         .btn { background: var(--btn); color: white; border: none; padding: 10px 18px; border-radius: 6px; font-size: 14px; cursor: pointer; }
         .btn:hover { opacity: 0.9; }
         .result { margin-top: 12px; padding: 10px; background: #f5f5f5; border-radius: 6px; font-size: 14px; display: none; }
@@ -30,85 +30,234 @@
         .cmd-item code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 13px; }
         .copy-btn { background: none; border: 1px solid var(--border); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; color: var(--sub); }
         .copy-btn:hover { background: var(--border); }
+        .color-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+        .color-btn { width: 40px; height: 40px; border-radius: 4px; cursor: pointer; border: 1px solid var(--border); font-weight: bold; display: flex; align-items: center; justify-content: center; }
+        .countdown-display { font-size: 2rem; text-align: center; margin: 12px 0; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h1 style="text-align:center; margin-bottom: 20px;">MC服务器控制台</h1>
-
-    <!-- 服务器状态查询 -->
-    <div class="tool-card">
-        <h3><i class="fas fa-server"></i> 服务器状态查询</h3>
-        <div class="input-group">
-            <input id="mc-ip" type="text" placeholder="例如: zecirtk.aternos.me:12345">
-            <button class="btn" onclick="checkMC()">查询</button>
-        </div>
-        <div id="mc-result" class="result"></div>
-        <p style="font-size:12px;color:var(--sub);margin-top:8px;">
-            注意：Aternos免费服休眠时可能显示离线，但游戏内可正常连接。
-        </p>
+    <h1 style="text-align:center; margin-bottom: 20px;">服务器</h1><!-- 服务器状态查询 -->
+<div class="tool-card">
+    <h3><i class="fas fa-server"></i> 服务器状态查询</h3>
+    <div class="input-group">
+        <input id="mc-ip" type="text" placeholder="例如: ****.**********.***:123456">
+        <button class="btn" onclick="checkMC()">查询</button>
     </div>
+    <div id="mc-result" class="result"></div>
+    <p style="font-size:12px;color:var(--sub);margin-top:8px;">
+        注意：部分休眠时可能显示离线，但游戏内大概率可正常连接。
+    </p>
+</div>
 
-    <!-- 常用指令速查 -->
-    <div class="tool-card">
-        <h3><i class="fas fa-terminal"></i> 管理员常用指令</h3>
-        <div id="cmd-list">
-            <div class="cmd-item"><code>/gamemode creative</code><button class="copy-btn" onclick="copyCmd('/gamemode creative')">复制</button></div>
-            <div class="cmd-item"><code>/gamemode survival</code><button class="copy-btn" onclick="copyCmd('/gamemode survival')">复制</button></div>
-            <div class="cmd-item"><code>/give @p diamond 64</code><button class="copy-btn" onclick="copyCmd('/give @p diamond 64')">复制</button></div>
-            <div class="cmd-item"><code>/time set day</code><button class="copy-btn" onclick="copyCmd('/time set day')">复制</button></div>
-            <div class="cmd-item"><code>/weather clear</code><button class="copy-btn" onclick="copyCmd('/weather clear')">复制</button></div>
-            <div class="cmd-item"><code>/tp @p 坐标</code><button class="copy-btn" onclick="copyCmd('/tp @p ')">复制</button></div>
-            <div class="cmd-item"><code>/effect @p speed 99999 10 true</code><button class="copy-btn" onclick="copyCmd('/effect @p speed 99999 10 true')">复制</button></div>
-            <div class="cmd-item"><code>/gamerule keepInventory true</code><button class="copy-btn" onclick="copyCmd('/gamerule keepInventory true')">复制</button></div>
-            <div class="cmd-item"><code>/kill @e[type=zombie]</code><button class="copy-btn" onclick="copyCmd('/kill @e[type=zombie]')">复制</button></div>
-            <div class="cmd-item"><code>/kick 玩家名</code><button class="copy-btn" onclick="copyCmd('/kick ')">复制</button></div>
-            <div class="cmd-item"><code>/ban 玩家名</code><button class="copy-btn" onclick="copyCmd('/ban ')">复制</button></div>
-            <div class="cmd-item"><code>/pardon 玩家名</code><button class="copy-btn" onclick="copyCmd('/pardon ')">复制</button></div>
-            <div class="cmd-item"><code>/op 玩家名</code><button class="copy-btn" onclick="copyCmd('/op ')">复制</button></div>
-            <div class="cmd-item"><code>/deop 玩家名</code><button class="copy-btn" onclick="copyCmd('/deop ')">复制</button></div>
-            <div class="cmd-item"><code>/list</code><button class="copy-btn" onclick="copyCmd('/list')">复制</button></div>
-        </div>
+<!-- 常用指令速查 -->
+<div class="tool-card">
+    <h3><i class="fas fa-terminal"></i> 管理员常用指令</h3>
+    <div id="cmd-list">
+        <div class="cmd-item"><code>/gamemode creative</code><button class="copy-btn" onclick="copyCmd('/gamemode creative')">复制</button></div>
+        <div class="cmd-item"><code>/gamemode survival</code><button class="copy-btn" onclick="copyCmd('/gamemode survival')">复制</button></div>
+        <div class="cmd-item"><code>/give @p diamond 64</code><button class="copy-btn" onclick="copyCmd('/give @p diamond 64')">复制</button></div>
+        <div class="cmd-item"><code>/time set day</code><button class="copy-btn" onclick="copyCmd('/time set day')">复制</button></div>
+        <div class="cmd-item"><code>/weather clear</code><button class="copy-btn" onclick="copyCmd('/weather clear')">复制</button></div>
+        <div class="cmd-item"><code>/tp @p 坐标</code><button class="copy-btn" onclick="copyCmd('/tp @p ')">复制</button></div>
+        <div class="cmd-item"><code>/effect @p speed 99999 10 true</code><button class="copy-btn" onclick="copyCmd('/effect @p speed 99999 10 true')">复制</button></div>
+        <div class="cmd-item"><code>/gamerule keepInventory true</code><button class="copy-btn" onclick="copyCmd('/gamerule keepInventory true')">复制</button></div>
+        <div class="cmd-item"><code>/kill @e[type=zombie]</code><button class="copy-btn" onclick="copyCmd('/kill @e[type=zombie]')">复制</button></div>
+        <div class="cmd-item"><code>/kick 玩家名</code><button class="copy-btn" onclick="copyCmd('/kick ')">复制</button></div>
+        <div class="cmd-item"><code>/ban 玩家名</code><button class="copy-btn" onclick="copyCmd('/ban ')">复制</button></div>
+        <div class="cmd-item"><code>/pardon 玩家名</code><button class="copy-btn" onclick="copyCmd('/pardon ')">复制</button></div>
+        <div class="cmd-item"><code>/op 玩家名</code><button class="copy-btn" onclick="copyCmd('/op ')">复制</button></div>
+        <div class="cmd-item"><code>/deop 玩家名</code><button class="copy-btn" onclick="copyCmd('/deop ')">复制</button></div>
+        <div class="cmd-item"><code>/list</code><button class="copy-btn" onclick="copyCmd('/list')">复制</button></div>
     </div>
+</div><!-- 指令生成器 -->
+<div class="tool-card">
+    <h3><i class="fas fa-magic"></i> 指令生成器</h3>
+    <div class="input-group">
+        <select id="cmd-type" onchange="updateCmdForm()">
+            <option value="give">give（给物品）</option>
+            <option value="tp">tp（传送）</option>
+            <option value="kick">kick（踢人）</option>
+            <option value="ban">ban（封禁）</option>
+            <option value="gamemode">gamemode（模式切换）</option>
+        </select>
+    </div>
+    <div id="cmd-params"></div>
+    <button class="btn" style="margin-top:8px;" onclick="generateCmd()">生成指令</button>
+    <div id="gen-result" class="result"></div>
+</div>
 
-    <a href="./" class="back-link"><i class="fas fa-arrow-left"></i> 返回软件库</a>
+<!-- 定时提醒 -->
+<div class="tool-card">
+    <h3><i class="fas fa-clock"></i> 定时提醒</h3>
+    <div class="input-group">
+        <input id="reminder-min" type="number" placeholder="分钟后" value="30" style="flex:1;">
+        <input id="reminder-msg" type="text" placeholder="提醒内容（可选）" value="该启动服务器了！" style="flex:2;">
+        <button class="btn" onclick="startReminder()">设定提醒</button>
+    </div>
+    <div class="countdown-display" id="reminder-display" style="display:none;"></div>
+    <button class="btn" style="background:#e74c3c; display:none;" id="reminder-stop-btn" onclick="stopReminder()">取消提醒</button>
+</div><!-- 颜色代码生成器 -->
+<div class="tool-card">
+    <h3><i class="fas fa-palette"></i> 颜色代码生成器（基岩版）</h3>
+    <p style="font-size:13px;color:var(--sub);margin-bottom:8px;">点击颜色复制代码，游戏中输入 § 后可粘贴</p>
+    <div class="color-grid" id="color-grid"></div>
+</div>
 
-    <script>
-        // ===== MC服务器状态查询 =====
+<!-- 坐标计算器 -->
+<div class="tool-card">
+    <h3><i class="fas fa-compass"></i> 坐标计算器</h3>
+    <div class="input-group">
+        <input id="coord-x1" type="number" placeholder="X1" style="flex:1;">
+        <input id="coord-z1" type="number" placeholder="Z1" style="flex:1;">
+        <input id="coord-x2" type="number" placeholder="X2" style="flex:1;">
+        <input id="coord-z2" type="number" placeholder="Z2" style="flex:1;">
+    </div>
+    <button class="btn" onclick="calcDistance()">计算距离</button>
+    <button class="btn" style="background:#4caf93;" onclick="randomCoords()">随机传送坐标</button>
+    <div id="coord-result" class="result"></div>
+</div>
+
+<a href="./" class="back-link"><i class="fas fa-arrow-left"></i> 返回软件库</a>    <script>
+        // ===== 服务器状态查询 =====
         async function checkMC() {
             const ip = document.getElementById('mc-ip').value.trim();
             const resDiv = document.getElementById('mc-result');
             if (!ip) { resDiv.style.display = 'block'; resDiv.className = 'result error'; resDiv.textContent = '请输入服务器IP地址和端口'; return; }
-            resDiv.style.display = 'block';
-            resDiv.className = 'result';
-            resDiv.textContent = '查询中...';
+            resDiv.style.display = 'block'; resDiv.className = 'result'; resDiv.textContent = '查询中...';
             try {
                 const resp = await fetch(`https://api.mcsrvstat.us/2/${encodeURIComponent(ip)}`);
                 const data = await resp.json();
                 if (data.online) {
                     resDiv.className = 'result success';
-                    resDiv.innerHTML = `
-                        <strong>${data.hostname || ip}</strong> ✅ 在线<br>
-                        玩家: ${data.players.online}/${data.players.max}<br>
-                        版本: ${data.version}<br>
-                        延迟: ${data.debug?.ping ? data.debug.ping + 'ms' : '未知'}
-                    `;
+                    resDiv.innerHTML = `<strong>${data.hostname || ip}</strong> 〔正常〕 在线<br>玩家: ${data.players.online}/${data.players.max}<br>版本: ${data.version}<br>延迟: ${data.debug?.ping ? data.debug.ping + 'ms' : '未知'}`;
                 } else {
                     resDiv.className = 'result error';
-                    resDiv.textContent = '❌ 服务器离线或无法连接（Aternos免费服休眠时属于正常现象）';
+                    resDiv.textContent = '〔错误〕服务器离线或无法连接（Aternos免费服休眠时属于正常现象）';
                 }
-            } catch (e) {
-                resDiv.className = 'result error';
-                resDiv.textContent = '请求失败，请检查网络';
-            }
+            } catch (e) { resDiv.className = 'result error'; resDiv.textContent = '请求失败，请检查网络'; }
         }
 
-        // ===== 复制指令到剪贴板 =====
         function copyCmd(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert('已复制：' + text);
-            }).catch(() => {
-                prompt('请手动复制以下指令：', text);
-            });
+            navigator.clipboard.writeText(text).then(() => alert('已复制：' + text)).catch(() => prompt('请手动复制：', text));
+        }
+
+        // ===== 指令生成器 =====
+        function updateCmdForm() {
+            const type = document.getElementById('cmd-type').value;
+            const paramsDiv = document.getElementById('cmd-params');
+            let html = '';
+            if (type === 'give') html = '目标 @p <input id="gen-target" value="@p" style="flex:1;"> 物品 <input id="gen-item" placeholder="diamond" style="flex:1;"> 数量 <input id="gen-count" type="number" value="1" style="flex:1;">';
+            else if (type === 'tp') html = '目标 @p <input id="gen-target" value="@p" style="flex:1;"> 坐标 X <input id="gen-x" type="number" placeholder="0" style="flex:1;"> Y <input id="gen-y" type="number" value="64" style="flex:1;"> Z <input id="gen-z" type="number" placeholder="0" style="flex:1;">';
+            else if (type === 'kick' || type === 'ban') html = '玩家名 <input id="gen-player" placeholder="Steve" style="flex:1;">';
+            else if (type === 'gamemode') html = '模式 <select id="gen-gamemode"><option value="creative">创造</option><option value="survival">生存</option></select> 目标 @p <input id="gen-target" value="@p" style="flex:1;">';
+            paramsDiv.innerHTML = '<div class="input-group" style="flex-wrap:wrap;">' + html + '</div>';
+        }
+        updateCmdForm();
+
+        function generateCmd() {
+            const type = document.getElementById('cmd-type').value;
+            let cmd = '';
+            if (type === 'give') {
+                const target = document.getElementById('gen-target')?.value || '@p';
+                const item = document.getElementById('gen-item')?.value || 'diamond';
+                const count = document.getElementById('gen-count')?.value || 1;
+                cmd = `/give ${target} ${item} ${count}`;
+            } else if (type === 'tp') {
+                const target = document.getElementById('gen-target')?.value || '@p';
+                const x = document.getElementById('gen-x')?.value || 0;
+                const y = document.getElementById('gen-y')?.value || 64;
+                const z = document.getElementById('gen-z')?.value || 0;
+                cmd = `/tp ${target} ${x} ${y} ${z}`;
+            } else if (type === 'kick') {
+                const player = document.getElementById('gen-player')?.value || 'Steve';
+                cmd = `/kick ${player}`;
+            } else if (type === 'ban') {
+                const player = document.getElementById('gen-player')?.value || 'Steve';
+                cmd = `/ban ${player}`;
+            } else if (type === 'gamemode') {
+                const mode = document.getElementById('gen-gamemode')?.value || 'creative';
+                const target = document.getElementById('gen-target')?.value || '@p';
+                cmd = `/gamemode ${mode} ${target}`;
+            }
+            const resDiv = document.getElementById('gen-result');
+            resDiv.style.display = 'block';
+            resDiv.className = 'result success';
+            resDiv.innerHTML = `指令：<code>${cmd}</code> <button class="copy-btn" onclick="copyCmd('${cmd}')">复制</button>`;
+        }
+
+        // ===== 定时提醒 =====
+        let reminderInterval = null;
+        function startReminder() {
+            const min = parseInt(document.getElementById('reminder-min').value) || 0;
+            let totalSec = min * 60;
+            if (totalSec <= 0) return;
+            clearInterval(reminderInterval);
+            document.getElementById('reminder-display').style.display = 'block';
+            document.getElementById('reminder-stop-btn').style.display = 'inline-block';
+            const display = document.getElementById('reminder-display');
+                    reminderInterval = setInterval(() => {
+                if (totalSec <= 0) {
+                    clearInterval(reminderInterval);
+                    display.textContent = '时间到！';
+                    alert(document.getElementById('reminder-msg').value || '时间到！');
+                    return;
+                }
+                totalSec--;
+                const mins = Math.floor(totalSec / 60).toString().padStart(2, '0');
+                const secs = (totalSec % 60).toString().padStart(2, '0');
+                display.textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+        function stopReminder() {
+            clearInterval(reminderInterval);
+            document.getElementById('reminder-display').style.display = 'none';
+            document.getElementById('reminder-stop-btn').style.display = 'none';
+        }
+
+        // ===== 颜色代码生成器 =====
+        const colors = [
+            { code: '§1', hex: '#0000AA' }, { code: '§2', hex: '#00AA00' }, { code: '§3', hex: '#00AAAA' },
+            { code: '§4', hex: '#AA0000' }, { code: '§5', hex: '#AA00AA' }, { code: '§6', hex: '#FFAA00' },
+            { code: '§7', hex: '#AAAAAA' }, { code: '§8', hex: '#555555' }, { code: '§9', hex: '#5555FF' },
+            { code: '§a', hex: '#55FF55' }, { code: '§b', hex: '#55FFFF' }, { code: '§c', hex: '#FF5555' },
+            { code: '§d', hex: '#FF55FF' }, { code: '§e', hex: '#FFFF55' }, { code: '§f', hex: '#FFFFFF' }
+        ];
+        const grid = document.getElementById('color-grid');
+        colors.forEach(c => {
+            const btn = document.createElement('button');
+            btn.className = 'color-btn';
+            btn.style.backgroundColor = c.hex;
+            btn.textContent = c.code;
+            btn.title = '复制 ' + c.code;
+            btn.onclick = () => copyCmd(c.code);
+            grid.appendChild(btn);
+        });
+
+        // ===== 坐标计算器 =====
+        function calcDistance() {
+            const x1 = parseFloat(document.getElementById('coord-x1').value) || 0;
+            const z1 = parseFloat(document.getElementById('coord-z1').value) || 0;
+            const x2 = parseFloat(document.getElementById('coord-x2').value) || 0;
+            const z2 = parseFloat(document.getElementById('coord-z2').value) || 0;
+            const dist = Math.round(Math.sqrt((x2-x1)**2 + (z2-z1)**2));
+            const resDiv = document.getElementById('coord-result');
+            resDiv.style.display = 'block';
+            resDiv.className = 'result success';
+            resDiv.innerHTML = `两点距离：<strong>${dist}</strong> 格`;
+        }
+        function randomCoords() {
+            const x1 = parseFloat(document.getElementById('coord-x1').value) || -1000;
+            const z1 = parseFloat(document.getElementById('coord-z1').value) || -1000;
+            const x2 = parseFloat(document.getElementById('coord-x2').value) || 1000;
+            const z2 = parseFloat(document.getElementById('coord-z2').value) || 1000;
+            const xMin = Math.min(x1, x2), xMax = Math.max(x1, x2);
+            const zMin = Math.min(z1, z2), zMax = Math.max(z1, z2);
+            const x = Math.floor(Math.random() * (xMax - xMin + 1)) + xMin;
+            const z = Math.floor(Math.random() * (zMax - zMin + 1)) + zMin;
+            const resDiv = document.getElementById('coord-result');
+            resDiv.style.display = 'block';
+            resDiv.className = 'result success';
+            resDiv.innerHTML = `随机坐标：<strong>${x}, 64, ${z}</strong> <br>指令：<code>/tp @p ${x} 64 ${z}</code> <button class="copy-btn" onclick="copyCmd('/tp @p ${x} 64 ${z}')">复制</button>`;
         }
     </script>
 </body>
