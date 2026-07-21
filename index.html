@@ -143,8 +143,11 @@
         showPage('community');
     });
 
-    function showNewPost() { document.getElementById('new-post-form').classList.remove('hidden'); }
-    function hideNewPost() { document.getElementById('new-post-form').classList.add('hidden'); }// ===== 软件库（GitHub Issues） =====
+    function showNewPost() {
+    document.getElementById('new-post-form').classList.remove('hidden');
+    // 平滑滚动到发帖表单
+    document.getElementById('new-post-form').scrollIntoView({ behavior: 'smooth' });
+    }function hideNewPost() { document.getElementById('new-post-form').classList.add('hidden'); }// ===== 软件库（GitHub Issues） =====
 async function loadSoftwares() {
     const div = document.getElementById('software-list');
     if (!div) return;
