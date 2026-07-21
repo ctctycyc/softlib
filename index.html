@@ -105,8 +105,7 @@
             </div>
         </div>
     </div>
-</div>
-<!-- 底部导航 -->
+</div><!-- 底部导航 -->
 <div class="bottom-nav">
     <div class="tab active" data-tab="home"><i class="fas fa-download"></i>软件</div>
     <div class="tab" data-tab="forum"><i class="fas fa-comments"></i>广场</div>
@@ -118,7 +117,8 @@
 <div id="drawer-panel" class="drawer-panel hidden">
     <button class="btn btn-outline btn-sm" style="margin-bottom:12px;" onclick="closeDrawer()">关闭</button>
     <div id="drawer-content"></div>
-</div><script>
+</div>
+<script>
     const supabase = window.supabase.createClient('https://rgekpmuujozhkkctpdup.supabase.co', 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr');
     const WORKER_URL = 'https://softlib-submit.dghkkppp.workers.dev';
 
@@ -191,7 +191,7 @@ async function loadSoftwares() {
 async function loadCategories() {
     backToCategories();
     const div = document.getElementById('category-list'); div.innerHTML = '<div class="card">加载中...</div>';
-    const { data } = await supabase.from('categories').select('*').order('sort_order');
+    const { data } = await supabase.from('categories').select('*').order('sort_order', { ascending: true });
     if (!data || !data.length) { div.innerHTML = '<div class="card">暂无板块</div>'; return; }
     div.innerHTML = data.map(c => `<div class="card" style="display:flex; justify-content:space-between; align-items:center;" onclick="openCategory(${c.id},'${c.name}')">
         <div><h3>${c.name}</h3><div class="desc">${c.description||''}</div></div>
@@ -304,11 +304,9 @@ function openDrawer(html) { document.getElementById('drawer-content').innerHTML 
 function closeDrawer() { document.getElementById('drawer-overlay').classList.add('hidden'); document.getElementById('drawer-panel').classList.add('hidden'); }// ===== 消息提醒 =====
 async function loadMessages() {
     const div = document.getElementById('message-list'); div.innerHTML = '<p>加载中...</p>';
-    // 查询所有帖子中 author 为当前昵称的帖子的 ID
     const { data: myPosts } = await supabase.from('posts').select('id').eq('author', nickname);
     if (!myPosts || !myPosts.length) { div.innerHTML = '<p>暂无新消息</p>'; return; }
     const postIds = myPosts.map(p => p.id);
-    // 查询这些帖子下的评论，排除自己的评论，按时间倒序
     const { data: replies } = await supabase.from('comments').select('*').in('post_id', postIds).neq('author', nickname).order('created_at', {ascending: false}).limit(20);
     if (!replies || !replies.length) { div.innerHTML = '<p>暂无新消息</p>'; return; }
     let html = '';
@@ -322,7 +320,7 @@ async function loadMessages() {
     }
     div.innerHTML = html;
 }
-function openPostFromMsg(postId) { showTab('forum'); openCategory(null, ''); openPost(postId); } // 从消息跳转到帖子    // ===== 个人中心 =====
+function openPostFromMsg(postId) { showTab('forum'); openCategory(null, ''); openPost(postId); }    // ===== 个人中心 =====
     function renderProfile() {
         document.getElementById('profile-nickname').textContent = nickname;
         document.getElementById('profile-badge').innerHTML = isAdmin ? '<span class="admin-badge">管理员</span>' : '普通用户';
@@ -333,13 +331,11 @@ function openPostFromMsg(postId) { showTab('forum'); openCategory(null, ''); ope
         const oldName = document.getElementById('admin-rename-old').value.trim();
         const newName = document.getElementById('admin-rename-new').value.trim();
         if (!oldName || !newName) return alert('请填写完整');
-        // 更新 posts 表
         await fetch('https://rgekpmuujozhkkctpdup.supabase.co/rest/v1/posts?author=eq.'+encodeURIComponent(oldName), {
             method: 'PATCH',
             headers: {'Content-Type':'application/json','apikey':'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr','Authorization':'Bearer '+(localStorage.getItem('authToken')||'')},
             body: JSON.stringify({author: newName})
         });
-        // 更新 comments 表
         await fetch('https://rgekpmuujozhkkctpdup.supabase.co/rest/v1/comments?author=eq.'+encodeURIComponent(oldName), {
             method: 'PATCH',
             headers: {'Content-Type':'application/json','apikey':'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr','Authorization':'Bearer '+(localStorage.getItem('authToken')||'')},
