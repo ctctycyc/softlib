@@ -118,12 +118,18 @@ async function loadPosts() {
     const div = document.getElementById('post-list');
     div.innerHTML = '<div class="card">加载中...</div>';
     try {
-        let url = 'https://rgekpmuujozhkkctpdup.supabase.co/rest/v1/posts?select=*&order=created_at.desc&limit=80';
-        if (currentCategoryId) url += '&category_id=eq.' + currentCategoryId;
+        // 正确的排序参数格式：order=created_at.desc.nullslast
+        let url = 'https://rgekpmuujozhkkctpdup.supabase.co/rest/v1/posts?select=*&order=created_at.desc.nullslast&limit=80';
+        if (currentCategoryId) {
+            url += '&category_id=eq.' + currentCategoryId;
+        }
         const res = await fetch(url, {
             headers: { 'apikey': 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr' }
         });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error('HTTP ' + res.status + ': ' + errorText);
+        }
         const data = await res.json();
         if (!Array.isArray(data) || !data.length) {
             div.innerHTML = '<div class="card">暂无帖子</div>';
