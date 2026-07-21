@@ -49,18 +49,23 @@
     <div class="top-nav">
         <div class="logo">软件库</div>
         <div class="nav-links">
-            <a href="#" id="nav-home" class="active">社区首页</a>
+            <a href="#" id="nav-home" class="active">首页（软件）</a>
+            <a href="#" id="nav-community">社区</a>
             <a href="./tools.html">工具箱</a>
             <a href="./chat.html">聊天室</a>
         </div>
     </div><div class="container" id="app">
-    <!-- 首页（软件列表 + 社区帖子） -->
+    <!-- 首页（软件列表） -->
     <div id="page-home">
         <h2 style="margin-bottom:12px;">软件</h2>
         <div id="software-list">
             <div class="card"><h3>软件加载中...</h3></div>
         </div>
-        <h2 style="margin:20px 0 12px;">社区</h2>
+    </div>
+
+    <!-- 社区页面（帖子列表 + 发帖） -->
+    <div id="page-community" class="hidden">
+        <h2 style="margin-bottom:12px;">社区</h2>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
             <span></span>
             <button class="btn" onclick="showNewPost()">发帖</button>
@@ -84,7 +89,7 @@
 
     <!-- 帖子详情页 -->
     <div id="page-detail" class="hidden">
-        <button class="btn" style="background:#999;margin-bottom:12px;" onclick="backToHome()">← 返回首页</button>
+        <button class="btn" style="background:#999;margin-bottom:12px;" onclick="backToCommunity()">← 返回社区</button>
         <div id="detail-content"></div>
         <h3 style="margin-top:16px;">回复</h3>
         <div id="comments-list"></div>
@@ -107,53 +112,71 @@
 
     let currentPostId = null;
 
-    function showHome() {
-        document.getElementById('page-home').classList.remove('hidden');
-        document.getElementById('page-detail').classList.add('hidden');
-        loadPosts();
-        loadSoftwares();
-    }
-    function showDetail() {
-        document.getElementById('page-home').classList.add('hidden');
-        document.getElementById('page-detail').classList.remove('hidden');
-    }
-    function backToHome() { showHome(); }
-    function showNewPost() { document.getElementById('new-post-form').classList.remove('hidden'); }
-    function hideNewPost() { document.getElementById('new-post-form').classList.add('hidden'); }
+    // 页面切换
+    const pages = {
+        home: document.getElementById('page-home'),
+        community: document.getElementById('page-community'),
+        detail: document.getElementById('page-detail')
+    };
 
-    // ===== 软件库（GitHub Issues） =====
-    async function loadSoftwares() {
-        const div = document.getElementById('software-list');
-        if (!div) return;
-        div.innerHTML = '<div class="card"><h3>软件加载中...</h3></div>';
-        try {
-            const res = await fetch('https://api.github.com/repos/ctctycyc/softlib/issues?labels=approved&state=open&sort=created&direction=desc&per_page=20');
-            if (!res.ok) {
-                div.innerHTML = '<div class="card"><h3>软件加载失败，请稍后再试</h3></div>';
-                return;
-            }
-            const issues = await res.json();
-            if (!Array.isArray(issues) || issues.length === 0) {
-                div.innerHTML = '<div class="card"><h3>暂无软件</h3></div>';
-                return;
-            }
-            div.innerHTML = issues.map(issue => {
-                const body = issue.body || '';
-                const lines = body.split('\n').filter(l => l.trim());
-                const desc = lines.find(l => !l.startsWith('http')) || '';
-                const link = lines.find(l => l.startsWith('http')) || '';
-                return `
-                    <div class="card">
-                        <h3>${issue.title}</h3>
-                        <div class="desc">${desc}</div>
-                        ${link ? `<a href="${link}" target="_blank" class="btn" style="display:inline-block;margin-top:8px;">下载</a>` : ''}
-                    </div>
-                `;
-            }).join('');
-        } catch (e) {
-            div.innerHTML = '<div class="card"><h3>软件加载失败，请检查网络</h3></div>';
+    function showPage(name) {
+        Object.keys(pages).forEach(k => pages[k].classList.add('hidden'));
+        pages[name].classList.remove('hidden');
+        if (name === 'home') loadSoftwares();
+        if (name === 'community') loadPosts();
+    }
+
+    function backToCommunity() { showPage('community'); }
+
+    // 导航点击事件
+    document.getElementById('nav-home').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+        this.classList.add('active');
+        showPage('home');
+    });
+
+    document.getElementById('nav-community').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+        this.classList.add('active');
+        showPage('community');
+    });
+
+    function showNewPost() { document.getElementById('new-post-form').classList.remove('hidden'); }
+    function hideNewPost() { document.getElementById('new-post-form').classList.add('hidden'); }// ===== 软件库（GitHub Issues） =====
+async function loadSoftwares() {
+    const div = document.getElementById('software-list');
+    if (!div) return;
+    div.innerHTML = '<div class="card"><h3>软件加载中...</h3></div>';
+    try {
+        const res = await fetch('https://api.github.com/repos/ctctycyc/softlib/issues?labels=approved&state=open&sort=created&direction=desc&per_page=20');
+        if (!res.ok) {
+            div.innerHTML = '<div class="card"><h3>软件加载失败，请稍后再试</h3></div>';
+            return;
         }
-    }// ===== 社区帖子 =====
+        const issues = await res.json();
+        if (!Array.isArray(issues) || issues.length === 0) {
+            div.innerHTML = '<div class="card"><h3>暂无软件</h3></div>';
+            return;
+        }
+        div.innerHTML = issues.map(issue => {
+            const body = issue.body || '';
+            const lines = body.split('\n').filter(l => l.trim());
+            const desc = lines.find(l => !l.startsWith('http')) || '';
+            const link = lines.find(l => l.startsWith('http')) || '';
+            return `
+                <div class="card">
+                    <h3>${issue.title}</h3>
+                    <div class="desc">${desc}</div>
+                    ${link ? `<a href="${link}" target="_blank" class="btn" style="display:inline-block;margin-top:8px;">下载</a>` : ''}
+                </div>
+            `;
+        }).join('');
+    } catch (e) {
+        div.innerHTML = '<div class="card"><h3>软件加载失败，请检查网络</h3></div>';
+    }
+}// ===== 社区帖子 =====
 async function loadPosts() {
     const div = document.getElementById('post-list');
     div.innerHTML = '<div class="card"><h3>帖子加载中...</h3></div>';
@@ -184,7 +207,7 @@ async function loadPosts() {
 
 async function openPost(id) {
     currentPostId = id;
-    showDetail();
+    showPage('detail');
     try {
         const res = await fetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${id}&select=*`, {
             headers: { 'apikey': SUPABASE_KEY }
@@ -227,7 +250,7 @@ async function loadComments(postId) {
     } catch (e) {
         div.innerHTML = `<div class="card error-card"><p>加载回复失败：${e.message}</p></div>`;
     }
-                }        async function createPost() {
+}        async function createPost() {
             const title = document.getElementById('post-title').value.trim();
             const content = document.getElementById('post-content').value.trim();
             const err = document.getElementById('post-error');
@@ -271,16 +294,8 @@ async function loadComments(postId) {
             } catch (e) { alert('网络错误：' + e.message); }
         }
 
-        document.getElementById('nav-home').addEventListener('click', function(e) {
-            e.preventDefault();
-            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-            this.classList.add('active');
-            showHome();
-        });
-
-        // 启动
-        loadSoftwares();
-        loadPosts();
+        // 启动（默认显示首页软件列表）
+        showPage('home');
     </script>
 </body>
 </html>
