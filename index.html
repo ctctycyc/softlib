@@ -23,7 +23,6 @@
             --shadow: 0 2px 6px rgba(0,0,0,0.04);
             --shadow-hover: 0 8px 20px rgba(0,0,0,0.08);
             --hover-bg: #fbfcfd;
-            --sidebar-bg: linear-gradient(180deg, #eef2f8, #f8f9fc);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -75,37 +74,28 @@
             white-space: nowrap;
         }
         .nav-links a:hover { background: rgba(74,111,165,0.15); text-decoration: none; transform: translateY(-1px); }
-        .nav-links a.active { background: rgba(74,111,165,0.22); color: #2c4a6e; font-weight: 580; }.container {
-    max-width: 980px;
-    margin: 24px auto;
-    padding: 0 18px;
-    display: flex;
-    gap: 22px;
-    flex-wrap: wrap;
-}
-.main-content { flex: 2.2; min-width: 0; }
-.sidebar { flex: 1; min-width: 250px; }
-.card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 20px;
-    margin-bottom: 16px;
-    box-shadow: var(--shadow);
-    transition: box-shadow 0.2s, background 0.2s, transform 0.2s;
-    cursor: pointer;
-    animation: cardUp 0.35s ease both;
-}
-@keyframes cardUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-.card:hover { box-shadow: var(--shadow-hover); background: var(--hover-bg); transform: translateY(-2px); }
-.card h3 { font-size: 1rem; margin-bottom: 6px; color: #1e2d3d; font-weight: 650; transition: color 0.15s; }
-.card:hover h3 { color: #0d1a2b; }
-.card .desc { font-size: 0.88rem; color: var(--sub); line-height: 1.55; margin-bottom: 8px; }
-.card .meta { font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.btn {
+        .nav-links a.active { background: rgba(74,111,165,0.22); color: #2c4a6e; font-weight: 580; }
+        .container { max-width: 860px; margin: 24px auto; padding: 0 18px; }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            transition: box-shadow 0.2s, background 0.2s, transform 0.2s;
+            cursor: pointer;
+            animation: cardUp 0.35s ease both;
+        }
+        @keyframes cardUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card:hover { box-shadow: var(--shadow-hover); background: var(--hover-bg); transform: translateY(-2px); }
+        .card h3 { font-size: 1rem; margin-bottom: 6px; color: #1e2d3d; font-weight: 650; transition: color 0.15s; }
+        .card:hover h3 { color: #0d1a2b; }
+        .card .desc { font-size: 0.88rem; color: var(--sub); line-height: 1.55; margin-bottom: 8px; }
+        .card .meta { font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }.btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     background: var(--btn); color: white; border: none; padding: 7px 20px;
     border-radius: 20px; font-weight: 520; cursor: pointer; font-size: 0.9rem;
@@ -133,46 +123,42 @@
 .input-group input:focus, .input-group textarea:focus {
     border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,111,165,0.12); outline: none;
 }
-.hidden { display: none !important; }        .post-item {
-            display: flex; align-items: flex-start; gap: 16px;
-            background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-            padding: 18px 20px; margin-bottom: 12px; box-shadow: var(--shadow);
-            transition: box-shadow 0.2s, background 0.2s, transform 0.2s; cursor: pointer;
-            animation: cardUp 0.35s ease both;
-        }
-        .post-item:hover { box-shadow: var(--shadow-hover); background: #fcfdfd; transform: translateY(-2px); }
-        .post-avatar {
-            width: 44px; height: 44px; border-radius: 10px;
-            background: linear-gradient(135deg, #d4e0f0, #c8d9ed);
-            color: #3a5070; display: flex; align-items: center; justify-content: center;
-            font-weight: 650; font-size: 1.1rem; flex-shrink: 0;
-            transition: background 0.2s, color 0.2s;
-        }
-        .post-item:hover .post-avatar { background: linear-gradient(135deg, #c0d4ea, #b3c9e2); }
-        .post-info { flex: 1; min-width: 0; }
-        .post-info h3 { font-size: 1.05rem; margin-bottom: 4px; color: #1e2d3d; font-weight: 650; transition: color 0.15s; }
-        .post-item:hover .post-info h3 { color: #0d1a2b; }
-        .post-info .desc { font-size: 0.88rem; color: var(--sub); margin-bottom: 6px; line-height: 1.55; }
-        .post-info .meta { font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 10px; }
-        .tag {
-            display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.72rem;
-            background: #e8f0fe; color: #4a6fa5; font-weight: 500; margin-right: 6px;
-        }
-        .comment-item {
-            display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid #f0f4f8;
-            font-size: 0.9rem; align-items: flex-start; transition: background 0.2s;
-            animation: fadeIn 0.3s ease both;
-        }
-        .comment-item:hover { background: #fdfdfd; }
-        .comment-item .author { font-weight: 650; color: var(--accent); white-space: nowrap; transition: color 0.15s; }
-        .comment-item:hover .author { color: #2c4a6e; }
-        .admin-badge {
-            background: linear-gradient(135deg, #7bb89e, #5ea386);
-            color: white; padding: 1px 8px; border-radius: 4px;
-            font-size: 0.72rem; margin-left: 6px; font-weight: 520; letter-spacing: 0.3px;
-            transition: background 0.2s;
-        }
-        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.15); z-index: 200; transition: opacity 0.3s; }
+.hidden { display: none !important; }
+.post-item {
+    display: flex; align-items: flex-start; gap: 16px;
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px 20px; margin-bottom: 12px; box-shadow: var(--shadow);
+    transition: box-shadow 0.2s, background 0.2s, transform 0.2s; cursor: pointer;
+    animation: cardUp 0.35s ease both;
+}
+.post-item:hover { box-shadow: var(--shadow-hover); background: #fcfdfd; transform: translateY(-2px); }
+.post-avatar {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: linear-gradient(135deg, #d4e0f0, #c8d9ed);
+    color: #3a5070; display: flex; align-items: center; justify-content: center;
+    font-weight: 650; font-size: 1.1rem; flex-shrink: 0;
+    transition: background 0.2s, color 0.2s;
+}
+.post-item:hover .post-avatar { background: linear-gradient(135deg, #c0d4ea, #b3c9e2); }
+.post-info { flex: 1; min-width: 0; }
+.post-info h3 { font-size: 1.05rem; margin-bottom: 4px; color: #1e2d3d; font-weight: 650; }
+.post-item:hover .post-info h3 { color: #0d1a2b; }
+.post-info .desc { font-size: 0.88rem; color: var(--sub); margin-bottom: 6px; line-height: 1.55; }
+.post-info .meta { font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+.comment-item {
+    display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid #f0f4f8;
+    font-size: 0.9rem; align-items: flex-start; transition: background 0.2s;
+    animation: fadeIn 0.3s ease both;
+}
+.comment-item:hover { background: #fdfdfd; }
+.comment-item .author { font-weight: 650; color: var(--accent); white-space: nowrap; }
+.comment-item:hover .author { color: #2c4a6e; }
+.admin-badge {
+    background: linear-gradient(135deg, #7bb89e, #5ea386);
+    color: white; padding: 1px 8px; border-radius: 4px;
+    font-size: 0.72rem; margin-left: 6px; font-weight: 520; letter-spacing: 0.3px;
+    transition: background 0.2s;
+}        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.15); z-index: 200; transition: opacity 0.3s; }
         .drawer-panel {
             position: fixed; right: 0; top: 0; height: 100%; width: 340px;
             background: var(--card); z-index: 201; padding: 24px; overflow-y: auto;
@@ -205,7 +191,6 @@
             100% { box-shadow: 0 0 0 0 rgba(74,111,165,0); }
         }
         .back-to-top:active { background: linear-gradient(135deg, #3a5f8a, #6a8ab5); transform: scale(0.92); }
-        .sidebar .card { background: var(--sidebar-bg); }
     </style>
 </head>
 <body>
@@ -216,18 +201,14 @@
             <a href="#" id="nav-community">社区</a>
             <a href="./tools.html"><i class="fas fa-tools"></i> 工具箱</a>
         </div>
-    </div><div class="container" id="app">
-    <!-- 主内容区 -->
-    <div class="main-content">
-        <!-- 首页 -->
+    </div>
+    <div class="container" id="app">
         <div id="page-home">
             <h2 style="margin-bottom:18px; font-weight:650; color:#1e2d3d; font-size:1.3rem;"><i class="fas fa-download"></i> 软件</h2>
             <div id="software-list">
                 <div class="card"><h3>加载中...</h3></div>
             </div>
         </div>
-
-        <!-- 社区页面 -->
         <div id="page-community" class="hidden">
             <h2 style="margin-bottom:16px; font-weight:650; color:#1e2d3d; font-size:1.3rem;"><i class="fas fa-comments"></i> 社区</h2>
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:16px;">
@@ -237,62 +218,31 @@
                     <button class="btn" onclick="showNewPost()"><i class="fas fa-pen"></i> 发帖</button>
                 </div>
             </div>
-            <div id="post-list">
-                <div class="card"><h3>加载中...</h3></div>
-            </div>
+            <div id="post-list"><div class="card"><h3>加载中...</h3></div></div>
             <div id="new-post-form" class="hidden">
                 <h3 style="margin-bottom:14px;">发新帖</h3>
-                <div class="input-group">
-                    <input id="post-title" type="text" placeholder="标题">
-                </div>
-                <div class="input-group">
-                    <textarea id="post-content" placeholder="内容..."></textarea>
-                </div>
+                <div class="input-group"><input id="post-title" type="text" placeholder="标题"></div>
+                <div class="input-group"><textarea id="post-content" placeholder="内容..."></textarea></div>
                 <button class="btn" onclick="createPost()">发布</button>
                 <button class="btn btn-outline" onclick="hideNewPost()">取消</button>
                 <div id="post-error" style="color:red;margin-top:8px;"></div>
             </div>
         </div>
-
-        <!-- 帖子详情 -->
         <div id="page-detail" class="hidden">
             <button class="btn btn-outline" style="margin-bottom:16px;" onclick="backToCommunity()"><i class="fas fa-arrow-left"></i> 返回社区</button>
             <div id="detail-content"></div>
             <h3 style="margin-top:24px; margin-bottom:14px; font-weight:650; font-size:1.1rem;"><i class="fas fa-reply-all"></i> 回复</h3>
             <div id="comments-list"></div>
-            <div class="input-group" style="margin-top:16px;">
-                <textarea id="comment-content" placeholder="写下你的回复..."></textarea>
-            </div>
+            <div class="input-group" style="margin-top:16px;"><textarea id="comment-content" placeholder="写下你的回复..."></textarea></div>
             <button class="btn" onclick="addComment()">发表回复</button>
         </div>
     </div>
-
-    <!-- 侧边栏 -->
-    <div class="sidebar">
-        <div class="card">
-            <h3 style="margin-bottom:10px;"><i class="fas fa-fire"></i> 热门帖子</h3>
-            <div id="hot-posts">
-                <p style="color:var(--muted);">加载中...</p>
-            </div>
-        </div>
-        <div class="card">
-            <h3 style="margin-bottom:10px;"><i class="fas fa-chart-bar"></i> 社区统计</h3>
-            <div id="community-stats">
-                <p style="color:var(--muted);">加载中...</p>
-            </div>
-        </div>
+    <div id="drawer-overlay" class="drawer-overlay hidden" onclick="closeDrawer()"></div>
+    <div id="drawer-panel" class="drawer-panel hidden">
+        <button class="btn btn-outline btn-sm" style="margin-bottom:16px;" onclick="closeDrawer()">关闭</button>
+        <div id="drawer-content"></div>
     </div>
-</div>
-
-<!-- 抽屉 -->
-<div id="drawer-overlay" class="drawer-overlay hidden" onclick="closeDrawer()"></div>
-<div id="drawer-panel" class="drawer-panel hidden">
-    <button class="btn btn-outline btn-sm" style="margin-bottom:16px;" onclick="closeDrawer()">关闭</button>
-    <div id="drawer-content"></div>
-</div>
-
-<!-- 回到顶部 -->
-<button class="back-to-top" id="back-to-top" title="回到顶部"><i class="fas fa-chevron-up"></i></button><script>
+    <button class="back-to-top" id="back-to-top" title="回到顶部"><i class="fas fa-chevron-up"></i></button><script>
     const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
     const WORKER_URL = 'https://softlib-submit.dghkkppp.workers.dev';
@@ -366,10 +316,9 @@
 
     async function getPublicIP() { try { const r = await fetch('https://api.ipify.org?format=json'); return (await r.json()).ip; } catch (e) { return null; } }
     async function isBanned() { const ip = await getPublicIP(); if (!ip) return false; const r = await fetch(SUPABASE_URL + `/rest/v1/banned_users?ip_address=eq.${ip}&select=*`, { headers: { 'apikey': SUPABASE_KEY } }); const d = await r.json(); return Array.isArray(d) && d.length > 0; }
-    async function banUser(targetNickname) { if (!isAdmin) return; const reason = prompt('封禁原因：', '违规行为'); if (!reason) return; const ip = await getPublicIP(); const r = await fetch(SUPABASE_URL + '/rest/v1/banned_users', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ ip_address: ip, nickname: targetNickname, reason }) }); if (r.ok) { alert('已封禁'); if (!pages.community.classList.contains('hidden')) loadPosts(); else if (!pages.detail.classList.contains('hidden')) loadComments(currentPostId); } else alert('封禁失败'); }
+    async function banUser(targetNickname) { if (!isAdmin) return; const reason = prompt('封禁原因：', '违规行为'); if (!reason) return; const ip = await getPublicIP(); const r = await fetch(SUPABASE_URL + '/rest/v1/banned_users', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ ip_address: ip, nickname: targetNickname, reason }) }); if (r.ok) { alert('已封禁'); if (!pages.community.classList.contains('hidden')) loadPosts(); else if (!pages.detail.classList.contains('hidden')) loadPosts(); else if (!pages.detail.classList.contains('hidden')) loadComments(currentPostId); } else alert('封禁失败'); }
         async function unbanUser(id) { if (!isAdmin) return; if (!confirm('解禁？')) return; const r = await fetch(SUPABASE_URL + `/rest/v1/banned_users?id=eq.${id}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } }); if (r.ok) { alert('已解禁'); showBannedList(); } else alert('解禁失败'); }
-        async function showBannedList() { const r = await fetch(SUPABASE_URL + '/rest/v1/banned_users?select=*&order=banned_at.desc', { headers: { 'apikey': SUPABASE_KEY } }); const d = await r.json(); if (!Array.isArray(d) || !d.length) { alert('名单为空'); return; } let h = '<h3>封禁名单</h3>'; d.forEach(u => h += `<div class="card" style="display:flex;justify-content:space-between;"><div><strong>${u.nickname||''}</strong><br><small>IP: ${u.ip_address||''} · ${u.reason||''}</small><br><small>${new Date(u.banned_at).toLocaleString('zh-CN')}</small></div><button class="btn btn-success btn-sm" onclick="unbanUser(${u.id})">解禁</button></div>`); openDrawer(h); }// 软件库加载
-async function loadSoftwares() {
+        async function showBannedList() { const r = await fetch(SUPABASE_URL + '/rest/v1/banned_users?select=*&order=banned_at.desc', { headers: { 'apikey': SUPABASE_KEY } }); const d = await r.json(); if (!Array.isArray(d) || !d.length) { alert('名单为空'); return; } let h = '<h3>封禁名单</h3>'; d.forEach(u => h += `<div class="card" style="display:flex;justify-content:space-between;"><div><strong>${u.nickname||''}</strong><br><small>IP: ${u.ip_address||''} · ${u.reason||''}</small><br><small>${new Date(u.banned_at).toLocaleString('zh-CN')}</small></div><button class="btn btn-success btn-sm" onclick="unbanUser(${u.id})">解禁</button></div>`); openDrawer(h); }async function loadSoftwares() {
     const div = document.getElementById('software-list'); div.innerHTML = '<div class="card"><h3>加载中...</h3></div>';
     try {
         const res = await fetch('https://api.github.com/repos/ctctycyc/softlib/issues?labels=approved&state=open&sort=created&direction=desc&per_page=20');
@@ -383,31 +332,6 @@ async function loadSoftwares() {
     } catch (e) { div.innerHTML = '<div class="card"><h3>网络错误</h3></div>'; }
 }
 
-// 侧边栏热门帖子
-async function loadHotPosts() {
-    const div = document.getElementById('hot-posts');
-    try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/posts?select=*&order=created_at.desc&limit=5', { headers: { 'apikey': SUPABASE_KEY } });
-        const data = await res.json();
-        if (Array.isArray(data) && data.length) {
-            div.innerHTML = data.map(p => `<p style="margin-bottom:6px;"><a href="#" onclick="openPost(${p.id})">${p.title||'(无标题)'}</a></p>`).join('');
-        } else { div.innerHTML = '<p style="color:var(--muted);">暂无帖子</p>'; }
-    } catch (e) { div.innerHTML = '<p style="color:var(--muted);">加载失败</p>'; }
-}
-
-// 社区统计
-async function loadCommunityStats() {
-    const div = document.getElementById('community-stats');
-    try {
-        const [postsRes, commentsRes] = await Promise.all([
-            fetch(SUPABASE_URL + '/rest/v1/posts?select=id', { headers: { 'apikey': SUPABASE_KEY } }),
-            fetch(SUPABASE_URL + '/rest/v1/comments?select=id', { headers: { 'apikey': SUPABASE_KEY } })
-        ]);
-        const posts = await postsRes.json(); const comments = await commentsRes.json();
-        div.innerHTML = `<p>帖子数：${Array.isArray(posts)?posts.length:0}</p><p>回复数：${Array.isArray(comments)?comments.length:0}</p>`;
-    } catch (e) { div.innerHTML = '<p style="color:var(--muted);">加载失败</p>'; }
-}
-loadHotPosts(); loadCommunityStats();// 帖子列表（支持搜索过滤）
 let allPosts = [], allPostsLoaded = false;
 
 async function loadPosts() {
