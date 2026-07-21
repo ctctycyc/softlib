@@ -20,7 +20,7 @@
             --nav-text: #eef2f7;
             --radius: 6px;
             --shadow: 0 1px 4px rgba(0,0,0,0.06);
-            --shadow-hover: 0 6px 16px rgba(0,0,0,0.1);
+            --shadow-hover: 0 8px 20px rgba(0,0,0,0.1);
             --hover-bg: #f8fafc;
             --code-bg: #f4f6f9;
         }
@@ -31,8 +31,13 @@
             color: var(--text);
             line-height: 1.65;
             font-size: 14px;
+            animation: fadeIn 0.5s ease both;
         }
-        a { color: var(--accent); text-decoration: none; transition: color 0.15s; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
         a:hover { color: #1a365d; text-decoration: underline; }
         .top-nav {
             background: var(--nav-bg);
@@ -58,7 +63,9 @@
             display: flex;
             align-items: center;
             gap: 7px;
+            transition: transform 0.2s;
         }
+        .logo:active { transform: scale(0.97); }
         .logo i { font-size: 1.05rem; opacity: 0.85; }
         .nav-links { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
         .nav-links a {
@@ -68,10 +75,12 @@
             border-radius: 4px;
             font-size: 0.9rem;
             font-weight: 450;
-            transition: background 0.15s, color 0.15s;
+            transition: background 0.2s, color 0.2s, transform 0.15s;
             white-space: nowrap;
+            position: relative;
         }
-        .nav-links a:hover { background: rgba(255,255,255,0.12); text-decoration: none; }
+        .nav-links a:hover { background: rgba(255,255,255,0.12); text-decoration: none; transform: translateY(-1px); }
+        .nav-links a:active { transform: translateY(0); }
         .nav-links a.active { background: rgba(255,255,255,0.2); font-weight: 550; }
         .container { max-width: 840px; margin: 24px auto; padding: 0 18px; }.card {
     background: var(--card);
@@ -80,21 +89,28 @@
     padding: 18px;
     margin-bottom: 14px;
     box-shadow: var(--shadow);
-    transition: box-shadow 0.15s, background 0.15s;
+    transition: box-shadow 0.2s, background 0.2s, transform 0.2s;
     cursor: pointer;
+    animation: cardUp 0.4s ease both;
 }
-.card:hover { box-shadow: var(--shadow-hover); background: var(--hover-bg); }
-.card h3 { font-size: 1rem; margin-bottom: 6px; color: #1e3b5a; font-weight: 620; }
+@keyframes cardUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.card:hover { box-shadow: var(--shadow-hover); background: var(--hover-bg); transform: translateY(-2px); }
+.card h3 { font-size: 1rem; margin-bottom: 6px; color: #1e3b5a; font-weight: 620; transition: color 0.15s; }
+.card:hover h3 { color: #15304a; }
 .card .desc { font-size: 0.9rem; color: var(--sub); line-height: 1.55; margin-bottom: 8px; }
 .card .meta { font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 5px;
     background: var(--btn); color: white; border: none; padding: 7px 20px;
     border-radius: 4px; font-weight: 520; cursor: pointer; font-size: 0.9rem;
-    text-decoration: none; transition: background 0.15s, box-shadow 0.15s;
+    text-decoration: none; transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
     box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
-.btn:hover { background: var(--btn-hover); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+.btn:hover { background: var(--btn-hover); box-shadow: 0 3px 8px rgba(0,0,0,0.15); transform: translateY(-1px); }
+.btn:active { transform: translateY(0); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
 .btn-sm { padding: 4px 12px; font-size: 0.82rem; }
 .btn-danger { background: #c0392b; } .btn-danger:hover { background: #a93226; }
 .btn-success { background: #27ae60; } .btn-success:hover { background: #219a52; }
@@ -107,57 +123,77 @@
 .input-group input, .input-group textarea {
     flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 4px;
     font-size: 0.9rem; background: #fff; color: var(--text);
-    transition: border-color 0.15s, box-shadow 0.15s;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 .input-group input:focus, .input-group textarea:focus {
     border-color: var(--accent); box-shadow: 0 0 0 3px rgba(44,82,130,0.12); outline: none;
 }
-.input-group textarea { min-height: 100px; resize: vertical; }
 .hidden { display: none !important; }        .post-item {
             display: flex; align-items: flex-start; gap: 14px;
             background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
             padding: 16px 18px; margin-bottom: 10px; box-shadow: var(--shadow);
-            transition: box-shadow 0.15s, background 0.15s; cursor: pointer;
+            transition: box-shadow 0.2s, background 0.2s, transform 0.2s; cursor: pointer;
+            animation: cardUp 0.4s ease both;
         }
-        .post-item:hover { box-shadow: var(--shadow-hover); background: #fcfdfd; }
+        .post-item:hover { box-shadow: var(--shadow-hover); background: #fcfdfd; transform: translateY(-2px); }
         .post-avatar {
             width: 40px; height: 40px; border-radius: 6px; background: #dce3ec;
             color: #3a5068; display: flex; align-items: center; justify-content: center;
             font-weight: 620; font-size: 1rem; flex-shrink: 0;
+            transition: background 0.2s, color 0.2s;
         }
+        .post-item:hover .post-avatar { background: #c9d5e3; }
         .post-info { flex: 1; min-width: 0; }
-        .post-info h3 { font-size: 1rem; margin-bottom: 3px; color: #1a365d; font-weight: 620; }
+        .post-info h3 { font-size: 1rem; margin-bottom: 3px; color: #1a365d; font-weight: 620; transition: color 0.15s; }
+        .post-item:hover .post-info h3 { color: #0d2b4a; }
         .post-info .desc { font-size: 0.87rem; color: var(--sub); margin-bottom: 5px; line-height: 1.5; }
         .post-info .meta { font-size: 0.76rem; color: var(--muted); display: flex; align-items: center; gap: 10px; }
         .comment-item {
             display: flex; gap: 10px; padding: 12px 0; border-bottom: 1px solid #eef1f5;
-            font-size: 0.9rem; align-items: flex-start;
+            font-size: 0.9rem; align-items: flex-start; transition: background 0.2s;
+            animation: fadeIn 0.3s ease both;
         }
-        .comment-item .author { font-weight: 620; color: var(--accent); white-space: nowrap; }
+        .comment-item:hover { background: #fdfdfd; }
+        .comment-item .author { font-weight: 620; color: var(--accent); white-space: nowrap; transition: color 0.15s; }
+        .comment-item:hover .author { color: #1a365d; }
         .admin-badge {
             background: #c0392b; color: white; padding: 1px 7px; border-radius: 3px;
             font-size: 0.7rem; margin-left: 5px; font-weight: 500; letter-spacing: 0.3px;
+            transition: background 0.2s;
         }
-        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.25); z-index: 200; }
+        .admin-badge:hover { background: #a93226; }
+        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.25); z-index: 200; transition: opacity 0.3s; }
         .drawer-panel {
             position: fixed; right: 0; top: 0; height: 100%; width: 320px;
             background: var(--card); z-index: 201; padding: 22px; overflow-y: auto;
-            box-shadow: -3px 0 12px rgba(0,0,0,0.1);
+            box-shadow: -3px 0 12px rgba(0,0,0,0.1); transition: transform 0.3s ease;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(40px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
         .search-box {
             flex: 1; padding: 8px 14px; border: 1px solid var(--border); border-radius: 4px;
             font-size: 0.9rem; background: #fff; color: var(--text); min-width: 180px;
-            transition: border-color 0.15s, box-shadow 0.15s;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
         .search-box:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(44,82,130,0.12); outline: none; }
         .back-to-top {
             position: fixed; bottom: 28px; right: 28px; background: var(--accent); color: white;
             border: none; border-radius: 50%; width: 44px; height: 44px; font-size: 1.2rem;
             cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.18);
-            transition: opacity 0.2s, transform 0.2s; opacity: 0; transform: translateY(12px);
-            pointer-events: none; z-index: 99; display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.25s, transform 0.25s, background 0.2s;
+            opacity: 0; transform: translateY(12px); pointer-events: none; z-index: 99;
+            display: flex; align-items: center; justify-content: center;
         }
-        .back-to-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .back-to-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(44,82,130,0.3); }
+            50% { box-shadow: 0 0 0 10px rgba(44,82,130,0); }
+            100% { box-shadow: 0 0 0 0 rgba(44,82,130,0); }
+        }
+        .back-to-top:active { background: #1a365d; transform: scale(0.92); }
     </style>
 </head>
 <body>
@@ -166,7 +202,7 @@
         <div class="nav-links">
             <a href="#" id="nav-home" class="active">首页</a>
             <a href="#" id="nav-community">社区</a>
-            <a href="./tools.html"><i class="fas fa-tools"></i> MC基岩版工具箱</a>
+            <a href="./tools.html"><i class="fas fa-tools"></i> 工具箱</a>
         </div>
     </div><div class="container" id="app">
     <!-- 首页 -->
@@ -301,7 +337,8 @@
     async function isBanned() { const ip = await getPublicIP(); if (!ip) return false; const r = await fetch(SUPABASE_URL + `/rest/v1/banned_users?ip_address=eq.${ip}&select=*`, { headers: { 'apikey': SUPABASE_KEY } }); const d = await r.json(); return Array.isArray(d) && d.length > 0; }
     async function banUser(targetNickname) { if (!isAdmin) return; const reason = prompt('封禁原因：', '违规行为'); if (!reason) return; const ip = await getPublicIP(); const r = await fetch(SUPABASE_URL + '/rest/v1/banned_users', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ ip_address: ip, nickname: targetNickname, reason }) }); if (r.ok) { alert('已封禁'); if (!pages.community.classList.contains('hidden')) loadPosts(); else if (!pages.detail.classList.contains('hidden')) loadComments(currentPostId); } else alert('封禁失败'); }
         async function unbanUser(id) { if (!isAdmin) return; if (!confirm('解禁？')) return; const r = await fetch(SUPABASE_URL + `/rest/v1/banned_users?id=eq.${id}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } }); if (r.ok) { alert('已解禁'); showBannedList(); } else alert('解禁失败'); }
-        async function showBannedList() { const r = await fetch(SUPABASE_URL + '/rest/v1/banned_users?select=*&order=banned_at.desc', { headers: { 'apikey': SUPABASE_KEY } }); const d = await r.json(); if (!Array.isArray(d) || !d.length) { alert('名单为空'); return; } let h = '<h3>封禁名单</h3>'; d.forEach(u => h += `<div class="card" style="display:flex;justify-content:space-between;"><div><strong>${u.nickname||''}</strong><br><small>IP: ${u.ip_address||''} · ${u.reason||''}</small><br><small>${new Date(u.banned_at).toLocaleString('zh-CN')}</small></div><button class="btn btn-success btn-sm" onclick="unbanUser(${u.id})">解禁</button></div>`); openDrawer(h); }// 软件库加载
+        async function showBannedList() { const r = await fetch(SUPABASE_URL + '/rest/v1/banned_users?select=*&order=banned_at.desc', { headers: { 'apikey': SUPABASE_KEY } }); const d = await r.json(); if (!Array.isArray(d) || !d.length) { alert('名单为空'); return; } let h = '<h3>封禁名单</h3>'; d.forEach(u => h += `<div class="card" style="display:flex;justify-content:space-between;"><div><strong>${u.nickname||''}</strong><br><small>IP: ${u.ip_address||''} · ${u.reason||''}</small><br><small>${new Date(u.banned_at).toLocaleString('zh-CN')}</small></div><button class="btn btn-success btn-sm" onclick="unbanUser(${u.id})">解禁</button></div>`); openDrawer(h); }
+// 软件库加载
 async function loadSoftwares() {
     const div = document.getElementById('software-list'); div.innerHTML = '<div class="card"><h3>加载中...</h3></div>';
     try {
