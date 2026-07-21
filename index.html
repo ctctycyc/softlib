@@ -44,7 +44,6 @@
         .comment .author { font-weight: 600; color: var(--accent); }
         .error-card { background: #ffeaea; border-left: 4px solid #e74c3c; }
         .admin-badge { background: #e74c3c; color: white; padding: 1px 6px; border-radius: 4px; font-size: 11px; margin-left: 4px; }
-        /* 抽屉样式 */
         .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 200; }
         .drawer-panel { position: fixed; right: 0; top: 0; height: 100%; width: 320px; background: var(--card); z-index: 201; padding: 20px; overflow-y: auto; box-shadow: -2px 0 10px rgba(0,0,0,0.1); }
     </style>
@@ -57,7 +56,7 @@
             <a href="#" id="nav-community">社区</a>
             <a href="./tools.html">工具箱</a>
             <a href="./chat.html">聊天室</a>
-            <a href="#" onclick="setNickname(); return false;">手动设置昵称</a>
+            <a href="#" onclick="setNickname(); return false;">设置昵称</a>
         </div>
     </div><div class="container" id="app">
     <!-- 首页（软件列表） -->
@@ -114,17 +113,17 @@
     <button class="btn" style="background:#999;margin-bottom:12px;" onclick="closeDrawer()">关闭</button>
     <div id="drawer-content"></div>
 </div><script>
-    // Supabase 配置
+    // ================= 配置区域 =================
     const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
+    const WORKER_URL = 'https://softlib-submit.dghkkppp.workers.dev';
+    // ===========================================
 
-    // ===== 管理员系统 =====
+    // 本地管理员状态（用于控制管理按钮的显示，仅自己浏览器有效）
     let isAdmin = false;
-    if (localStorage.getItem('isAdmin') === 'true') {
-        isAdmin = true;
-    }
+    if (localStorage.getItem('isAdmin') === 'true') isAdmin = true;
 
-    // ===== 昵称系统 =====
+    // 昵称系统
     let nickname = localStorage.getItem('custom_nickname');
     if (!nickname) {
         nickname = '游客' + Math.floor(Math.random() * 9000 + 1000);
@@ -146,27 +145,15 @@
         if (name === 'home') loadSoftwares();
         if (name === 'community') {
             loadPosts();
-            // 管理员按钮显隐
             document.getElementById('banned-list-btn').classList.toggle('hidden', !isAdmin);
         }
     }
 
     function backToCommunity() { showPage('community'); }
 
-    // 导航点击事件
-    document.getElementById('nav-home').addEventListener('click', function(e) {
-        e.preventDefault();
-        document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-        this.classList.add('active');
-        showPage('home');
-    });
-
-    document.getElementById('nav-community').addEventListener('click', function(e) {
-        e.preventDefault();
-        document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-        this.classList.add('active');
-        showPage('community');
-    });
+    // 导航
+    document.getElementById('nav-home').addEventListener('click', e => { e.preventDefault(); showPage('home'); });
+    document.getElementById('nav-community').addEventListener('click', e => { e.preventDefault(); showPage('community'); });
 
     // 发帖表单
     function showNewPost() {
@@ -182,376 +169,231 @@
             nickname = newName.trim();
             localStorage.setItem('custom_nickname', nickname);
             alert('昵称已设置为：' + nickname);
-            if (document.getElementById('page-community') && !document.getElementById('page-community').classList.contains('hidden')) {
-                loadPosts();
-            }
+            if (!pages.community.classList.contains('hidden')) loadPosts();
         }
-    }
-
-    // 管理员验证
-    async function verifyAdmin() {
+    }// ================= 管理员验证（通过 Worker，密码安全） =================
+async function verifyAdmin() {
     const pwd = prompt('请输入管理员密码：');
     if (!pwd) return;
     try {
-        const res = await fetch('https://softlib-submit.dghkkppp.workers.dev', {
+        const res = await fetch(WORKER_URL + '/verify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password: pwd })
+            body: JSON.stringify({ password: pwd, nickname: nickname })
         });
         const data = await res.json();
         if (data.valid) {
             isAdmin = true;
             localStorage.setItem('isAdmin', 'true');
             alert('管理员权限已激活！');
-            if (document.getElementById('page-community') && !document.getElementById('page-community').classList.contains('hidden')) {
-                showPage('community');
-            }
+            if (!pages.community.classList.contains('hidden')) showPage('community');
         } else {
             alert('密码错误！');
         }
     } catch (e) {
         alert('验证服务连接失败，请检查网络');
     }
-    }
+}
 
-    function logoutAdmin() {
-        isAdmin = false;
-        localStorage.removeItem('isAdmin');
-        alert('已退出管理员模式');
-        if (document.getElementById('page-community') && !document.getElementById('page-community').classList.contains('hidden')) {
-            showPage('community');
-        }
-    }
-
-    // 隐藏管理入口：点击标题5次激活
-    let titleClicks = 0;
-    let clickTimer = null;
-    document.querySelector('.logo').addEventListener('click', function(e) {
-        titleClicks++;
-        if (clickTimer) clearTimeout(clickTimer);
-        clickTimer = setTimeout(() => { titleClicks = 0; }, 2000);
-        if (titleClicks >= 5) {
-            titleClicks = 0;
-            if (isAdmin) {
-                if (confirm('是否退出管理员模式？')) {
-                    logoutAdmin();
-                }
-            } else {
-                verifyAdmin();
-            }
-        }
+async function logoutAdmin() {
+    isAdmin = false;
+    localStorage.removeItem('isAdmin');
+    // 通知 Worker 删除当前昵称的管理员会话
+    await fetch(WORKER_URL + '/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nickname: nickname })
     });
+    alert('已退出管理员模式');
+    if (!pages.community.classList.contains('hidden')) showPage('community');
+}
 
-    // 获取带管理员标签的显示名
-    function getDisplayName(name) {
-        if (isAdmin && name === nickname) {
-            return `${name} <span class="admin-badge">管理</span>`;
-        }
-        return name;
+// 隐藏管理入口：点击标题5次
+let titleClicks = 0;
+let clickTimer = null;
+document.querySelector('.logo').addEventListener('click', () => {
+    titleClicks++;
+    if (clickTimer) clearTimeout(clickTimer);
+    clickTimer = setTimeout(() => { titleClicks = 0; }, 2000);
+    if (titleClicks >= 5) {
+        titleClicks = 0;
+        isAdmin ? logoutAdmin() : verifyAdmin();
     }
+});
 
-    // ===== 抽屉控制 =====
-    function openDrawer(html) {
-        document.getElementById('drawer-content').innerHTML = html;
-        document.getElementById('drawer-overlay').classList.remove('hidden');
-        document.getElementById('drawer-panel').classList.remove('hidden');
-    }
-    function closeDrawer() {
-        document.getElementById('drawer-overlay').classList.add('hidden');
-        document.getElementById('drawer-panel').classList.add('hidden');
-    }
+// ================= 管理标识（从数据库读取，所有人可见） =================
+async function getAdminNicknames() {
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/admin_sessions?expires_at=gt.' + new Date().toISOString() + '&select=nickname', {
+            headers: { 'apikey': SUPABASE_KEY }
+        });
+        const data = await res.json();
+        return Array.isArray(data) ? [...new Set(data.map(d => d.nickname))] : [];
+    } catch (e) { return []; }
+}
 
-    // ===== IP封禁核心功能 =====
-    async function getPublicIP() {
-        try {
-            const resp = await fetch('https://api.ipify.org?format=json');
-            const data = await resp.json();
-            return data.ip;
-        } catch (e) {
-            return null;
-        }
+async function getDisplayNameAsync(name) {
+    const adminNicknames = await getAdminNicknames();
+    if (adminNicknames.includes(name)) {
+        return `${name} <span class="admin-badge">管理</span>`;
     }
+    return name;
+}
 
-        async function isBanned() {
+// ================= 抽屉控制 =================
+function openDrawer(html) {
+    document.getElementById('drawer-content').innerHTML = html;
+    document.getElementById('drawer-overlay').classList.remove('hidden');
+    document.getElementById('drawer-panel').classList.remove('hidden');
+}
+function closeDrawer() {
+    document.getElementById('drawer-overlay').classList.add('hidden');
+    document.getElementById('drawer-panel').classList.add('hidden');
+        }// ================= IP封禁核心功能 =================
+async function getPublicIP() {
+    try { const r = await fetch('https://api.ipify.org?format=json'); return (await r.json()).ip; } catch (e) { return null; }
+}
+
+async function isBanned() {
+    const ip = await getPublicIP(); if (!ip) return false;
+    try {
+        const res = await fetch(SUPABASE_URL + `/rest/v1/banned_users?ip_address=eq.${ip}&select=*`, { headers: { 'apikey': SUPABASE_KEY } });
+        const data = await res.json();
+        return (Array.isArray(data) && data.length > 0);
+    } catch (e) { return false; }
+}
+
+async function banUser(targetNickname) {
+    if (!isAdmin) return;
+    const reason = prompt('封禁原因：', '违规行为'); if (!reason) return;
+    try {
         const ip = await getPublicIP();
-        if (!ip) return false;
-        try {
-            const res = await fetch(SUPABASE_URL + `/rest/v1/banned_users?ip_address=eq.${ip}&select=*`, {
-                headers: { 'apikey': SUPABASE_KEY }
-            });
-            const data = await res.json();
-            return (Array.isArray(data) && data.length > 0);
-        } catch (e) { return false; }
-    }
+        const res = await fetch(SUPABASE_URL + '/rest/v1/banned_users', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+            body: JSON.stringify({ ip_address: ip, nickname: targetNickname, reason })
+        });
+        if (res.ok) {
+            alert(`已封禁 "${targetNickname}"`);
+            if (!pages.community.classList.contains('hidden')) loadPosts();
+            else if (!pages.detail.classList.contains('hidden')) loadComments(currentPostId);
+        } else alert('封禁失败：' + await res.text());
+    } catch (e) { alert('网络错误'); }
+}
 
-    async function banUser(targetNickname) {
-        if (!isAdmin) return;
-        const reason = prompt('请输入封禁原因：', '违规行为');
-        if (!reason) return;
-        try {
-            const ip = await getPublicIP();
-            const res = await fetch(SUPABASE_URL + '/rest/v1/banned_users', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-                body: JSON.stringify({ ip_address: ip, nickname: targetNickname, reason: reason })
-            });
-            if (res.ok) {
-                alert(`已封禁用户 "${targetNickname}" (IP: ${ip})`);
-                if (document.getElementById('page-community') && !document.getElementById('page-community').classList.contains('hidden')) {
-                    loadPosts();
-                } else if (document.getElementById('page-detail') && !document.getElementById('page-detail').classList.contains('hidden')) {
-                    loadComments(currentPostId);
-                }
-            } else {
-                const err = await res.text();
-                alert('封禁失败：' + err);
-            }
-        } catch (e) { alert('网络错误：' + e.message); }
-    }
+async function unbanUser(id) {
+    if (!isAdmin) return;
+    if (!confirm('解禁？')) return;
+    const res = await fetch(SUPABASE_URL + `/rest/v1/banned_users?id=eq.${id}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } });
+    if (res.ok) { alert('已解禁'); showBannedList(); } else alert('解禁失败');
+}
 
-    async function unbanUser(id) {
-        if (!isAdmin) return;
-        if (!confirm('确定要解禁这个用户吗？')) return;
-        try {
-            const res = await fetch(SUPABASE_URL + `/rest/v1/banned_users?id=eq.${id}`, {
-                method: 'DELETE',
-                headers: { 'apikey': SUPABASE_KEY }
-            });
-            if (res.ok) {
-                alert('解禁成功！');
-                showBannedList();
-            } else {
-                alert('解禁失败');
-            }
-        } catch (e) { alert('网络错误：' + e.message); }
-    }
-
-    async function showBannedList() {
-        if (!isAdmin) return;
-        try {
-            const res = await fetch(SUPABASE_URL + '/rest/v1/banned_users?select=*&order=banned_at.desc', {
-                headers: { 'apikey': SUPABASE_KEY }
-            });
-            const data = await res.json();
-            if (!Array.isArray(data) || data.length === 0) {
-                alert('封禁名单为空');
-                return;
-            }
-            let listHtml = '<h3>封禁名单</h3>';
-            data.forEach(user => {
-                listHtml += `
-                    <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <strong>${user.nickname || '未知昵称'}</strong>
-                            <div class="desc">IP: ${user.ip_address || '未记录'} · ${user.reason || '无原因'}</div>
-                            <div class="meta">封禁时间: ${new Date(user.banned_at).toLocaleString('zh-CN')}</div>
-                        </div>
-                        <button class="btn" style="background:#4caf93;" onclick="unbanUser(${user.id})">解禁</button>
-                    </div>
-                `;
-            });
-            openDrawer(listHtml);
-        } catch (e) { alert('网络错误：' + e.message); }
-    }
-
-    // ===== 软件库（GitHub Issues） =====
-    async function loadSoftwares() {
-        const div = document.getElementById('software-list');
-        if (!div) return;
-        div.innerHTML = '<div class="card"><h3>软件加载中...</h3></div>';
-        try {
-            const res = await fetch('https://api.github.com/repos/ctctycyc/softlib/issues?labels=approved&state=open&sort=created&direction=desc&per_page=20');
-            if (!res.ok) {
-                div.innerHTML = '<div class="card"><h3>软件加载失败，请稍后再试</h3></div>';
-                return;
-            }
-            const issues = await res.json();
-            if (!Array.isArray(issues) || issues.length === 0) {
-                div.innerHTML = '<div class="card"><h3>暂无软件</h3></div>';
-                return;
-            }
-            div.innerHTML = issues.map(issue => {
-                const body = issue.body || '';
-                const lines = body.split('\n').filter(l => l.trim());
-                const desc = lines.find(l => !l.startsWith('http')) || '';
-                const link = lines.find(l => l.startsWith('http')) || '';
-                return `
-                    <div class="card">
-                        <h3>${issue.title}</h3>
-                        <div class="desc">${desc}</div>
-                        ${link ? `<a href="${link}" target="_blank" class="btn" style="display:inline-block;margin-top:8px;">下载</a>` : ''}
-                    </div>
-                `;
-            }).join('');
-                } catch (e) {
-            div.innerHTML = '<div class="card"><h3>软件加载失败，请检查网络</h3></div>';
+async function showBannedList() {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/banned_users?select=*&order=banned_at.desc', { headers: { 'apikey': SUPABASE_KEY } });
+    const data = await res.json();
+    if (!Array.isArray(data) || !data.length) { alert('封禁名单为空'); return; }
+    let html = '<h3>封禁名单</h3>';
+    data.forEach(u => html += `<div class="card" style="display:flex;justify-content:space-between;align-items:center;"><div><strong>${u.nickname||'?'}</strong><div class="desc">IP: ${u.ip_address||'?'} · ${u.reason||''}</div><div class="meta">${new Date(u.banned_at).toLocaleString('zh-CN')}</div></div><button class="btn" style="background:#4caf93;" onclick="unbanUser(${u.id})">解禁</button></div>`);
+    openDrawer(html);
+    }// ================= 软件库（从 GitHub Issues 加载） =================
+async function loadSoftwares() {
+    const div = document.getElementById('software-list');
+    div.innerHTML = '<div class="card"><h3>加载中...</h3></div>';
+    try {
+        const res = await fetch('https://api.github.com/repos/ctctycyc/softlib/issues?labels=approved&state=open&sort=created&direction=desc&per_page=20');
+        if (!res.ok) { div.innerHTML = '<div class="card"><h3>加载失败</h3></div>'; return; }
+        const issues = await res.json();
+        if (!Array.isArray(issues) || !issues.length) { div.innerHTML = '<div class="card"><h3>暂无软件</h3></div>'; return; }
+        div.innerHTML = issues.map(i => {
+            const body = i.body||'', lines = body.split('\n').filter(l=>l.trim()), desc = lines.find(l=>!l.startsWith('http'))||'', link = lines.find(l=>l.startsWith('http'))||'';
+            return `<div class="card"><h3>${i.title}</h3><div class="desc">${desc}</div>${link?`<a href="${link}" target="_blank" class="btn" style="margin-top:8px;">下载</a>`:''}</div>`;
+        }).join('');
+    } catch (e) { div.innerHTML = '<div class="card"><h3>网络错误</h3></div>'; }
+}// ================= 社区帖子 =================
+async function loadPosts() {
+    const div = document.getElementById('post-list');
+    div.innerHTML = '<div class="card"><h3>加载中...</h3></div>';
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/posts?select=*&order=created_at.desc&limit=50', { headers: { 'apikey': SUPABASE_KEY } });
+        if (!res.ok) { div.innerHTML = `<div class="card error-card"><h3>加载失败(${res.status})</h3></div>`; return; }
+        const data = await res.json();
+        if (!Array.isArray(data) || !data.length) { div.innerHTML = '<div class="card"><h3>暂无帖子</h3></div>'; return; }
+        let html = '';
+        for (const p of data) {
+            const display = await getDisplayNameAsync(p.author||'未知');
+            html += `<div class="card" onclick="openPost(${p.id})"><h3>${p.title||'(无标题)'}</h3><div class="desc">${(p.content||'').substring(0,100)}...</div><div class="meta">${display} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div></div>`;
         }
-    }
+        div.innerHTML = html;
+    } catch (e) { div.innerHTML = `<div class="card error-card"><h3>网络错误：${e.message}</h3></div>`; }
+}
 
-    // ===== 社区帖子 =====
-    async function loadPosts() {
-        const div = document.getElementById('post-list');
-        div.innerHTML = '<div class="card"><h3>帖子加载中...</h3></div>';
-        try {
-            const res = await fetch(SUPABASE_URL + '/rest/v1/posts?select=*&order=created_at.desc&limit=50', {
-                headers: { 'apikey': SUPABASE_KEY }
-            });
-            if (!res.ok) {
-                div.innerHTML = `<div class="card error-card"><h3>加载失败（HTTP ${res.status}）</h3></div>`;
-                return;
-            }
-            const data = await res.json();
-            if (Array.isArray(data) && data.length > 0) {
-                div.innerHTML = data.map(p => `
-                    <div class="card" onclick="openPost(${p.id})">
-                        <h3>${p.title || '(无标题)'}</h3>
-                        <div class="desc">${(p.content || '').substring(0, 100)}...</div>
-                        <div class="meta">${getDisplayName(p.author || '未知')} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div>
-                    </div>
-                `).join('');
-            } else {
-                div.innerHTML = '<div class="card"><h3>暂无帖子，发第一个吧！</h3></div>';
-            }
-        } catch (e) {
-            div.innerHTML = `<div class="card error-card"><h3>网络错误：${e.message}</h3></div>`;
+async function openPost(id) {
+    currentPostId = id; showPage('detail');
+    try {
+        const res = await fetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${id}&select=*`, { headers: { 'apikey': SUPABASE_KEY } });
+        if (!res.ok) throw new Error('HTTP '+res.status);
+        const data = await res.json();
+        if (Array.isArray(data) && data.length) {
+            const p = data[0];
+            const display = await getDisplayNameAsync(p.author||'未知');
+            document.getElementById('detail-content').innerHTML = `<h2>${p.title||'(无标题)'}</h2><div class="meta">${display} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div><p style="margin-top:12px;line-height:1.6;">${p.content||''}</p>${isAdmin?`<button class="btn" style="background:#e74c3c;margin-top:8px;" onclick="deletePost(${p.id})">删除帖子</button> <button class="btn" style="background:#e74c3c;margin-top:8px;" onclick="banUser('${p.author}')">封禁作者</button>`:''}`;
         }
-    }
+        loadComments(id);
+    } catch (e) { document.getElementById('detail-content').innerHTML = `<div class="card error-card"><h3>加载失败：${e.message}</h3></div>`; }
+}
 
-    async function openPost(id) {
-        currentPostId = id;
-        showPage('detail');
-        try {
-            const res = await fetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${id}&select=*`, {
-                headers: { 'apikey': SUPABASE_KEY }
-            });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const data = await res.json();
-            if (Array.isArray(data) && data.length > 0) {
-                const p = data[0];
-                document.getElementById('detail-content').innerHTML = `
-                    <h2>${p.title || '(无标题)'}</h2>
-                    <div class="meta">${getDisplayName(p.author || '未知')} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div>
-                    <p style="margin-top:12px;line-height:1.6;">${p.content || ''}</p>
-                    ${isAdmin ? `<button class="btn" style="background:#e74c3c;margin-top:8px;" onclick="deletePost(${p.id})">删除帖子</button> <button class="btn" style="background:#e74c3c;margin-top:8px;" onclick="banUser('${p.author}')">封禁作者</button>` : ''}
-                `;
-            }
-            loadComments(id);
-        } catch (e) {
-            document.getElementById('detail-content').innerHTML = `<div class="card error-card"><h3>加载帖子失败：${e.message}</h3></div>`;
+async function loadComments(postId) {
+    const div = document.getElementById('comments-list');
+    div.innerHTML = '<p style="color:#999;">加载中...</p>';
+    try {
+        const res = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${postId}&select=*&order=created_at.asc`, { headers: { 'apikey': SUPABASE_KEY } });
+        if (!res.ok) throw new Error('HTTP '+res.status);
+        const data = await res.json();
+        if (!Array.isArray(data) || !data.length) { div.innerHTML = '<p style="color:#999;">暂无回复</p>'; return; }
+        let html = '';
+        for (const c of data) {
+            const display = await getDisplayNameAsync(c.author||'匿名');
+            html += `<div class="comment"><div><span class="author">${display}</span>：${c.content||''}</div>${isAdmin?`<div><button class="btn" style="background:#e74c3c;font-size:11px;padding:2px 8px;" onclick="deleteComment(${c.id})">删除</button> <button class="btn" style="background:#e74c3c;font-size:11px;padding:2px 8px;" onclick="banUser('${c.author}')">封禁</button></div>`:''}</div>`;
         }
-    }
-
-    async function loadComments(postId) {
-        const div = document.getElementById('comments-list');
-        div.innerHTML = '<p style="color:#999;">加载回复中...</p>';
-        try {
-            const res = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${postId}&select=*&order=created_at.asc`, {
-                headers: { 'apikey': SUPABASE_KEY }
-            });
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            const data = await res.json();
-            if (Array.isArray(data) && data.length > 0) {
-                div.innerHTML = data.map(c => `
-                    <div class="comment">
-                        <div><span class="author">${getDisplayName(c.author || '匿名')}</span>：${c.content || ''}</div>
-                        ${isAdmin ? `<div><button class="btn" style="background:#e74c3c;font-size:11px;padding:2px 8px;" onclick="deleteComment(${c.id})">删除</button> <button class="btn" style="background:#e74c3c;font-size:11px;padding:2px 8px;" onclick="banUser('${c.author}')">封禁</button></div>` : ''}
-                    </div>
-                `).join('');
-            } else {
-                div.innerHTML = '<p style="color:#999;">暂无回复</p>';
-            }
-        } catch (e) {
-            div.innerHTML = `<div class="card error-card"><p>加载回复失败：${e.message}</p></div>`;
+        div.innerHTML = html;
+    } catch (e) { div.innerHTML = `<div class="card error-card"><p>加载失败：${e.message}</p></div>`; }
+    }        // ================= 发帖/回复（带封禁检查） =================
+        async function createPost() {
+            if (await isBanned()) { alert('您已被封禁'); return; }
+            const title = document.getElementById('post-title').value.trim(), content = document.getElementById('post-content').value.trim(), err = document.getElementById('post-error');
+            if (!title || !content) { err.textContent = '标题和内容不能为空'; return; }
+            try {
+                const res = await fetch(SUPABASE_URL + '/rest/v1/posts', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ title, content, author: nickname }) });
+                if (res.ok) { document.getElementById('post-title').value = ''; document.getElementById('post-content').value = ''; hideNewPost(); loadPosts(); }
+                else { err.textContent = '发布失败：' + await res.text(); }
+            } catch (e) { err.textContent = '网络错误：' + e.message; }
         }
-    }
 
-    // 发帖（带封禁检查）
-    async function createPost() {
-        if (await isBanned()) { alert('您已被封禁，无法执行此操作。'); return; }
-        const title = document.getElementById('post-title').value.trim();
-        const content = document.getElementById('post-content').value.trim();
-        const err = document.getElementById('post-error');
-        if (!title || !content) { err.textContent = '标题和内容不能为空'; return; }
-        try {
-            const res = await fetch(SUPABASE_URL + '/rest/v1/posts', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-                body: JSON.stringify({ title, content, author: nickname })
-            });
-            if (res.ok) {
-                document.getElementById('post-title').value = '';
-                document.getElementById('post-content').value = '';
-                                hideNewPost();
-                loadPosts();
-            } else {
-                const errText = await res.text();
-                err.textContent = '发布失败：' + errText;
-            }
-        } catch (e) {
-            err.textContent = '网络错误：' + e.message;
+        async function addComment() {
+            if (await isBanned()) { alert('您已被封禁'); return; }
+            const content = document.getElementById('comment-content').value.trim();
+            if (!content || !currentPostId) return;
+            try {
+                const res = await fetch(SUPABASE_URL + '/rest/v1/comments', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ post_id: currentPostId, content, author: nickname }) });
+                if (res.ok) { document.getElementById('comment-content').value = ''; loadComments(currentPostId); }
+                else alert('回复失败：' + await res.text());
+            } catch (e) { alert('网络错误：' + e.message); }
         }
-    }
 
-    // 回复（带封禁检查）
-    async function addComment() {
-        if (await isBanned()) { alert('您已被封禁，无法执行此操作。'); return; }
-        const content = document.getElementById('comment-content').value.trim();
-        if (!content || !currentPostId) return;
-        try {
-            const res = await fetch(SUPABASE_URL + '/rest/v1/comments', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-                body: JSON.stringify({ post_id: currentPostId, content, author: nickname })
-            });
-            if (res.ok) {
-                document.getElementById('comment-content').value = '';
-                loadComments(currentPostId);
-            } else {
-                const errText = await res.text();
-                alert('回复失败：' + errText);
-            }
-        } catch (e) { alert('网络错误：' + e.message); }
-    }
+        // ================= 删除操作（管理员） =================
+        async function deletePost(id) {
+            if (!isAdmin) return; if (!confirm('删除帖子？')) return;
+            const res = await fetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${id}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } });
+            if (res.ok) { alert('已删除'); backToCommunity(); loadPosts(); } else alert('删除失败');
+        }
 
-    // 删除帖子（管理员）
-    async function deletePost(id) {
-        if (!isAdmin) return;
-        if (!confirm('确定要删除这个帖子吗？此操作不可撤销。')) return;
-        try {
-            const res = await fetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${id}`, {
-                method: 'DELETE',
-                headers: { 'apikey': SUPABASE_KEY }
-            });
-            if (res.ok) {
-                alert('帖子已删除');
-                backToCommunity();
-                loadPosts();
-            } else {
-                alert('删除失败');
-            }
-        } catch (e) { alert('网络错误'); }
-    }
+        async function deleteComment(id) {
+            if (!isAdmin) return; if (!confirm('删除回复？')) return;
+            const res = await fetch(SUPABASE_URL + `/rest/v1/comments?id=eq.${id}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } });
+            if (res.ok) { alert('已删除'); loadComments(currentPostId); } else alert('删除失败');
+        }
 
-    // 删除回复（管理员）
-    async function deleteComment(id) {
-        if (!isAdmin) return;
-        if (!confirm('确定要删除这条回复吗？')) return;
-        try {
-            const res = await fetch(SUPABASE_URL + `/rest/v1/comments?id=eq.${id}`, {
-                method: 'DELETE',
-                headers: { 'apikey': SUPABASE_KEY }
-            });
-            if (res.ok) {
-                alert('回复已删除');
-                loadComments(currentPostId);
-            } else {
-                alert('删除失败');
-            }
-        } catch (e) { alert('网络错误'); }
-    }
-
-    // 启动（默认显示首页软件列表）
-    showPage('home');
-</script>
+        // 启动
+        showPage('home');
+    </script>
 </body>
 </html>
