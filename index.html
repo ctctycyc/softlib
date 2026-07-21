@@ -7,38 +7,34 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
-            --bg: #eef1f5;
+            --bg: #f3f5f9;
             --card: #ffffff;
             --text: #2c3e50;
             --sub: #5a6b7a;
-            --muted: #8b95a5;
-            --border: #dce1e8;
-            --accent: #2c5282;
-            --btn: #e07b39;
-            --btn-hover: #c96a2e;
-            --nav-bg: #1a2d42;
-            --nav-text: #eef2f7;
-            --radius: 6px;
-            --shadow: 0 1px 4px rgba(0,0,0,0.06);
-            --shadow-hover: 0 8px 20px rgba(0,0,0,0.1);
-            --hover-bg: #f8fafc;
-            --code-bg: #f4f6f9;
+            --muted: #9099a8;
+            --border: #e2e8f0;
+            --accent: #4a6fa5;
+            --accent-light: #7b9cc2;
+            --btn: #5b8cbd;
+            --btn-hover: #4876a8;
+            --nav-bg: linear-gradient(135deg, #d4e0f0, #c8d9ed);
+            --nav-text: #3a5070;
+            --radius: 8px;
+            --shadow: 0 2px 6px rgba(0,0,0,0.04);
+            --shadow-hover: 0 8px 20px rgba(0,0,0,0.08);
+            --hover-bg: #fbfcfd;
+            --sidebar-bg: linear-gradient(180deg, #eef2f8, #f8f9fc);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg);
             color: var(--text);
-            line-height: 1.65;
+            line-height: 1.6;
             font-size: 14px;
-            animation: fadeIn 0.5s ease both;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
         }
         a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
-        a:hover { color: #1a365d; text-decoration: underline; }
+        a:hover { color: var(--accent-light); text-decoration: underline; }
         .top-nav {
             background: var(--nav-bg);
             color: var(--nav-text);
@@ -50,150 +46,166 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-            min-height: 50px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            min-height: 52px;
+            backdrop-filter: blur(8px);
         }
         .logo {
-            font-size: 1.15rem;
+            font-size: 1.2rem;
             font-weight: 700;
             margin-right: auto;
             cursor: default;
-            color: #fff;
-            letter-spacing: 0.3px;
+            color: #2c4a6e;
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 8px;
             transition: transform 0.2s;
         }
         .logo:active { transform: scale(0.97); }
-        .logo i { font-size: 1.05rem; opacity: 0.85; }
+        .logo i { font-size: 1.1rem; opacity: 0.8; }
         .nav-links { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
         .nav-links a {
             color: var(--nav-text);
             text-decoration: none;
             padding: 6px 14px;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 0.9rem;
-            font-weight: 450;
+            font-weight: 480;
             transition: background 0.2s, color 0.2s, transform 0.15s;
             white-space: nowrap;
-            position: relative;
         }
-        .nav-links a:hover { background: rgba(255,255,255,0.12); text-decoration: none; transform: translateY(-1px); }
-        .nav-links a:active { transform: translateY(0); }
-        .nav-links a.active { background: rgba(255,255,255,0.2); font-weight: 550; }
-        .container { max-width: 840px; margin: 24px auto; padding: 0 18px; }.card {
+        .nav-links a:hover { background: rgba(74,111,165,0.15); text-decoration: none; transform: translateY(-1px); }
+        .nav-links a.active { background: rgba(74,111,165,0.22); color: #2c4a6e; font-weight: 580; }.container {
+    max-width: 980px;
+    margin: 24px auto;
+    padding: 0 18px;
+    display: flex;
+    gap: 22px;
+    flex-wrap: wrap;
+}
+.main-content { flex: 2.2; min-width: 0; }
+.sidebar { flex: 1; min-width: 250px; }
+.card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 18px;
-    margin-bottom: 14px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
     box-shadow: var(--shadow);
     transition: box-shadow 0.2s, background 0.2s, transform 0.2s;
     cursor: pointer;
-    animation: cardUp 0.4s ease both;
+    animation: cardUp 0.35s ease both;
 }
 @keyframes cardUp {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
 }
 .card:hover { box-shadow: var(--shadow-hover); background: var(--hover-bg); transform: translateY(-2px); }
-.card h3 { font-size: 1rem; margin-bottom: 6px; color: #1e3b5a; font-weight: 620; transition: color 0.15s; }
-.card:hover h3 { color: #15304a; }
-.card .desc { font-size: 0.9rem; color: var(--sub); line-height: 1.55; margin-bottom: 8px; }
+.card h3 { font-size: 1rem; margin-bottom: 6px; color: #1e2d3d; font-weight: 650; transition: color 0.15s; }
+.card:hover h3 { color: #0d1a2b; }
+.card .desc { font-size: 0.88rem; color: var(--sub); line-height: 1.55; margin-bottom: 8px; }
 .card .meta { font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     background: var(--btn); color: white; border: none; padding: 7px 20px;
-    border-radius: 4px; font-weight: 520; cursor: pointer; font-size: 0.9rem;
+    border-radius: 20px; font-weight: 520; cursor: pointer; font-size: 0.9rem;
     text-decoration: none; transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(91,140,189,0.25);
 }
-.btn:hover { background: var(--btn-hover); box-shadow: 0 3px 8px rgba(0,0,0,0.15); transform: translateY(-1px); }
-.btn:active { transform: translateY(0); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-.btn-sm { padding: 4px 12px; font-size: 0.82rem; }
-.btn-danger { background: #c0392b; } .btn-danger:hover { background: #a93226; }
-.btn-success { background: #27ae60; } .btn-success:hover { background: #219a52; }
+.btn:hover { background: var(--btn-hover); box-shadow: 0 4px 14px rgba(91,140,189,0.4); transform: translateY(-1px); }
+.btn:active { transform: translateY(0); box-shadow: 0 2px 4px rgba(91,140,189,0.2); }
+.btn-sm { padding: 4px 14px; font-size: 0.82rem; }
+.btn-danger { background: #d88a8a; box-shadow: 0 2px 8px rgba(216,138,138,0.25); }
+.btn-danger:hover { background: #c07070; box-shadow: 0 4px 14px rgba(216,138,138,0.4); }
+.btn-success { background: #7bb89e; box-shadow: 0 2px 8px rgba(123,184,158,0.25); }
+.btn-success:hover { background: #5ea386; }
 .btn-outline {
     background: transparent; color: var(--sub); border: 1px solid var(--border);
     box-shadow: none;
 }
 .btn-outline:hover { background: var(--hover-bg); color: var(--text); box-shadow: none; }
-.input-group { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+.input-group { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
 .input-group input, .input-group textarea {
-    flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 4px;
+    flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
     font-size: 0.9rem; background: #fff; color: var(--text);
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 .input-group input:focus, .input-group textarea:focus {
-    border-color: var(--accent); box-shadow: 0 0 0 3px rgba(44,82,130,0.12); outline: none;
+    border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,111,165,0.12); outline: none;
 }
 .hidden { display: none !important; }        .post-item {
-            display: flex; align-items: flex-start; gap: 14px;
+            display: flex; align-items: flex-start; gap: 16px;
             background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-            padding: 16px 18px; margin-bottom: 10px; box-shadow: var(--shadow);
+            padding: 18px 20px; margin-bottom: 12px; box-shadow: var(--shadow);
             transition: box-shadow 0.2s, background 0.2s, transform 0.2s; cursor: pointer;
-            animation: cardUp 0.4s ease both;
+            animation: cardUp 0.35s ease both;
         }
         .post-item:hover { box-shadow: var(--shadow-hover); background: #fcfdfd; transform: translateY(-2px); }
         .post-avatar {
-            width: 40px; height: 40px; border-radius: 6px; background: #dce3ec;
-            color: #3a5068; display: flex; align-items: center; justify-content: center;
-            font-weight: 620; font-size: 1rem; flex-shrink: 0;
+            width: 44px; height: 44px; border-radius: 10px;
+            background: linear-gradient(135deg, #d4e0f0, #c8d9ed);
+            color: #3a5070; display: flex; align-items: center; justify-content: center;
+            font-weight: 650; font-size: 1.1rem; flex-shrink: 0;
             transition: background 0.2s, color 0.2s;
         }
-        .post-item:hover .post-avatar { background: #c9d5e3; }
+        .post-item:hover .post-avatar { background: linear-gradient(135deg, #c0d4ea, #b3c9e2); }
         .post-info { flex: 1; min-width: 0; }
-        .post-info h3 { font-size: 1rem; margin-bottom: 3px; color: #1a365d; font-weight: 620; transition: color 0.15s; }
-        .post-item:hover .post-info h3 { color: #0d2b4a; }
-        .post-info .desc { font-size: 0.87rem; color: var(--sub); margin-bottom: 5px; line-height: 1.5; }
-        .post-info .meta { font-size: 0.76rem; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+        .post-info h3 { font-size: 1.05rem; margin-bottom: 4px; color: #1e2d3d; font-weight: 650; transition: color 0.15s; }
+        .post-item:hover .post-info h3 { color: #0d1a2b; }
+        .post-info .desc { font-size: 0.88rem; color: var(--sub); margin-bottom: 6px; line-height: 1.55; }
+        .post-info .meta { font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+        .tag {
+            display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.72rem;
+            background: #e8f0fe; color: #4a6fa5; font-weight: 500; margin-right: 6px;
+        }
         .comment-item {
-            display: flex; gap: 10px; padding: 12px 0; border-bottom: 1px solid #eef1f5;
+            display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid #f0f4f8;
             font-size: 0.9rem; align-items: flex-start; transition: background 0.2s;
             animation: fadeIn 0.3s ease both;
         }
         .comment-item:hover { background: #fdfdfd; }
-        .comment-item .author { font-weight: 620; color: var(--accent); white-space: nowrap; transition: color 0.15s; }
-        .comment-item:hover .author { color: #1a365d; }
+        .comment-item .author { font-weight: 650; color: var(--accent); white-space: nowrap; transition: color 0.15s; }
+        .comment-item:hover .author { color: #2c4a6e; }
         .admin-badge {
-            background: #c0392b; color: white; padding: 1px 7px; border-radius: 3px;
-            font-size: 0.7rem; margin-left: 5px; font-weight: 500; letter-spacing: 0.3px;
+            background: linear-gradient(135deg, #7bb89e, #5ea386);
+            color: white; padding: 1px 8px; border-radius: 4px;
+            font-size: 0.72rem; margin-left: 6px; font-weight: 520; letter-spacing: 0.3px;
             transition: background 0.2s;
         }
-        .admin-badge:hover { background: #a93226; }
-        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.25); z-index: 200; transition: opacity 0.3s; }
+        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.15); z-index: 200; transition: opacity 0.3s; }
         .drawer-panel {
-            position: fixed; right: 0; top: 0; height: 100%; width: 320px;
-            background: var(--card); z-index: 201; padding: 22px; overflow-y: auto;
-            box-shadow: -3px 0 12px rgba(0,0,0,0.1); transition: transform 0.3s ease;
+            position: fixed; right: 0; top: 0; height: 100%; width: 340px;
+            background: var(--card); z-index: 201; padding: 24px; overflow-y: auto;
+            box-shadow: -4px 0 16px rgba(0,0,0,0.06); transition: transform 0.3s ease;
             animation: slideIn 0.3s ease;
         }
         @keyframes slideIn {
-            from { transform: translateX(40px); opacity: 0; }
+            from { transform: translateX(50px); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
         .search-box {
-            flex: 1; padding: 8px 14px; border: 1px solid var(--border); border-radius: 4px;
-            font-size: 0.9rem; background: #fff; color: var(--text); min-width: 180px;
+            flex: 1; padding: 9px 16px; border: 1px solid var(--border); border-radius: 20px;
+            font-size: 0.9rem; background: #fff; color: var(--text); min-width: 200px;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .search-box:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(44,82,130,0.12); outline: none; }
+        .search-box:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,111,165,0.12); outline: none; }
         .back-to-top {
-            position: fixed; bottom: 28px; right: 28px; background: var(--accent); color: white;
-            border: none; border-radius: 50%; width: 44px; height: 44px; font-size: 1.2rem;
-            cursor: pointer; box-shadow: 0 3px 10px rgba(0,0,0,0.18);
+            position: fixed; bottom: 30px; right: 30px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            color: white; border: none; border-radius: 50%; width: 46px; height: 46px; font-size: 1.2rem;
+            cursor: pointer; box-shadow: 0 4px 14px rgba(74,111,165,0.3);
             transition: opacity 0.25s, transform 0.25s, background 0.2s;
-            opacity: 0; transform: translateY(12px); pointer-events: none; z-index: 99;
+            opacity: 0; transform: translateY(14px); pointer-events: none; z-index: 99;
             display: flex; align-items: center; justify-content: center;
         }
         .back-to-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; animation: pulse 2s ease-in-out infinite; }
         @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(44,82,130,0.3); }
-            50% { box-shadow: 0 0 0 10px rgba(44,82,130,0); }
-            100% { box-shadow: 0 0 0 0 rgba(44,82,130,0); }
+            0% { box-shadow: 0 0 0 0 rgba(74,111,165,0.4); }
+            50% { box-shadow: 0 0 0 14px rgba(74,111,165,0); }
+            100% { box-shadow: 0 0 0 0 rgba(74,111,165,0); }
         }
-        .back-to-top:active { background: #1a365d; transform: scale(0.92); }
+        .back-to-top:active { background: linear-gradient(135deg, #3a5f8a, #6a8ab5); transform: scale(0.92); }
+        .sidebar .card { background: var(--sidebar-bg); }
     </style>
 </head>
 <body>
@@ -205,63 +217,82 @@
             <a href="./tools.html"><i class="fas fa-tools"></i> 工具箱</a>
         </div>
     </div><div class="container" id="app">
-    <!-- 首页 -->
-    <div id="page-home">
-        <h2 style="margin-bottom:16px; font-weight:600; color:#1e3e5f; font-size:1.2rem;"><i class="fas fa-download"></i> 软件</h2>
-        <div id="software-list">
-            <div class="card"><h3>加载中...</h3></div>
+    <!-- 主内容区 -->
+    <div class="main-content">
+        <!-- 首页 -->
+        <div id="page-home">
+            <h2 style="margin-bottom:18px; font-weight:650; color:#1e2d3d; font-size:1.3rem;"><i class="fas fa-download"></i> 软件</h2>
+            <div id="software-list">
+                <div class="card"><h3>加载中...</h3></div>
+            </div>
+        </div>
+
+        <!-- 社区页面 -->
+        <div id="page-community" class="hidden">
+            <h2 style="margin-bottom:16px; font-weight:650; color:#1e2d3d; font-size:1.3rem;"><i class="fas fa-comments"></i> 社区</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:16px;">
+                <input type="text" class="search-box" id="search-input" placeholder="搜索帖子...">
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <button class="btn btn-danger hidden" id="banned-list-btn" onclick="showBannedList()"><i class="fas fa-ban"></i> 封禁名单</button>
+                    <button class="btn" onclick="showNewPost()"><i class="fas fa-pen"></i> 发帖</button>
+                </div>
+            </div>
+            <div id="post-list">
+                <div class="card"><h3>加载中...</h3></div>
+            </div>
+            <div id="new-post-form" class="hidden">
+                <h3 style="margin-bottom:14px;">发新帖</h3>
+                <div class="input-group">
+                    <input id="post-title" type="text" placeholder="标题">
+                </div>
+                <div class="input-group">
+                    <textarea id="post-content" placeholder="内容..."></textarea>
+                </div>
+                <button class="btn" onclick="createPost()">发布</button>
+                <button class="btn btn-outline" onclick="hideNewPost()">取消</button>
+                <div id="post-error" style="color:red;margin-top:8px;"></div>
+            </div>
+        </div>
+
+        <!-- 帖子详情 -->
+        <div id="page-detail" class="hidden">
+            <button class="btn btn-outline" style="margin-bottom:16px;" onclick="backToCommunity()"><i class="fas fa-arrow-left"></i> 返回社区</button>
+            <div id="detail-content"></div>
+            <h3 style="margin-top:24px; margin-bottom:14px; font-weight:650; font-size:1.1rem;"><i class="fas fa-reply-all"></i> 回复</h3>
+            <div id="comments-list"></div>
+            <div class="input-group" style="margin-top:16px;">
+                <textarea id="comment-content" placeholder="写下你的回复..."></textarea>
+            </div>
+            <button class="btn" onclick="addComment()">发表回复</button>
         </div>
     </div>
 
-    <!-- 社区页面 -->
-    <div id="page-community" class="hidden">
-        <h2 style="margin-bottom:14px; font-weight:600; color:#1e3e5f; font-size:1.2rem;"><i class="fas fa-users"></i> 社区</h2>
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
-            <input type="text" class="search-box" id="search-input" placeholder="搜索帖子...">
-            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                <button class="btn btn-danger hidden" id="banned-list-btn" onclick="showBannedList()"><i class="fas fa-ban"></i> 封禁名单</button>
-                <button class="btn" onclick="showNewPost()"><i class="fas fa-pen"></i> 发帖</button>
+    <!-- 侧边栏 -->
+    <div class="sidebar">
+        <div class="card">
+            <h3 style="margin-bottom:10px;"><i class="fas fa-fire"></i> 热门帖子</h3>
+            <div id="hot-posts">
+                <p style="color:var(--muted);">加载中...</p>
             </div>
         </div>
-        <div id="post-list">
-            <div class="card"><h3>加载中...</h3></div>
-        </div>
-        <div id="new-post-form" class="hidden">
-            <h3 style="margin-bottom:12px;">发新帖</h3>
-            <div class="input-group">
-                <input id="post-title" type="text" placeholder="标题">
+        <div class="card">
+            <h3 style="margin-bottom:10px;"><i class="fas fa-chart-bar"></i> 社区统计</h3>
+            <div id="community-stats">
+                <p style="color:var(--muted);">加载中...</p>
             </div>
-            <div class="input-group">
-                <textarea id="post-content" placeholder="内容..."></textarea>
-            </div>
-            <button class="btn" onclick="createPost()">发布</button>
-            <button class="btn btn-outline" onclick="hideNewPost()">取消</button>
-            <div id="post-error" style="color:red;margin-top:8px;"></div>
         </div>
-    </div>
-
-    <!-- 帖子详情 -->
-    <div id="page-detail" class="hidden">
-        <button class="btn btn-outline" style="margin-bottom:14px;" onclick="backToCommunity()"><i class="fas fa-arrow-left"></i> 返回社区</button>
-        <div id="detail-content"></div>
-        <h3 style="margin-top:20px; margin-bottom:12px; font-weight:600; font-size:1rem;"><i class="fas fa-reply-all"></i> 回复</h3>
-        <div id="comments-list"></div>
-        <div class="input-group" style="margin-top:14px;">
-            <textarea id="comment-content" placeholder="写下你的回复..."></textarea>
-        </div>
-        <button class="btn" onclick="addComment()">发表回复</button>
     </div>
 </div>
 
 <!-- 抽屉 -->
 <div id="drawer-overlay" class="drawer-overlay hidden" onclick="closeDrawer()"></div>
 <div id="drawer-panel" class="drawer-panel hidden">
-    <button class="btn btn-outline btn-sm" style="margin-bottom:14px;" onclick="closeDrawer()">关闭</button>
+    <button class="btn btn-outline btn-sm" style="margin-bottom:16px;" onclick="closeDrawer()">关闭</button>
     <div id="drawer-content"></div>
 </div>
 
 <!-- 回到顶部 -->
-<button class="back-to-top" id="back-to-top" title="回到顶部"><i class="fas fa-arrow-up"></i></button><script>
+<button class="back-to-top" id="back-to-top" title="回到顶部"><i class="fas fa-chevron-up"></i></button><script>
     const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
     const WORKER_URL = 'https://softlib-submit.dghkkppp.workers.dev';
@@ -337,8 +368,7 @@
     async function isBanned() { const ip = await getPublicIP(); if (!ip) return false; const r = await fetch(SUPABASE_URL + `/rest/v1/banned_users?ip_address=eq.${ip}&select=*`, { headers: { 'apikey': SUPABASE_KEY } }); const d = await r.json(); return Array.isArray(d) && d.length > 0; }
     async function banUser(targetNickname) { if (!isAdmin) return; const reason = prompt('封禁原因：', '违规行为'); if (!reason) return; const ip = await getPublicIP(); const r = await fetch(SUPABASE_URL + '/rest/v1/banned_users', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ ip_address: ip, nickname: targetNickname, reason }) }); if (r.ok) { alert('已封禁'); if (!pages.community.classList.contains('hidden')) loadPosts(); else if (!pages.detail.classList.contains('hidden')) loadComments(currentPostId); } else alert('封禁失败'); }
         async function unbanUser(id) { if (!isAdmin) return; if (!confirm('解禁？')) return; const r = await fetch(SUPABASE_URL + `/rest/v1/banned_users?id=eq.${id}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } }); if (r.ok) { alert('已解禁'); showBannedList(); } else alert('解禁失败'); }
-        async function showBannedList() { const r = await fetch(SUPABASE_URL + '/rest/v1/banned_users?select=*&order=banned_at.desc', { headers: { 'apikey': SUPABASE_KEY } }); const d = await r.json(); if (!Array.isArray(d) || !d.length) { alert('名单为空'); return; } let h = '<h3>封禁名单</h3>'; d.forEach(u => h += `<div class="card" style="display:flex;justify-content:space-between;"><div><strong>${u.nickname||''}</strong><br><small>IP: ${u.ip_address||''} · ${u.reason||''}</small><br><small>${new Date(u.banned_at).toLocaleString('zh-CN')}</small></div><button class="btn btn-success btn-sm" onclick="unbanUser(${u.id})">解禁</button></div>`); openDrawer(h); }
-// 软件库加载
+        async function showBannedList() { const r = await fetch(SUPABASE_URL + '/rest/v1/banned_users?select=*&order=banned_at.desc', { headers: { 'apikey': SUPABASE_KEY } }); const d = await r.json(); if (!Array.isArray(d) || !d.length) { alert('名单为空'); return; } let h = '<h3>封禁名单</h3>'; d.forEach(u => h += `<div class="card" style="display:flex;justify-content:space-between;"><div><strong>${u.nickname||''}</strong><br><small>IP: ${u.ip_address||''} · ${u.reason||''}</small><br><small>${new Date(u.banned_at).toLocaleString('zh-CN')}</small></div><button class="btn btn-success btn-sm" onclick="unbanUser(${u.id})">解禁</button></div>`); openDrawer(h); }// 软件库加载
 async function loadSoftwares() {
     const div = document.getElementById('software-list'); div.innerHTML = '<div class="card"><h3>加载中...</h3></div>';
     try {
@@ -348,10 +378,36 @@ async function loadSoftwares() {
         if (!Array.isArray(issues) || !issues.length) { div.innerHTML = '<div class="card"><h3>暂无软件</h3></div>'; return; }
         div.innerHTML = issues.map(i => {
             const body = i.body||'', lines = body.split('\n').filter(l=>l.trim()), desc = lines.find(l=>!l.startsWith('http'))||'', link = lines.find(l=>l.startsWith('http'))||'';
-            return `<div class="card"><h3>${i.title}</h3><div class="desc">${desc}</div>${link?`<a href="${link}" target="_blank" class="btn btn-sm" style="margin-top:6px;"><i class="fas fa-download"></i> 下载</a>`:''}</div>`;
+            return `<div class="card"><h3>${i.title}</h3><div class="desc">${desc}</div>${link?`<a href="${link}" target="_blank" class="btn btn-sm" style="margin-top:8px;"><i class="fas fa-download"></i> 下载</a>`:''}</div>`;
         }).join('');
     } catch (e) { div.innerHTML = '<div class="card"><h3>网络错误</h3></div>'; }
-}// 帖子列表（支持搜索过滤）
+}
+
+// 侧边栏热门帖子
+async function loadHotPosts() {
+    const div = document.getElementById('hot-posts');
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/posts?select=*&order=created_at.desc&limit=5', { headers: { 'apikey': SUPABASE_KEY } });
+        const data = await res.json();
+        if (Array.isArray(data) && data.length) {
+            div.innerHTML = data.map(p => `<p style="margin-bottom:6px;"><a href="#" onclick="openPost(${p.id})">${p.title||'(无标题)'}</a></p>`).join('');
+        } else { div.innerHTML = '<p style="color:var(--muted);">暂无帖子</p>'; }
+    } catch (e) { div.innerHTML = '<p style="color:var(--muted);">加载失败</p>'; }
+}
+
+// 社区统计
+async function loadCommunityStats() {
+    const div = document.getElementById('community-stats');
+    try {
+        const [postsRes, commentsRes] = await Promise.all([
+            fetch(SUPABASE_URL + '/rest/v1/posts?select=id', { headers: { 'apikey': SUPABASE_KEY } }),
+            fetch(SUPABASE_URL + '/rest/v1/comments?select=id', { headers: { 'apikey': SUPABASE_KEY } })
+        ]);
+        const posts = await postsRes.json(); const comments = await commentsRes.json();
+        div.innerHTML = `<p>帖子数：${Array.isArray(posts)?posts.length:0}</p><p>回复数：${Array.isArray(comments)?comments.length:0}</p>`;
+    } catch (e) { div.innerHTML = '<p style="color:var(--muted);">加载失败</p>'; }
+}
+loadHotPosts(); loadCommunityStats();// 帖子列表（支持搜索过滤）
 let allPosts = [], allPostsLoaded = false;
 
 async function loadPosts() {
@@ -396,7 +452,7 @@ document.getElementById('search-input').addEventListener('input', function(e) {
                 const data = await res.json();
                 if (Array.isArray(data) && data.length) {
                     const p = data[0]; const display = await getDisplayNameAsync(p.author||'未知');
-                    document.getElementById('detail-content').innerHTML = `<h2>${p.title||'(无标题)'}</h2><div class="meta" style="margin:8px 0;">${display} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div><p style="margin:12px 0;line-height:1.7;">${p.content||''}</p>${isAdmin?`<button class="btn btn-danger btn-sm" onclick="deletePost(${p.id})"><i class="fas fa-trash"></i> 删除</button> <button class="btn btn-danger btn-sm" onclick="banUser('${p.author}')"><i class="fas fa-ban"></i> 封禁</button>`:''}`;
+                    document.getElementById('detail-content').innerHTML = `<h2>${p.title||'(无标题)'}</h2><div class="meta" style="margin:10px 0;">${display} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div><p style="margin:14px 0;line-height:1.75;">${p.content||''}</p>${isAdmin?`<button class="btn btn-danger btn-sm" onclick="deletePost(${p.id})"><i class="fas fa-trash"></i> 删除</button> <button class="btn btn-danger btn-sm" onclick="banUser('${p.author}')"><i class="fas fa-ban"></i> 封禁</button>`:''}`;
                 }
                 loadComments(id);
             } catch (e) { document.getElementById('detail-content').innerHTML = `<div class="card"><h3>加载失败</h3></div>`; }
