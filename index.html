@@ -151,21 +151,27 @@ async function loadSoftware() {
     }
         }// ===== 社区功能 =====
 async function loadRecentPosts() {
-    const res = await fetch(SUPABASE_URL + '/rest/v1/posts?select=*&order=created_at.desc&limit=5', {
-        headers: { 'apikey': SUPABASE_KEY }
-    });
-    const data = await res.json();
     const div = document.getElementById('recent-posts');
-    if (Array.isArray(data) && data.length > 0) {
-        div.innerHTML = data.map(p => `
-            <div class="card" onclick="openPost(${p.id})">
-                <h3>${p.title}</h3>
-                <div class="desc">${p.content.substring(0, 80)}...</div>
-                <div class="meta">${p.author} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div>
-            </div>
-        `).join('');
-    } else {
-        div.innerHTML = '<div class="card"><h3>暂无帖子，去社区发第一个吧！</h3></div>';
+    div.innerHTML = '<div class="card"><h3>加载中...</h3></div>';
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/posts?select=*&order=created_at.desc&limit=5', {
+            headers: { 'apikey': SUPABASE_KEY }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+            div.innerHTML = data.map(p => `
+                <div class="card" onclick="openPost(${p.id})">
+                    <h3>${p.title}</h3>
+                    <div class="desc">${(p.content || '').substring(0, 80)}...</div>
+                    <div class="meta">${p.author || '未知'} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div>
+                </div>
+            `).join('');
+        } else {
+            div.innerHTML = '<div class="card"><h3>暂无帖子，去社区发第一个吧！</h3></div>';
+        }
+    } catch (e) {
+        div.innerHTML = `<div class="card"><h3>加载失败：${e.message}</h3></div>`;
     }
 }
 
