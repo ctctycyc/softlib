@@ -2,67 +2,300 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>聊天室</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>软件库 · 社区版</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #e8ecef; --card: #fff; --text: #222; --accent: #3390ec; }
-        [data-theme="dark"] { --bg: #1a1d21; --card: #24272c; --text: #e8eaed; --accent: #5b9bd5; }
+        :root {
+            --bg: #f0f2f5; --card: #ffffff; --text: #1a1a1a; --sub: #555;
+            --border: #e0e0e0; --accent: #1e3c72; --btn: #ff6b35;
+            --nav-bg: #1e3c72; --nav-text: #ffffff; --radius: 8px;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: system-ui; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; }
-        .top-bar { background: var(--card); padding: 10px 15px; border-bottom: 1px solid #ccc; display: flex; gap: 10px; align-items: center; }
-        .top-bar h2 { flex: 1; font-size: 1.2rem; }
-        .icon-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text); }
-        .message-list { flex: 1; overflow-y: auto; padding: 10px 15px; display: flex; flex-direction: column; gap: 8px; }
-        .msg-row { display: flex; gap: 8px; max-width: 80%; }
-        .msg-row.self { align-self: flex-end; flex-direction: row-reverse; }
-        .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; }
-        .bubble { padding: 8px 14px; border-radius: 12px; background: #fff; border: 1px solid #ddd; }
-        .self .bubble { background: var(--accent); color: white; }
-        .input-area { padding: 10px; background: var(--card); border-top: 1px solid #ccc; display: flex; gap: 8px; align-items: flex-end; }
-        .input-area textarea { flex: 1; border: 1px solid #ccc; border-radius: 20px; padding: 8px 14px; resize: none; background: var(--bg); color: var(--text); min-height: 38px; }
-        .send-btn { background: var(--accent); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1rem; cursor: pointer; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
+        .top-nav {
+            background: var(--nav-bg); color: var(--nav-text);
+            padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+            flex-wrap: wrap; position: sticky; top: 0; z-index: 100;
+        }
+        .top-nav a { color: var(--nav-text); text-decoration: none; font-size: 13px; }
+        .logo { font-size: 18px; font-weight: 700; margin-right: auto; }
+        .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+        .nav-links a { padding: 4px 8px; border-radius: 20px; transition: 0.2s; font-size: 13px; }
+        .nav-links a.active { background: rgba(255,255,255,0.2); }
+        .container { max-width: 800px; margin: 16px auto; padding: 0 16px; }
+        .card {
+            background: var(--card); border-radius: var(--radius);
+            padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow);
+            transition: 0.2s; cursor: pointer; border: 1px solid var(--border);
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+        .card h3 { font-size: 16px; margin-bottom: 4px; }
+        .card .desc { font-size: 13px; color: var(--sub); }
+        .card .meta { font-size: 12px; color: #999; margin-top: 6px; }
+        .btn { background: var(--btn); color: white; border: none; padding: 8px 18px; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: 13px; }
+        .btn:hover { opacity: 0.9; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .input-group input, .input-group textarea { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
+        .input-group textarea { min-height: 80px; resize: vertical; }
         .hidden { display: none !important; }
+        .comment { padding: 10px; border-bottom: 1px solid var(--border); font-size: 14px; }
+        .comment .author { font-weight: 600; color: var(--accent); }
+        .error-card { background: #ffeaea; border-left: 4px solid #e74c3c; }
     </style>
 </head>
 <body>
-    <div class="top-bar">
-        <h2>聊天室</h2>
-        <button class="icon-btn" onclick="loadHistory()">🔄</button>
+    <div class="top-nav">
+        <div class="logo">软件库</div>
+        <div class="nav-links">
+            <a href="#" id="nav-home" class="active">首页（软件）</a>
+            <a href="#" id="nav-community">社区</a>
+            <a href="./tools.html">工具箱</a>
+            <a href="./chat.html">聊天室</a>
+        </div>
+    </div><div class="container" id="app">
+    <!-- 首页（软件列表） -->
+    <div id="page-home">
+        <h2 style="margin-bottom:12px;">软件</h2>
+        <div id="software-list">
+            <div class="card"><h3>软件加载中...</h3></div>
+        </div>
     </div>
-    <div class="message-list" id="chat-box"></div>
-    <div class="input-area">
-        <textarea id="msg" placeholder="输入消息..." rows="1"></textarea>
-        <button class="send-btn" onclick="sendMsg()">➤</button>
+
+    <!-- 社区页面（帖子列表 + 发帖） -->
+    <div id="page-community" class="hidden">
+        <h2 style="margin-bottom:12px;">社区</h2>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <span></span>
+            <button class="btn" onclick="showNewPost()">发帖</button>
+        </div>
+        <div id="post-list">
+            <div class="card"><h3>帖子加载中...</h3></div>
+        </div>
+        <div id="new-post-form" class="hidden">
+            <h3>发新帖</h3>
+            <div class="input-group">
+                <input id="post-title" type="text" placeholder="标题">
+            </div>
+            <div class="input-group">
+                <textarea id="post-content" placeholder="内容..."></textarea>
+            </div>
+            <button class="btn" onclick="createPost()">发布</button>
+            <button class="btn" style="background:#999;" onclick="hideNewPost()">取消</button>
+            <div id="post-error" style="color:red;margin-top:8px;"></div>
+        </div>
+    </div>
+
+    <!-- 帖子详情页 -->
+    <div id="page-detail" class="hidden">
+        <button class="btn" style="background:#999;margin-bottom:12px;" onclick="backToCommunity()">← 返回社区</button>
+        <div id="detail-content"></div>
+        <h3 style="margin-top:16px;">回复</h3>
+        <div id="comments-list"></div>
+        <div class="input-group" style="margin-top:12px;">
+            <textarea id="comment-content" placeholder="写下你的回复..."></textarea>
+        </div>
+        <button class="btn" onclick="addComment()">发表回复</button>
+    </div>
     </div><script>
+    // Supabase 配置
     const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
-    let nickname = localStorage.getItem('nickname');
-    if (!nickname) { nickname = '游客' + Math.floor(Math.random() * 9000 + 1000); localStorage.setItem('nickname', nickname); }
 
-    async function loadHistory() {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/chat_messages?select=*&order=created_at.asc&limit=50', { headers: { 'apikey': SUPABASE_KEY } });
-        const msgs = await res.json();
-        const box = document.getElementById('chat-box'); box.innerHTML = '';
-        if (Array.isArray(msgs)) msgs.forEach(m => {
-            const div = document.createElement('div');
-            div.className = 'msg-row ' + (m.email === nickname ? 'self' : 'other');
-            div.innerHTML = `<div class="avatar">${(m.email||'?')[0].toUpperCase()}</div><div class="bubble">${m.message||''}</div>`;
-            box.appendChild(div);
-        });
-        box.scrollTop = box.scrollHeight;
+    // 游客昵称
+    let nickname = localStorage.getItem('nickname');
+    if (!nickname) {
+        nickname = '游客' + Math.floor(Math.random() * 9000 + 1000);
+        localStorage.setItem('nickname', nickname);
     }
 
-    async function sendMsg() {
-        const msg = document.getElementById('msg').value.trim();
-        if (!msg) return;
-        await fetch(SUPABASE_URL + '/rest/v1/chat_messages', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-            body: JSON.stringify({ email: nickname, message: msg })
+    let currentPostId = null;
+
+    // 页面切换
+    const pages = {
+        home: document.getElementById('page-home'),
+        community: document.getElementById('page-community'),
+        detail: document.getElementById('page-detail')
+    };
+
+    function showPage(name) {
+        Object.keys(pages).forEach(k => pages[k].classList.add('hidden'));
+        pages[name].classList.remove('hidden');
+        if (name === 'home') loadSoftwares();
+        if (name === 'community') loadPosts();
+    }
+
+    function backToCommunity() { showPage('community'); }
+
+    // 导航点击事件
+    document.getElementById('nav-home').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+        this.classList.add('active');
+        showPage('home');
+    });
+
+    document.getElementById('nav-community').addEventListener('click', function(e) {
+        e.preventDefault();
+        document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+        this.classList.add('active');
+        showPage('community');
+    });
+
+    function showNewPost() { document.getElementById('new-post-form').classList.remove('hidden'); }
+    function hideNewPost() { document.getElementById('new-post-form').classList.add('hidden'); }// ===== 软件库（GitHub Issues） =====
+async function loadSoftwares() {
+    const div = document.getElementById('software-list');
+    if (!div) return;
+    div.innerHTML = '<div class="card"><h3>软件加载中...</h3></div>';
+    try {
+        const res = await fetch('https://api.github.com/repos/ctctycyc/softlib/issues?labels=approved&state=open&sort=created&direction=desc&per_page=20');
+        if (!res.ok) {
+            div.innerHTML = '<div class="card"><h3>软件加载失败，请稍后再试</h3></div>';
+            return;
+        }
+        const issues = await res.json();
+        if (!Array.isArray(issues) || issues.length === 0) {
+            div.innerHTML = '<div class="card"><h3>暂无软件</h3></div>';
+            return;
+        }
+        div.innerHTML = issues.map(issue => {
+            const body = issue.body || '';
+            const lines = body.split('\n').filter(l => l.trim());
+            const desc = lines.find(l => !l.startsWith('http')) || '';
+            const link = lines.find(l => l.startsWith('http')) || '';
+            return `
+                <div class="card">
+                    <h3>${issue.title}</h3>
+                    <div class="desc">${desc}</div>
+                    ${link ? `<a href="${link}" target="_blank" class="btn" style="display:inline-block;margin-top:8px;">下载</a>` : ''}
+                </div>
+            `;
+        }).join('');
+    } catch (e) {
+        div.innerHTML = '<div class="card"><h3>软件加载失败，请检查网络</h3></div>';
+    }
+}// ===== 社区帖子 =====
+async function loadPosts() {
+    const div = document.getElementById('post-list');
+    div.innerHTML = '<div class="card"><h3>帖子加载中...</h3></div>';
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/posts?select=*&order=created_at.desc&limit=50', {
+            headers: { 'apikey': SUPABASE_KEY }
         });
-        document.getElementById('msg').value = '';
-        loadHistory();
-    }        document.getElementById('msg').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); sendMsg(); } });
-        loadHistory();
+        if (!res.ok) {
+            div.innerHTML = `<div class="card error-card"><h3>加载失败（HTTP ${res.status}）</h3></div>`;
+            return;
+        }
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+            div.innerHTML = data.map(p => `
+                <div class="card" onclick="openPost(${p.id})">
+                    <h3>${p.title || '(无标题)'}</h3>
+                    <div class="desc">${(p.content || '').substring(0, 100)}...</div>
+                    <div class="meta">${p.author || '未知'} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div>
+                </div>
+            `).join('');
+        } else {
+            div.innerHTML = '<div class="card"><h3>暂无帖子，发第一个吧！</h3></div>';
+        }
+    } catch (e) {
+        div.innerHTML = `<div class="card error-card"><h3>网络错误：${e.message}</h3></div>`;
+    }
+}
+
+async function openPost(id) {
+    currentPostId = id;
+    showPage('detail');
+    try {
+        const res = await fetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${id}&select=*`, {
+            headers: { 'apikey': SUPABASE_KEY }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+            const p = data[0];
+            document.getElementById('detail-content').innerHTML = `
+                <h2>${p.title || '(无标题)'}</h2>
+                <div class="meta">${p.author || '未知'} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div>
+                <p style="margin-top:12px;line-height:1.6;">${p.content || ''}</p>
+            `;
+        }
+        loadComments(id);
+    } catch (e) {
+        document.getElementById('detail-content').innerHTML = `<div class="card error-card"><h3>加载帖子失败：${e.message}</h3></div>`;
+    }
+}
+
+async function loadComments(postId) {
+    const div = document.getElementById('comments-list');
+    div.innerHTML = '<p style="color:#999;">加载回复中...</p>';
+    try {
+        const res = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${postId}&select=*&order=created_at.asc`, {
+            headers: { 'apikey': SUPABASE_KEY }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+            div.innerHTML = data.map(c => `
+                <div class="comment">
+                    <span class="author">${c.author || '匿名'}</span>：${c.content || ''}
+                    <div class="meta">${new Date(c.created_at).toLocaleString('zh-CN')}</div>
+                </div>
+            `).join('');
+        } else {
+            div.innerHTML = '<p style="color:#999;">暂无回复</p>';
+        }
+    } catch (e) {
+        div.innerHTML = `<div class="card error-card"><p>加载回复失败：${e.message}</p></div>`;
+    }
+            }        async function createPost() {
+            const title = document.getElementById('post-title').value.trim();
+            const content = document.getElementById('post-content').value.trim();
+            const err = document.getElementById('post-error');
+            if (!title || !content) { err.textContent = '标题和内容不能为空'; return; }
+            try {
+                const res = await fetch(SUPABASE_URL + '/rest/v1/posts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+                    body: JSON.stringify({ title, content, author: nickname })
+                });
+                if (res.ok) {
+                    document.getElementById('post-title').value = '';
+                    document.getElementById('post-content').value = '';
+                    hideNewPost();
+                    loadPosts();
+                } else {
+                    const errText = await res.text();
+                    err.textContent = '发布失败：' + errText;
+                }
+            } catch (e) {
+                err.textContent = '网络错误：' + e.message;
+            }
+        }
+
+        async function addComment() {
+            const content = document.getElementById('comment-content').value.trim();
+            if (!content || !currentPostId) return;
+            try {
+                const res = await fetch(SUPABASE_URL + '/rest/v1/comments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+                    body: JSON.stringify({ post_id: currentPostId, content, author: nickname })
+                });
+                if (res.ok) {
+                    document.getElementById('comment-content').value = '';
+                    loadComments(currentPostId);
+                } else {
+                    const errText = await res.text();
+                    alert('回复失败：' + errText);
+                }
+            } catch (e) { alert('网络错误：' + e.message); }
+        }
+
+        // 启动（默认显示首页软件列表）
+        showPage('home');
     </script>
 </body>
 </html>
