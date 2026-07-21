@@ -7,215 +7,49 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         :root {
-            --bg: #e9edf0;
-            --card: #ffffff;
-            --text: #2c3e50;
-            --sub: #5a6b7a;
-            --border: #cfd8e3;
-            --accent: #2c5282;
-            --btn: #e07b39;
-            --nav-bg: #1e3e5f;
-            --nav-text: #f0f4f8;
-            --radius: 4px;
-            --shadow: 0 1px 3px rgba(0,0,0,0.08);
-            --shadow-hover: 0 4px 12px rgba(0,0,0,0.12);
-            --hover-bg: #f5f7fa;
+            --bg: #e9edf0; --card: #ffffff; --text: #2c3e50; --sub: #5a6b7a; --border: #cfd8e3;
+            --accent: #2c5282; --btn: #e07b39; --nav-bg: #1e3e5f; --nav-text: #f0f4f8;
+            --radius: 4px; --shadow: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-hover: 0 4px 12px rgba(0,0,0,0.12); --hover-bg: #f5f7fa;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            font-size: 14px;
-        }
-        .top-nav {
-            background: var(--nav-bg);
-            color: var(--nav-text);
-            padding: 8px 18px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-        .logo {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-right: auto;
-            cursor: default;
-            color: #fff;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; font-size: 14px; }
+        .top-nav { background: var(--nav-bg); color: var(--nav-text); padding: 8px 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .logo { font-size: 1.2rem; font-weight: 700; margin-right: auto; cursor: default; color: #fff; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; }
         .logo i { font-size: 1.1rem; opacity: 0.9; }
         .nav-links { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-        .nav-links a {
-            color: var(--nav-text);
-            text-decoration: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            transition: background 0.15s;
-            white-space: nowrap;
-        }
+        .nav-links a { color: var(--nav-text); text-decoration: none; padding: 5px 10px; border-radius: 4px; font-size: 0.9rem; transition: background 0.15s; white-space: nowrap; }
         .nav-links a:hover { background: rgba(255,255,255,0.15); }
         .nav-links a.active { background: rgba(255,255,255,0.25); font-weight: 500; }
-        .container { max-width: 820px; margin: 20px auto; padding: 0 16px; }/* 通用卡片 */
-.card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    margin-bottom: 12px;
-    box-shadow: var(--shadow);
-    transition: box-shadow 0.15s, background 0.15s;
-    cursor: pointer;
-}
-.card:hover {
-    box-shadow: var(--shadow-hover);
-    background: var(--hover-bg);
-}
-.card h3 {
-    font-size: 1rem;
-    margin-bottom: 4px;
-    color: #1a3a5c;
-    font-weight: 600;
-}
-.card .desc {
-    font-size: 0.9rem;
-    color: var(--sub);
-    line-height: 1.5;
-    margin-bottom: 6px;
-}
-.card .meta {
-    font-size: 0.75rem;
-    color: #8b95a5;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-.btn {
-    display: inline-block;
-    background: var(--btn);
-    color: white;
-    border: none;
-    padding: 7px 18px;
-    border-radius: 4px;
-    font-weight: 500;
-    cursor: pointer;
-    font-size: 0.9rem;
-    text-decoration: none;
-    transition: background 0.15s;
-    text-align: center;
-}
-.btn:hover { background: #c96a2e; }
-.btn-sm { padding: 4px 10px; font-size: 0.8rem; }
-.btn-danger { background: #c0392b; }
-.btn-danger:hover { background: #a93226; }
-.btn-success { background: #27ae60; }
-.btn-success:hover { background: #219a52; }
-.input-group { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-.input-group input, .input-group textarea {
-    flex: 1;
-    padding: 9px 12px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    font-size: 0.9rem;
-    background: #fff;
-    color: var(--text);
-}
-.input-group textarea { min-height: 90px; resize: vertical; }
-.hidden { display: none !important; }        /* 社区帖子特有的样式 */
-        .post-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 14px 16px;
-            margin-bottom: 8px;
-            box-shadow: var(--shadow);
-            transition: box-shadow 0.15s, background 0.15s;
-            cursor: pointer;
-        }
-        .post-item:hover {
-            box-shadow: var(--shadow-hover);
-            background: #fcfdfd;
-        }
-        .post-avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 6px;
-            background: #ced6e0;
-            color: #4a5c6c;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 0.95rem;
-            flex-shrink: 0;
-        }
+        .container { max-width: 820px; margin: 20px auto; padding: 0 16px; }        .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow); transition: box-shadow 0.15s, background 0.15s; cursor: pointer; }
+        .card:hover { box-shadow: var(--shadow-hover); background: var(--hover-bg); }
+        .card h3 { font-size: 1rem; margin-bottom: 4px; color: #1a3a5c; font-weight: 600; }
+        .card .desc { font-size: 0.9rem; color: var(--sub); line-height: 1.5; margin-bottom: 6px; }
+        .card .meta { font-size: 0.75rem; color: #8b95a5; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .btn { display: inline-block; background: var(--btn); color: white; border: none; padding: 7px 18px; border-radius: 4px; font-weight: 500; cursor: pointer; font-size: 0.9rem; text-decoration: none; transition: background 0.15s; text-align: center; }
+        .btn:hover { background: #c96a2e; }
+        .btn-sm { padding: 4px 10px; font-size: 0.8rem; }
+        .btn-danger { background: #c0392b; } .btn-danger:hover { background: #a93226; }
+        .btn-success { background: #27ae60; } .btn-success:hover { background: #219a52; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .input-group input, .input-group textarea { flex: 1; padding: 9px 12px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem; background: #fff; color: var(--text); }
+        .input-group textarea { min-height: 90px; resize: vertical; }
+        .hidden { display: none !important; }
+        .post-item { display: flex; align-items: flex-start; gap: 12px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 8px; box-shadow: var(--shadow); transition: box-shadow 0.15s, background 0.15s; cursor: pointer; }
+        .post-item:hover { box-shadow: var(--shadow-hover); background: #fcfdfd; }
+        .post-avatar { width: 38px; height: 38px; border-radius: 6px; background: #ced6e0; color: #4a5c6c; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.95rem; flex-shrink: 0; }
         .post-info { flex: 1; min-width: 0; }
-        .post-info h3 {
-            font-size: 1rem;
-            margin-bottom: 2px;
-            color: #1a3a5c;
-            font-weight: 600;
-        }
-        .post-info .desc {
-            font-size: 0.85rem;
-            color: var(--sub);
-            margin-bottom: 4px;
-        }
-        .post-info .meta {
-            font-size: 0.75rem;
-            color: #8b95a5;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .comment-item {
-            display: flex;
-            gap: 10px;
-            padding: 10px 0;
-            border-bottom: 1px solid #eef1f5;
-            font-size: 0.9rem;
-        }
-        .comment-item .author {
-            font-weight: 600;
-            color: #2c5282;
-            white-space: nowrap;
-        }
-        .admin-badge {
-            background: #c0392b;
-            color: white;
-            padding: 1px 6px;
-            border-radius: 3px;
-            font-size: 0.7rem;
-            margin-left: 5px;
-            font-weight: 500;
-        }
+        .post-info h3 { font-size: 1rem; margin-bottom: 2px; color: #1a3a5c; font-weight: 600; }
+        .post-info .desc { font-size: 0.85rem; color: var(--sub); margin-bottom: 4px; }
+        .post-info .meta { font-size: 0.75rem; color: #8b95a5; display: flex; align-items: center; gap: 8px; }
+        .comment-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eef1f5; font-size: 0.9rem; }
+        .comment-item .author { font-weight: 600; color: #2c5282; white-space: nowrap; }
+        .admin-badge { background: #c0392b; color: white; padding: 1px 6px; border-radius: 3px; font-size: 0.7rem; margin-left: 5px; font-weight: 500; }
         .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.25); z-index: 200; }
-        .drawer-panel {
-            position: fixed;
-            right: 0;
-            top: 0;
-            height: 100%;
-            width: 310px;
-            background: var(--card);
-            z-index: 201;
-            padding: 20px;
-            overflow-y: auto;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-        }
+        .drawer-panel { position: fixed; right: 0; top: 0; height: 100%; width: 310px; background: var(--card); z-index: 201; padding: 20px; overflow-y: auto; box-shadow: -2px 0 10px rgba(0,0,0,0.1); }
+        .search-box { flex: 1; padding: 7px 12px; border: 1px solid var(--border); border-radius: 4px; font-size: 0.9rem; background: #fff; color: var(--text); min-width: 160px; }
+        .back-to-top { position: fixed; bottom: 30px; right: 30px; background: var(--accent); color: white; border: none; border-radius: 50%; width: 42px; height: 42px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: opacity 0.2s, transform 0.2s; opacity: 0; transform: translateY(10px); pointer-events: none; z-index: 99; display: flex; align-items: center; justify-content: center; }
+        .back-to-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
     </style>
 </head>
 <body>
@@ -224,7 +58,7 @@
         <div class="nav-links">
             <a href="#" id="nav-home" class="active">首页</a>
             <a href="#" id="nav-community">社区</a>
-            <a href="./tools.html"><i class="fas fa-tools"></i> 工具箱</a>
+            <a href="#" onclick="setNickname(); return false;">设置昵称</a>
         </div>
     </div><div class="container" id="app">
     <!-- 首页（软件列表） -->
@@ -238,9 +72,9 @@
     <!-- 社区页面 -->
     <div id="page-community" class="hidden">
         <h2 style="margin-bottom:12px; font-weight:600; color:#1e3e5f;"><i class="fas fa-users"></i> 社区</h2>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-            <span></span>
-            <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+            <input type="text" class="search-box" id="search-input" placeholder="搜索帖子...">
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                 <button class="btn btn-danger hidden" id="banned-list-btn" onclick="showBannedList()"><i class="fas fa-ban"></i> 封禁名单</button>
                 <button class="btn" onclick="showNewPost()"><i class="fas fa-pen"></i> 发帖</button>
             </div>
@@ -280,7 +114,10 @@
 <div id="drawer-panel" class="drawer-panel hidden">
     <button class="btn btn-sm" style="background:#7f8c8d;margin-bottom:12px;" onclick="closeDrawer()">关闭</button>
     <div id="drawer-content"></div>
-</div><script>
+</div>
+
+<!-- 回到顶部 -->
+<button class="back-to-top" id="back-to-top" title="回到顶部"><i class="fas fa-arrow-up"></i></button><script>
     const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
     const WORKER_URL = 'https://softlib-submit.dghkkppp.workers.dev';
@@ -289,10 +126,7 @@
     if (localStorage.getItem('isAdmin') === 'true') isAdmin = true;
 
     let nickname = localStorage.getItem('custom_nickname');
-    if (!nickname) {
-        nickname = '游客' + Math.floor(Math.random() * 9000 + 1000);
-        localStorage.setItem('custom_nickname', nickname);
-    }
+    if (!nickname) { nickname = '游客' + Math.floor(Math.random() * 9000 + 1000); localStorage.setItem('custom_nickname', nickname); }
 
     let currentPostId = null;
     const pages = {
@@ -308,6 +142,7 @@
         if (name === 'community') {
             loadPosts();
             document.getElementById('banned-list-btn').classList.toggle('hidden', !isAdmin);
+            document.getElementById('search-input').value = ''; // 切换页面时清空搜索框
         }
     }
     function backToCommunity() { showPage('community'); }
@@ -315,55 +150,32 @@
     document.getElementById('nav-home').addEventListener('click', e => { e.preventDefault(); showPage('home'); });
     document.getElementById('nav-community').addEventListener('click', e => { e.preventDefault(); showPage('community'); });
 
-    function showNewPost() {
-        document.getElementById('new-post-form').classList.remove('hidden');
-        document.getElementById('new-post-form').scrollIntoView({ behavior: 'smooth' });
-    }
+    function showNewPost() { document.getElementById('new-post-form').classList.remove('hidden'); document.getElementById('new-post-form').scrollIntoView({ behavior: 'smooth' }); }
     function hideNewPost() { document.getElementById('new-post-form').classList.add('hidden'); }
-// 设置昵称
-function setNickname() {
-    const newName = prompt('请输入你的昵称：', nickname);
-    if (newName && newName.trim()) {
-        nickname = newName.trim();
-        localStorage.setItem('custom_nickname', nickname);
-        alert('昵称已设置为：' + nickname);
-        // 如果当前在社区页面，刷新帖子显示新昵称
-        if (!document.getElementById('page-community').classList.contains('hidden')) {
-            loadPosts();
-        }
-    }
-}
-    async function verifyAdmin() {
-        const pwd = prompt('管理员密码：');
-        if (!pwd) return;
-        try {
-            const res = await fetch(WORKER_URL + '/verify', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password: pwd, nickname })
-            });
-            const data = await res.json();
-            if (data.valid) {
-                isAdmin = true; localStorage.setItem('isAdmin', 'true');
-                alert('管理员已激活');
-                if (!pages.community.classList.contains('hidden')) showPage('community');
-            } else alert('密码错误');
-        } catch (e) { alert('连接失败'); }
+
+    function setNickname() {
+        const newName = prompt('请输入你的昵称：', nickname);
+        if (newName && newName.trim()) { nickname = newName.trim(); localStorage.setItem('custom_nickname', nickname); alert('昵称已设置为：' + nickname); if (!pages.community.classList.contains('hidden')) loadPosts(); }
     }
 
+    async function verifyAdmin() {
+        const pwd = prompt('管理员密码：'); if (!pwd) return;
+        try {
+            const res = await fetch(WORKER_URL + '/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pwd, nickname }) });
+            const data = await res.json();
+            if (data.valid) { isAdmin = true; localStorage.setItem('isAdmin', 'true'); alert('管理员已激活'); if (!pages.community.classList.contains('hidden')) showPage('community'); }
+            else alert('密码错误');
+        } catch (e) { alert('连接失败'); }
+    }
     async function logoutAdmin() {
         isAdmin = false; localStorage.removeItem('isAdmin');
-        await fetch(WORKER_URL + '/logout', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nickname })
-        });
-        alert('已退出管理');
-        if (!pages.community.classList.contains('hidden')) showPage('community');
+        await fetch(WORKER_URL + '/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nickname }) });
+        alert('已退出管理'); if (!pages.community.classList.contains('hidden')) showPage('community');
     }
 
     let titleClicks = 0, clickTimer = null;
     document.querySelector('.logo').addEventListener('click', () => {
-        titleClicks++;
-        if (clickTimer) clearTimeout(clickTimer);
+        titleClicks++; if (clickTimer) clearTimeout(clickTimer);
         clickTimer = setTimeout(() => titleClicks = 0, 2000);
         if (titleClicks >= 5) { titleClicks = 0; isAdmin ? logoutAdmin() : verifyAdmin(); }
     });
@@ -371,58 +183,25 @@ function setNickname() {
     async function getAdminNicknames() {
         try {
             const res = await fetch(SUPABASE_URL + '/rest/v1/admin_sessions?expires_at=gt.' + new Date().toISOString() + '&select=nickname', { headers: { 'apikey': SUPABASE_KEY } });
-            const data = await res.json();
-            return Array.isArray(data) ? [...new Set(data.map(d => d.nickname))] : [];
+            const data = await res.json(); return Array.isArray(data) ? [...new Set(data.map(d => d.nickname))] : [];
         } catch (e) { return []; }
     }
-
     async function getDisplayNameAsync(name) {
         const adminNicknames = await getAdminNicknames();
         return adminNicknames.includes(name) ? `${name} <span class="admin-badge">管理</span>` : name;
     }
 
-    function openDrawer(html) {
-        document.getElementById('drawer-content').innerHTML = html;
-        document.getElementById('drawer-overlay').classList.remove('hidden');
-        document.getElementById('drawer-panel').classList.remove('hidden');
-    }
-    function closeDrawer() {
-        document.getElementById('drawer-overlay').classList.add('hidden');
-        document.getElementById('drawer-panel').classList.add('hidden');
-    }async function getPublicIP() { try { const r = await fetch('https://api.ipify.org?format=json'); return (await r.json()).ip; } catch (e) { return null; } }
-async function isBanned() {
-    const ip = await getPublicIP(); if (!ip) return false;
-    const r = await fetch(SUPABASE_URL + `/rest/v1/banned_users?ip_address=eq.${ip}&select=*`, { headers: { 'apikey': SUPABASE_KEY } });
-    const d = await r.json(); return Array.isArray(d) && d.length > 0;
-}
-async function banUser(targetNickname) {
-    if (!isAdmin) return;
-    const reason = prompt('封禁原因：', '违规行为'); if (!reason) return;
-    const ip = await getPublicIP();
-    const r = await fetch(SUPABASE_URL + '/rest/v1/banned_users', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-        body: JSON.stringify({ ip_address: ip, nickname: targetNickname, reason })
-    });
-    if (r.ok) { alert('已封禁'); if (!pages.community.classList.contains('hidden')) loadPosts(); else if (!pages.detail.classList.contains('hidden')) loadComments(currentPostId); }
-    else alert('封禁失败');
-}
-async function unbanUser(id) {
-    if (!isAdmin) return;
-    if (!confirm('解禁？')) return;
-    const r = await fetch(SUPABASE_URL + `/rest/v1/banned_users?id=eq.${id}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } });
-    if (r.ok) { alert('已解禁'); showBannedList(); } else alert('解禁失败');
-}
-async function showBannedList() {
-    const r = await fetch(SUPABASE_URL + '/rest/v1/banned_users?select=*&order=banned_at.desc', { headers: { 'apikey': SUPABASE_KEY } });
-    const d = await r.json();
-    if (!Array.isArray(d) || !d.length) { alert('名单为空'); return; }
-    let h = '<h3>封禁名单</h3>';
-    d.forEach(u => h += `<div class="card" style="display:flex;justify-content:space-between;"><div><strong>${u.nickname||''}</strong><br><small>IP: ${u.ip_address||''} · ${u.reason||''}</small><br><small>${new Date(u.banned_at).toLocaleString('zh-CN')}</small></div><button class="btn btn-success btn-sm" onclick="unbanUser(${u.id})">解禁</button></div>`);
-    openDrawer(h);
-}// 软件库加载
+    function openDrawer(html) { document.getElementById('drawer-content').innerHTML = html; document.getElementById('drawer-overlay').classList.remove('hidden'); document.getElementById('drawer-panel').classList.remove('hidden'); }
+    function closeDrawer() { document.getElementById('drawer-overlay').classList.add('hidden'); document.getElementById('drawer-panel').classList.add('hidden'); }
+
+    async function getPublicIP() { try { const r = await fetch('https://api.ipify.org?format=json'); return (await r.json()).ip; } catch (e) { return null; } }
+    async function isBanned() { const ip = await getPublicIP(); if (!ip) return false; const r = await fetch(SUPABASE_URL + `/rest/v1/banned_users?ip_address=eq.${ip}&select=*`, { headers: { 'apikey': SUPABASE_KEY } }); const d = await r.json(); return Array.isArray(d) && d.length > 0; }
+    async function banUser(targetNickname) { if (!isAdmin) return; const reason = prompt('封禁原因：', '违规行为'); if (!reason) return; const ip = await getPublicIP(); const r = await fetch(SUPABASE_URL +  '/rest/v1/banned_users', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ ip_address: ip, nickname: targetNickname, reason }) }); if (r.ok) { alert('已封禁'); if (!pages.community.classList.contains('hidden')) loadPosts(); else if (!pages.detail.classList.contains('hidden')) loadComments(currentPostId); } else alert('封禁失败'); }
+        async function unbanUser(id) { if (!isAdmin) return; if (!confirm('解禁？')) return; const r = await fetch(SUPABASE_URL + `/rest/v1/banned_users?id=eq.${id}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } }); if (r.ok) { alert('已解禁'); showBannedList(); } else alert('解禁失败'); }
+        async function showBannedList() { const r = await fetch(SUPABASE_URL + '/rest/v1/banned_users?select=*&order=banned_at.desc', { headers: { 'apikey': SUPABASE_KEY } }); const d = await r.json(); if (!Array.isArray(d) || !d.length) { alert('名单为空');return; } let h = '<h3>封禁名单</h3>'; d.forEach(u => h += `<div class="card" style="display:flex;justify-content:space-between;"><div><strong>${u.nickname||''}</strong><br><small>IP: ${u.ip_address||''} · ${u.reason||''}</small><br><small>${new Date(u.banned_at).toLocaleString('zh-CN')}</small></div><button class="btn btn-success btn-sm" onclick="unbanUser(${u.id})">解禁</button></div>`); openDrawer(h); }
+// 软件库加载
 async function loadSoftwares() {
-    const div = document.getElementById('software-list');
-    div.innerHTML = '<div class="card"><h3>加载中...</h3></div>';
+    const div = document.getElementById('software-list'); div.innerHTML = '<div class="card"><h3>加载中...</h3></div>';
     try {
         const res = await fetch('https://api.github.com/repos/ctctycyc/softlib/issues?labels=approved&state=open&sort=created&direction=desc&per_page=20');
         if (!res.ok) { div.innerHTML = '<div class="card"><h3>加载失败</h3></div>'; return; }
@@ -433,42 +212,58 @@ async function loadSoftwares() {
             return `<div class="card"><h3>${i.title}</h3><div class="desc">${desc}</div>${link?`<a href="${link}" target="_blank" class="btn btn-sm" style="margin-top:6px;"><i class="fas fa-download"></i> 下载</a>`:''}</div>`;
         }).join('');
     } catch (e) { div.innerHTML = '<div class="card"><h3>网络错误</h3></div>'; }
-}
+}// 帖子列表（支持搜索过滤）
+let allPosts = []; // 缓存所有帖子数据
+let allPostsLoaded = false;
 
-// 帖子列表
 async function loadPosts() {
-    const div = document.getElementById('post-list');
-    div.innerHTML = '<div class="card"><h3>加载中...</h3></div>';
+    const div = document.getElementById('post-list'); div.innerHTML = '<div class="card"><h3>加载中...</h3></div>';
     try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/posts?select=*&order=created_at.desc&limit=50', { headers: { 'apikey': SUPABASE_KEY } });
+        const res = await fetch(SUPABASE_URL + '/rest/v1/posts?select=*&order=created_at.desc&limit=100', { headers: { 'apikey': SUPABASE_KEY } });
         if (!res.ok) { div.innerHTML = `<div class="card"><h3>加载失败(${res.status})</h3></div>`; return; }
         const data = await res.json();
         if (!Array.isArray(data) || !data.length) { div.innerHTML = '<div class="card"><h3>暂无帖子</h3></div>'; return; }
-        let html = '';
-        for (const p of data) {
-            const display = await getDisplayNameAsync(p.author||'未知');
-            html += `<div class="post-item" onclick="openPost(${p.id})">
-                <div class="post-avatar">${(p.author||'?')[0].toUpperCase()}</div>
-                <div class="post-info">
-                    <h3>${p.title||'(无标题)'}</h3>
-                    <div class="desc">${(p.content||'').substring(0,120)}...</div>
-                    <div class="meta">${display} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div>
-                </div>
-            </div>`;
-        }
-        div.innerHTML = html;
+        allPosts = data; allPostsLoaded = true;
+        renderPostList(allPosts);
     } catch (e) { div.innerHTML = `<div class="card"><h3>网络错误：${e.message}</h3></div>`; }
 }
 
-async function openPost(id) {
+async function renderPostList(posts) {
+    const div = document.getElementById('post-list');
+    let html = '';
+    for (const p of posts) {
+        const display = await getDisplayNameAsync(p.author||'未知');
+        html += `<div class="post-item" onclick="openPost(${p.id})">
+            <div class="post-avatar">${(p.author||'?')[0].toUpperCase()}</div>
+            <div class="post-info">
+                <h3>${p.title||'(无标题)'}</h3>
+                <div class="desc">${(p.content||'').substring(0,120)}...</div>
+                <div class="meta">${display} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div>
+            </div>
+        </div>`;
+    }
+    div.innerHTML = html || '<div class="card"><h3>没有找到相关帖子</h3></div>';
+}
+
+// 搜索功能：输入时过滤帖子
+document.getElementById('search-input').addEventListener('input', function(e) {
+    const keyword = e.target.value.trim().toLowerCase();
+    if (!allPostsLoaded) return; // 还没加载完就不搜索
+    if (!keyword) { renderPostList(allPosts); return; }
+    const filtered = allPosts.filter(p => {
+        return (p.title||'').toLowerCase().includes(keyword) ||
+               (p.content||'').toLowerCase().includes(keyword) ||
+               (p.author||'').toLowerCase().includes(keyword);
+    });
+    renderPostList(filtered);
+});async function openPost(id) {
     currentPostId = id; showPage('detail');
     try {
         const res = await fetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${id}&select=*`, { headers: { 'apikey': SUPABASE_KEY } });
         if (!res.ok) throw new Error('HTTP '+res.status);
         const data = await res.json();
         if (Array.isArray(data) && data.length) {
-            const p = data[0];
-            const display = await getDisplayNameAsync(p.author||'未知');
+            const p = data[0]; const display = await getDisplayNameAsync(p.author||'未知');
             document.getElementById('detail-content').innerHTML = `<h2>${p.title||'(无标题)'}</h2><div class="meta" style="margin:8px 0;">${display} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div><p style="margin:12px 0;line-height:1.7;">${p.content||''}</p>${isAdmin?`<button class="btn btn-danger btn-sm" onclick="deletePost(${p.id})"><i class="fas fa-trash"></i> 删除</button> <button class="btn btn-danger btn-sm" onclick="banUser('${p.author}')"><i class="fas fa-ban"></i> 封禁</button>`:''}`;
         }
         loadComments(id);
@@ -476,8 +271,7 @@ async function openPost(id) {
 }
 
 async function loadComments(postId) {
-    const div = document.getElementById('comments-list');
-    div.innerHTML = '<p>加载中...</p>';
+    const div = document.getElementById('comments-list'); div.innerHTML = '<p>加载中...</p>';
     try {
         const res = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${postId}&select=*&order=created_at.asc`, { headers: { 'apikey': SUPABASE_KEY } });
         if (!res.ok) throw new Error('HTTP '+res.status);
@@ -513,17 +307,16 @@ async function loadComments(postId) {
             } catch (e) { alert('网络错误'); }
         }
 
-        async function deletePost(id) {
-            if (!isAdmin) return; if (!confirm('删除帖子？')) return;
-            const res = await fetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${id}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } });
-            if (res.ok) { alert('已删除'); backToCommunity(); loadPosts(); } else alert('删除失败');
-        }
+        async function deletePost(id) { if (!isAdmin) return; if (!confirm('删除帖子？')) return; const res = await fetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${id}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } }); if (res.ok) { alert('已删除'); backToCommunity(); loadPosts(); } else alert('删除失败'); }
+        async function deleteComment(id) { if (!isAdmin) return; if (!confirm('删除回复？')) return; const res = await fetch(SUPABASE_URL + `/rest/v1/comments?id=eq.${id}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } }); if (res.ok) { alert('已删除'); loadComments(currentPostId); } else alert('删除失败'); }
 
-        async function deleteComment(id) {
-            if (!isAdmin) return; if (!confirm('删除回复？')) return;
-            const res = await fetch(SUPABASE_URL + `/rest/v1/comments?id=eq.${id}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } });
-            if (res.ok) { alert('已删除'); loadComments(currentPostId); } else alert('删除失败');
-        }
+        // 回到顶部按钮
+        const backToTopBtn = document.getElementById('back-to-top');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 400) { backToTopBtn.classList.add('visible'); }
+            else { backToTopBtn.classList.remove('visible'); }
+        });
+        backToTopBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
         showPage('home');
     </script>
