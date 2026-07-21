@@ -5,429 +5,352 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>软件库 · 社区</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg: #f3f5f9;
-            --card: #ffffff;
-            --text: #2c3e50;
-            --sub: #5a6b7a;
-            --muted: #9099a8;
-            --border: #e2e8f0;
-            --accent: #4a6fa5;
-            --accent-light: #7b9cc2;
-            --btn: #5b8cbd;
-            --btn-hover: #4876a8;
-            --nav-bg: linear-gradient(135deg, #d4e0f0, #c8d9ed);
-            --nav-text: #3a5070;
-            --radius: 8px;
-            --shadow: 0 2px 6px rgba(0,0,0,0.04);
-            --shadow-hover: 0 8px 20px rgba(0,0,0,0.08);
-            --hover-bg: #fbfcfd;
+            --bg: #f3f5f9; --card: #ffffff; --text: #2c3e50; --sub: #5a6b7a; --muted: #9099a8;
+            --border: #e2e8f0; --accent: #4a6fa5; --accent-light: #7b9cc2; --btn: #5b8cbd;
+            --btn-hover: #4876a8; --nav-bg: #fff; --nav-text: #3a5070; --radius: 8px;
+            --shadow: 0 2px 6px rgba(0,0,0,0.04); --shadow-hover: 0 8px 20px rgba(0,0,0,0.08);
+            --hover-bg: #fbfcfd; --danger: #d88a8a; --success: #7bb89e;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            font-size: 14px;
-        }
-        a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
-        a:hover { color: var(--accent-light); text-decoration: underline; }
-        .top-nav {
-            background: var(--nav-bg);
-            color: var(--nav-text);
-            padding: 0 20px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-            min-height: 52px;
-            backdrop-filter: blur(8px);
-        }
-        .logo {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-right: auto;
-            cursor: default;
-            color: #2c4a6e;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: transform 0.2s;
-        }
-        .logo:active { transform: scale(0.97); }
-        .logo i { font-size: 1.1rem; opacity: 0.8; }
-        .nav-links { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
-        .nav-links a {
-            color: var(--nav-text);
-            text-decoration: none;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 480;
-            transition: background 0.2s, color 0.2s, transform 0.15s;
-            white-space: nowrap;
-        }
-        .nav-links a:hover { background: rgba(74,111,165,0.15); text-decoration: none; transform: translateY(-1px); }
-        .nav-links a.active { background: rgba(74,111,165,0.22); color: #2c4a6e; font-weight: 580; }
-        .container { max-width: 860px; margin: 24px auto; padding: 0 18px; }
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 18px 20px;
-            margin-bottom: 16px;
-            box-shadow: var(--shadow);
-            transition: box-shadow 0.2s, background 0.2s, transform 0.2s;
-            cursor: pointer;
-            animation: cardUp 0.35s ease both;
-        }
-        @keyframes cardUp {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .card:hover { box-shadow: var(--shadow-hover); background: var(--hover-bg); transform: translateY(-2px); }
-        .card h3 { font-size: 1rem; margin-bottom: 6px; color: #1e2d3d; font-weight: 650; transition: color 0.15s; }
-        .card:hover h3 { color: #0d1a2b; }
-        .card .desc { font-size: 0.88rem; color: var(--sub); line-height: 1.55; margin-bottom: 8px; }
-        .card .meta { font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }.btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    background: var(--btn); color: white; border: none; padding: 7px 20px;
-    border-radius: 20px; font-weight: 520; cursor: pointer; font-size: 0.9rem;
-    text-decoration: none; transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
-    box-shadow: 0 2px 8px rgba(91,140,189,0.25);
-}
-.btn:hover { background: var(--btn-hover); box-shadow: 0 4px 14px rgba(91,140,189,0.4); transform: translateY(-1px); }
-.btn:active { transform: translateY(0); box-shadow: 0 2px 4px rgba(91,140,189,0.2); }
-.btn-sm { padding: 4px 14px; font-size: 0.82rem; }
-.btn-danger { background: #d88a8a; box-shadow: 0 2px 8px rgba(216,138,138,0.25); }
-.btn-danger:hover { background: #c07070; box-shadow: 0 4px 14px rgba(216,138,138,0.4); }
-.btn-success { background: #7bb89e; box-shadow: 0 2px 8px rgba(123,184,158,0.25); }
-.btn-success:hover { background: #5ea386; }
-.btn-outline {
-    background: transparent; color: var(--sub); border: 1px solid var(--border);
-    box-shadow: none;
-}
-.btn-outline:hover { background: var(--hover-bg); color: var(--text); box-shadow: none; }
-.input-group { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-.input-group input, .input-group textarea {
-    flex: 1; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
-    font-size: 0.9rem; background: #fff; color: var(--text);
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-.input-group input:focus, .input-group textarea:focus {
-    border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,111,165,0.12); outline: none;
-}
-.hidden { display: none !important; }
-.post-item {
-    display: flex; align-items: flex-start; gap: 16px;
-    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 18px 20px; margin-bottom: 12px; box-shadow: var(--shadow);
-    transition: box-shadow 0.2s, background 0.2s, transform 0.2s; cursor: pointer;
-    animation: cardUp 0.35s ease both;
-}
-.post-item:hover { box-shadow: var(--shadow-hover); background: #fcfdfd; transform: translateY(-2px); }
-.post-avatar {
-    width: 44px; height: 44px; border-radius: 10px;
-    background: linear-gradient(135deg, #d4e0f0, #c8d9ed);
-    color: #3a5070; display: flex; align-items: center; justify-content: center;
-    font-weight: 650; font-size: 1.1rem; flex-shrink: 0;
-    transition: background 0.2s, color 0.2s;
-}
-.post-item:hover .post-avatar { background: linear-gradient(135deg, #c0d4ea, #b3c9e2); }
-.post-info { flex: 1; min-width: 0; }
-.post-info h3 { font-size: 1.05rem; margin-bottom: 4px; color: #1e2d3d; font-weight: 650; }
-.post-item:hover .post-info h3 { color: #0d1a2b; }
-.post-info .desc { font-size: 0.88rem; color: var(--sub); margin-bottom: 6px; line-height: 1.55; }
-.post-info .meta { font-size: 0.78rem; color: var(--muted); display: flex; align-items: center; gap: 10px; }
-.comment-item {
-    display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid #f0f4f8;
-    font-size: 0.9rem; align-items: flex-start; transition: background 0.2s;
-    animation: fadeIn 0.3s ease both;
-}
-.comment-item:hover { background: #fdfdfd; }
-.comment-item .author { font-weight: 650; color: var(--accent); white-space: nowrap; }
-.comment-item:hover .author { color: #2c4a6e; }
-.admin-badge {
-    background: linear-gradient(135deg, #7bb89e, #5ea386);
-    color: white; padding: 1px 8px; border-radius: 4px;
-    font-size: 0.72rem; margin-left: 6px; font-weight: 520; letter-spacing: 0.3px;
-    transition: background 0.2s;
-}        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.15); z-index: 200; transition: opacity 0.3s; }
-        .drawer-panel {
-            position: fixed; right: 0; top: 0; height: 100%; width: 340px;
-            background: var(--card); z-index: 201; padding: 24px; overflow-y: auto;
-            box-shadow: -4px 0 16px rgba(0,0,0,0.06); transition: transform 0.3s ease;
-            animation: slideIn 0.3s ease;
-        }
-        @keyframes slideIn {
-            from { transform: translateX(50px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        .search-box {
-            flex: 1; padding: 9px 16px; border: 1px solid var(--border); border-radius: 20px;
-            font-size: 0.9rem; background: #fff; color: var(--text); min-width: 200px;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .search-box:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(74,111,165,0.12); outline: none; }
-        .back-to-top {
-            position: fixed; bottom: 30px; right: 30px;
-            background: linear-gradient(135deg, var(--accent), var(--accent-light));
-            color: white; border: none; border-radius: 50%; width: 46px; height: 46px; font-size: 1.2rem;
-            cursor: pointer; box-shadow: 0 4px 14px rgba(74,111,165,0.3);
-            transition: opacity 0.25s, transform 0.25s, background 0.2s;
-            opacity: 0; transform: translateY(14px); pointer-events: none; z-index: 99;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .back-to-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; animation: pulse 2s ease-in-out infinite; }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(74,111,165,0.4); }
-            50% { box-shadow: 0 0 0 14px rgba(74,111,165,0); }
-            100% { box-shadow: 0 0 0 0 rgba(74,111,165,0); }
-        }
-        .back-to-top:active { background: linear-gradient(135deg, #3a5f8a, #6a8ab5); transform: scale(0.92); }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; font-size: 14px; padding-bottom: 60px; }
+        a { color: var(--accent); text-decoration: none; }
+        .top-bar { background: var(--nav-bg); padding: 10px 16px; display: flex; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+        .top-bar .logo { font-weight: 700; font-size: 1.1rem; color: #2c4a6e; margin-right: auto; cursor: default; }
+        .container { max-width: 800px; margin: 0 auto; padding: 16px; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow); transition: box-shadow 0.2s, background 0.2s; cursor: pointer; animation: fadeUp 0.3s ease; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .card:hover { box-shadow: var(--shadow-hover); background: var(--hover-bg); }
+        .card h3 { font-size: 1rem; color: #1e2d3d; font-weight: 650; margin-bottom: 4px; }
+        .card .desc { font-size: 0.88rem; color: var(--sub); }
+        .card .meta { font-size: 0.76rem; color: var(--muted); margin-top: 6px; display: flex; gap: 12px; align-items: center; }
+        .btn { display: inline-flex; align-items: center; gap: 4px; background: var(--btn); color: #fff; border: none; padding: 6px 16px; border-radius: 18px; font-weight: 500; cursor: pointer; font-size: 0.85rem; transition: background 0.2s, transform 0.15s; box-shadow: 0 2px 6px rgba(91,140,189,0.2); }
+        .btn:hover { background: var(--btn-hover); transform: translateY(-1px); }
+        .btn-sm { padding: 4px 12px; font-size: 0.8rem; }
+        .btn-danger { background: var(--danger); } .btn-success { background: var(--success); }
+        .btn-outline { background: transparent; color: var(--sub); border: 1px solid var(--border); box-shadow: none; }
+        .btn-outline:hover { background: var(--hover-bg); }
+        .hidden { display: none !important; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 12px; }
+        .input-group input, .input-group textarea { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; background: #fff; color: var(--text); }
+        .input-group textarea { min-height: 80px; resize: vertical; }        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--nav-bg); border-top: 1px solid var(--border); display: flex; z-index: 100; }
+        .bottom-nav .tab { flex: 1; text-align: center; padding: 8px 0; color: var(--muted); font-size: 0.72rem; cursor: pointer; transition: color 0.2s; }
+        .bottom-nav .tab i { font-size: 1.3rem; display: block; margin-bottom: 2px; }
+        .bottom-nav .tab.active { color: var(--accent); font-weight: 600; }
+        .admin-badge { background: linear-gradient(135deg, #7bb89e, #5ea386); color: #fff; padding: 1px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 4px; }
+        .comment-item { padding: 10px 0; border-bottom: 1px solid #f0f4f8; font-size: 0.9rem; }
+        .comment-item .author { font-weight: 600; color: var(--accent); }
+        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.15); z-index: 200; }
+        .drawer-panel { position: fixed; right: 0; top: 0; height: 100%; width: 320px; background: var(--card); z-index: 201; padding: 20px; overflow-y: auto; box-shadow: -4px 0 16px rgba(0,0,0,0.06); }
+        .search-box { flex: 1; padding: 8px 14px; border: 1px solid var(--border); border-radius: 20px; font-size: 0.9rem; background: #fff; color: var(--text); min-width: 180px; }
+        .post-item { display: flex; gap: 12px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow); cursor: pointer; transition: box-shadow 0.2s; }
+        .post-item:hover { box-shadow: var(--shadow-hover); }
+        .post-avatar { width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #d4e0f0, #c8d9ed); color: #3a5070; display: flex; align-items: center; justify-content: center; font-weight: 650; font-size: 1rem; flex-shrink: 0; }
+        .post-info { flex: 1; }
+        .post-info h3 { font-size: 1rem; color: #1e2d3d; margin-bottom: 2px; }
+        .post-info .desc { font-size: 0.85rem; color: var(--sub); }
+        .post-info .meta { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
     </style>
 </head>
 <body>
-    <div class="top-nav">
-        <div class="logo"><i class="fas fa-cube"></i> 软件库</div>
-        <div class="nav-links">
-            <a href="#" id="nav-home" class="active">首页</a>
-            <a href="#" id="nav-community">社区</a>
-            <a href="./tools.html"><i class="fas fa-tools"></i> 工具箱</a>
+<div class="top-bar">
+    <div class="logo" id="logo-text">软件库</div>
+</div>
+<div class="container" id="main-content">
+    <!-- 软件页 -->
+    <div id="page-home"><h2 style="margin-bottom:12px;"><i class="fas fa-download"></i> 软件</h2><div id="software-list"><div class="card">加载中...</div></div></div>
+    <!-- 广场页 -->
+    <div id="page-forum" class="hidden">
+        <div id="category-list"></div>
+        <div id="post-list-section" class="hidden">
+            <div style="display:flex; gap:8px; margin-bottom:12px; align-items:center;">
+                <button class="btn btn-outline btn-sm" onclick="backToCategories()"><i class="fas fa-arrow-left"></i> 返回</button>
+                <h3 id="current-category-name" style="flex:1;">板块</h3>
+                <button class="btn btn-sm" onclick="showNewPost()"><i class="fas fa-pen"></i> 发帖</button>
+            </div>
+            <input type="text" class="search-box" id="search-input" placeholder="搜索帖子..." style="margin-bottom:12px;">
+            <div id="post-list"></div>
         </div>
-    </div>
-    <div class="container" id="app">
-        <div id="page-home">
-            <h2 style="margin-bottom:18px; font-weight:650; color:#1e2d3d; font-size:1.3rem;"><i class="fas fa-download"></i> 软件</h2>
-            <div id="software-list">
-                <div class="card"><h3>加载中...</h3></div>
-            </div>
-        </div>
-        <div id="page-community" class="hidden">
-            <h2 style="margin-bottom:16px; font-weight:650; color:#1e2d3d; font-size:1.3rem;"><i class="fas fa-comments"></i> 社区</h2>
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; margin-bottom:16px;">
-                <input type="text" class="search-box" id="search-input" placeholder="搜索帖子...">
-                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-                    <button class="btn btn-danger hidden" id="banned-list-btn" onclick="showBannedList()"><i class="fas fa-ban"></i> 封禁名单</button>
-                    <button class="btn" onclick="showNewPost()"><i class="fas fa-pen"></i> 发帖</button>
-                </div>
-            </div>
-            <div id="post-list"><div class="card"><h3>加载中...</h3></div></div>
-            <div id="new-post-form" class="hidden">
-                <h3 style="margin-bottom:14px;">发新帖</h3>
-                <div class="input-group"><input id="post-title" type="text" placeholder="标题"></div>
-                <div class="input-group"><textarea id="post-content" placeholder="内容..."></textarea></div>
-                <button class="btn" onclick="createPost()">发布</button>
-                <button class="btn btn-outline" onclick="hideNewPost()">取消</button>
-                <div id="post-error" style="color:red;margin-top:8px;"></div>
-            </div>
+        <div id="new-post-form" class="hidden">
+            <h3>发新帖</h3>
+            <div class="input-group"><input id="post-title" placeholder="标题"></div>
+            <div class="input-group"><textarea id="post-content" placeholder="内容..."></textarea></div>
+            <button class="btn" onclick="createPost()">发布</button><button class="btn btn-outline" onclick="hideNewPost()">取消</button>
+            <div id="post-error" style="color:red;margin-top:8px;"></div>
         </div>
         <div id="page-detail" class="hidden">
-            <button class="btn btn-outline" style="margin-bottom:16px;" onclick="backToCommunity()"><i class="fas fa-arrow-left"></i> 返回社区</button>
+            <button class="btn btn-outline btn-sm" onclick="backToPosts()"><i class="fas fa-arrow-left"></i> 返回帖子</button>
             <div id="detail-content"></div>
-            <h3 style="margin-top:24px; margin-bottom:14px; font-weight:650; font-size:1.1rem;"><i class="fas fa-reply-all"></i> 回复</h3>
+            <h3 style="margin-top:16px;">回复</h3>
             <div id="comments-list"></div>
-            <div class="input-group" style="margin-top:16px;"><textarea id="comment-content" placeholder="写下你的回复..."></textarea></div>
+            <div class="input-group" style="margin-top:12px;"><textarea id="comment-content" placeholder="写下你的回复..."></textarea></div>
             <button class="btn" onclick="addComment()">发表回复</button>
         </div>
     </div>
-    <div id="drawer-overlay" class="drawer-overlay hidden" onclick="closeDrawer()"></div>
-    <div id="drawer-panel" class="drawer-panel hidden">
-        <button class="btn btn-outline btn-sm" style="margin-bottom:16px;" onclick="closeDrawer()">关闭</button>
-        <div id="drawer-content"></div>
+    <!-- 消息页 -->
+    <div id="page-messages" class="hidden"><h2 style="margin-bottom:12px;"><i class="fas fa-bell"></i> 消息</h2><div id="message-list"><p style="color:var(--muted);">暂无新消息</p></div></div>
+    <!-- 个人页 -->
+    <div id="page-profile" class="hidden">
+        <h2 style="margin-bottom:12px;"><i class="fas fa-user"></i> 个人</h2>
+        <div class="card">
+            <p>昵称：<strong id="profile-nickname"></strong></p>
+            <p>身份：<span id="profile-badge"></span></p>
+            <div id="admin-panel" class="hidden" style="margin-top:12px;">
+                <h4>管理面板</h4>
+                <div class="input-group"><input id="admin-rename-old" placeholder="旧昵称"><input id="admin-rename-new" placeholder="新昵称"><button class="btn btn-sm" onclick="adminRename()">改昵称</button></div>
+                <div class="input-group"><input id="admin-category-old" placeholder="旧板块名"><input id="admin-category-new" placeholder="新板块名"><button class="btn btn-sm" onclick="adminRenameCategory()">改板块名</button></div>
+                <button class="btn btn-danger btn-sm" onclick="showBannedList()">封禁名单</button>
+            </div>
+        </div>
     </div>
-    <button class="back-to-top" id="back-to-top" title="回到顶部"><i class="fas fa-chevron-up"></i></button><script>
-    const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
+</div>
+<!-- 底部导航 -->
+<div class="bottom-nav">
+    <div class="tab active" data-tab="home"><i class="fas fa-download"></i>软件</div>
+    <div class="tab" data-tab="forum"><i class="fas fa-comments"></i>广场</div>
+    <div class="tab" data-tab="messages"><i class="fas fa-bell"></i>消息</div>
+    <div class="tab" data-tab="profile"><i class="fas fa-user"></i>个人</div>
+</div>
+<!-- 抽屉 -->
+<div id="drawer-overlay" class="drawer-overlay hidden" onclick="closeDrawer()"></div>
+<div id="drawer-panel" class="drawer-panel hidden">
+    <button class="btn btn-outline btn-sm" style="margin-bottom:12px;" onclick="closeDrawer()">关闭</button>
+    <div id="drawer-content"></div>
+</div><script>
+    const supabase = window.supabase.createClient('https://rgekpmuujozhkkctpdup.supabase.co', 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr');
     const WORKER_URL = 'https://softlib-submit.dghkkppp.workers.dev';
 
-    let isAdmin = false;
-    if (localStorage.getItem('isAdmin') === 'true') isAdmin = true;
+    // ===== 状态 =====
+    let isAdmin = localStorage.getItem('isAdmin') === 'true';
+    let nickname = localStorage.getItem('custom_nickname') || ('游客' + Math.floor(Math.random()*9000+1000));
+    if (!localStorage.getItem('custom_nickname')) localStorage.setItem('custom_nickname', nickname);
+    let currentCategoryId = null, currentCategoryName = '', currentPostId = null;
+    let allPosts = [], allPostsLoaded = false;
 
-    let nickname = localStorage.getItem('custom_nickname');
-    if (!nickname) { nickname = '游客' + Math.floor(Math.random() * 9000 + 1000); localStorage.setItem('custom_nickname', nickname); }
-
-    let currentPostId = null;
-    const pages = {
-        home: document.getElementById('page-home'),
-        community: document.getElementById('page-community'),
-        detail: document.getElementById('page-detail')
-    };
-
-    function showPage(name) {
-        Object.keys(pages).forEach(k => pages[k].classList.add('hidden'));
-        pages[name].classList.remove('hidden');
-        if (name === 'home') loadSoftwares();
-        if (name === 'community') {
-            loadPosts();
-            document.getElementById('banned-list-btn').classList.toggle('hidden', !isAdmin);
-            document.getElementById('search-input').value = '';
-        }
+    // ===== 页面切换 =====
+    function showTab(tab) {
+        ['home','forum','messages','profile'].forEach(t => document.getElementById('page-'+t).classList.add('hidden'));
+        document.getElementById('page-'+tab).classList.remove('hidden');
+        document.querySelectorAll('.bottom-nav .tab').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+        if (tab === 'home') loadSoftwares();
+        if (tab === 'forum') loadCategories();
+        if (tab === 'messages') loadMessages();
+        if (tab === 'profile') renderProfile();
     }
-    function backToCommunity() { showPage('community'); }
+    document.querySelectorAll('.bottom-nav .tab').forEach(el => el.addEventListener('click', () => showTab(el.dataset.tab)));
 
-    document.getElementById('nav-home').addEventListener('click', e => { e.preventDefault(); showPage('home'); });
-    document.getElementById('nav-community').addEventListener('click', e => { e.preventDefault(); showPage('community'); });
-
-    function showNewPost() { document.getElementById('new-post-form').classList.remove('hidden'); document.getElementById('new-post-form').scrollIntoView({ behavior: 'smooth' }); }
+    // 广场内部导航
+    function backToCategories() { document.getElementById('category-list').classList.remove('hidden'); document.getElementById('post-list-section').classList.add('hidden'); document.getElementById('page-detail').classList.add('hidden'); }
+    function backToPosts() { document.getElementById('page-detail').classList.add('hidden'); document.getElementById('post-list-section').classList.remove('hidden'); }
+    function showNewPost() { document.getElementById('new-post-form').classList.remove('hidden'); document.getElementById('new-post-form').scrollIntoView({behavior:'smooth'}); }
     function hideNewPost() { document.getElementById('new-post-form').classList.add('hidden'); }
 
-    async function verifyAdmin() {
-        const pwd = prompt('管理员密码：'); if (!pwd) return;
-        try {
-            const res = await fetch(WORKER_URL + '/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pwd, nickname }) });
-            const data = await res.json();
-            if (data.valid) { isAdmin = true; localStorage.setItem('isAdmin', 'true'); alert('管理员已激活'); if (!pages.community.classList.contains('hidden')) showPage('community'); }
-            else alert('密码错误');
-        } catch (e) { alert('连接失败'); }
-    }
-    async function logoutAdmin() {
-        isAdmin = false; localStorage.removeItem('isAdmin');
-        await fetch(WORKER_URL + '/logout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nickname }) });
-        alert('已退出管理'); if (!pages.community.classList.contains('hidden')) showPage('community');
-    }
-
+    // ===== 管理员验证 =====
     let titleClicks = 0, clickTimer = null;
-    document.querySelector('.logo').addEventListener('click', () => {
+    document.getElementById('logo-text').addEventListener('click', () => {
         titleClicks++; if (clickTimer) clearTimeout(clickTimer);
         clickTimer = setTimeout(() => titleClicks = 0, 2000);
         if (titleClicks >= 5) { titleClicks = 0; isAdmin ? logoutAdmin() : verifyAdmin(); }
     });
+    async function verifyAdmin() {
+        const pwd = prompt('管理员密码：'); if (!pwd) return;
+        const res = await fetch(WORKER_URL+'/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pwd, nickname})});
+        const data = await res.json();
+        if (data.valid) { isAdmin = true; localStorage.setItem('isAdmin','true'); alert('管理员已激活'); showTab('forum'); renderProfile(); }
+        else alert('密码错误');
+    }
+    async function logoutAdmin() { isAdmin = false; localStorage.removeItem('isAdmin'); await fetch(WORKER_URL+'/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nickname})}); alert('已退出管理'); showTab('forum'); renderProfile(); }
 
+    // ===== 管理标识 =====
     async function getAdminNicknames() {
-        try {
-            const res = await fetch(SUPABASE_URL + '/rest/v1/admin_sessions?expires_at=gt.' + new Date().toISOString() + '&select=nickname', { headers: { 'apikey': SUPABASE_KEY } });
-            const data = await res.json(); return Array.isArray(data) ? [...new Set(data.map(d => d.nickname))] : [];
-        } catch (e) { return []; }
+        const res = await fetch('https://rgekpmuujozhkkctpdup.supabase.co/rest/v1/admin_sessions?expires_at=gt.'+new Date().toISOString()+'&select=nickname',{headers:{'apikey':'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr'}});
+        const data = await res.json(); return Array.isArray(data) ? [...new Set(data.map(d=>d.nickname))] : [];
     }
-    async function getDisplayNameAsync(name) {
-        const adminNicknames = await getAdminNicknames();
-        return adminNicknames.includes(name) ? `${name} <span class="admin-badge">管理</span>` : name;
-    }
-
-    function openDrawer(html) { document.getElementById('drawer-content').innerHTML = html; document.getElementById('drawer-overlay').classList.remove('hidden'); document.getElementById('drawer-panel').classList.remove('hidden'); }
-    function closeDrawer() { document.getElementById('drawer-overlay').classList.add('hidden'); document.getElementById('drawer-panel').classList.add('hidden'); }
-
-    async function getPublicIP() { try { const r = await fetch('https://api.ipify.org?format=json'); return (await r.json()).ip; } catch (e) { return null; } }
-    async function isBanned() { const ip = await getPublicIP(); if (!ip) return false; const r = await fetch(SUPABASE_URL + `/rest/v1/banned_users?ip_address=eq.${ip}&select=*`, { headers: { 'apikey': SUPABASE_KEY } }); const d = await r.json(); return Array.isArray(d) && d.length > 0; }
-    async function banUser(targetNickname) { if (!isAdmin) return; const reason = prompt('封禁原因：', '违规行为'); if (!reason) return; const ip = await getPublicIP(); const r = await fetch(SUPABASE_URL + '/rest/v1/banned_users', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ ip_address: ip, nickname: targetNickname, reason }) }); if (r.ok) { alert('已封禁'); if (!pages.community.classList.contains('hidden')) loadPosts(); else if (!pages.detail.classList.contains('hidden')) loadPosts(); else if (!pages.detail.classList.contains('hidden')) loadComments(currentPostId); } else alert('封禁失败'); }
-        async function unbanUser(id) { if (!isAdmin) return; if (!confirm('解禁？')) return; const r = await fetch(SUPABASE_URL + `/rest/v1/banned_users?id=eq.${id}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } }); if (r.ok) { alert('已解禁'); showBannedList(); } else alert('解禁失败'); }
-        async function showBannedList() { const r = await fetch(SUPABASE_URL + '/rest/v1/banned_users?select=*&order=banned_at.desc', { headers: { 'apikey': SUPABASE_KEY } }); const d = await r.json(); if (!Array.isArray(d) || !d.length) { alert('名单为空'); return; } let h = '<h3>封禁名单</h3>'; d.forEach(u => h += `<div class="card" style="display:flex;justify-content:space-between;"><div><strong>${u.nickname||''}</strong><br><small>IP: ${u.ip_address||''} · ${u.reason||''}</small><br><small>${new Date(u.banned_at).toLocaleString('zh-CN')}</small></div><button class="btn btn-success btn-sm" onclick="unbanUser(${u.id})">解禁</button></div>`); openDrawer(h); }async function loadSoftwares() {
-    const div = document.getElementById('software-list'); div.innerHTML = '<div class="card"><h3>加载中...</h3></div>';
+    async function getDisplayName(name) {
+        const admins = await getAdminNicknames();
+        return admins.includes(name) ? `${name} <span class="admin-badge">管理</span>` : name;
+    }// ===== 软件库 =====
+async function loadSoftwares() {
+    const div = document.getElementById('software-list'); div.innerHTML = '<div class="card">加载中...</div>';
     try {
         const res = await fetch('https://api.github.com/repos/ctctycyc/softlib/issues?labels=approved&state=open&sort=created&direction=desc&per_page=20');
-        if (!res.ok) { div.innerHTML = '<div class="card"><h3>加载失败</h3></div>'; return; }
+        if (!res.ok) { div.innerHTML = '<div class="card">加载失败</div>'; return; }
         const issues = await res.json();
-        if (!Array.isArray(issues) || !issues.length) { div.innerHTML = '<div class="card"><h3>暂无软件</h3></div>'; return; }
+        if (!Array.isArray(issues) || !issues.length) { div.innerHTML = '<div class="card">暂无软件</div>'; return; }
         div.innerHTML = issues.map(i => {
             const body = i.body||'', lines = body.split('\n').filter(l=>l.trim()), desc = lines.find(l=>!l.startsWith('http'))||'', link = lines.find(l=>l.startsWith('http'))||'';
             return `<div class="card"><h3>${i.title}</h3><div class="desc">${desc}</div>${link?`<a href="${link}" target="_blank" class="btn btn-sm" style="margin-top:8px;"><i class="fas fa-download"></i> 下载</a>`:''}</div>`;
         }).join('');
-    } catch (e) { div.innerHTML = '<div class="card"><h3>网络错误</h3></div>'; }
+    } catch (e) { div.innerHTML = '<div class="card">网络错误</div>'; }
 }
 
-let allPosts = [], allPostsLoaded = false;
-
+// ===== 板块 =====
+async function loadCategories() {
+    backToCategories();
+    const div = document.getElementById('category-list'); div.innerHTML = '<div class="card">加载中...</div>';
+    const { data } = await supabase.from('categories').select('*').order('sort_order');
+    if (!data || !data.length) { div.innerHTML = '<div class="card">暂无板块</div>'; return; }
+    div.innerHTML = data.map(c => `<div class="card" style="display:flex; justify-content:space-between; align-items:center;" onclick="openCategory(${c.id},'${c.name}')">
+        <div><h3>${c.name}</h3><div class="desc">${c.description||''}</div></div>
+        ${isAdmin ? `<button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); editCategory(${c.id},'${c.name}')"><i class="fas fa-edit"></i></button>` : ''}
+    </div>`).join('');
+}
+async function openCategory(id, name) {
+    currentCategoryId = id; currentCategoryName = name;
+    document.getElementById('category-list').classList.add('hidden');
+    document.getElementById('post-list-section').classList.remove('hidden');
+    document.getElementById('current-category-name').textContent = name;
+    loadPosts();
+}
+async function editCategory(id, name) {
+    const newName = prompt('修改板块名：', name); if (!newName) return;
+    await supabase.from('categories').update({name: newName}).eq('id', id);
+    loadCategories();
+}
+async function adminRenameCategory() {
+    if (!isAdmin) return;
+    const oldName = document.getElementById('admin-category-old').value.trim();
+    const newName = document.getElementById('admin-category-new').value.trim();
+    if (!oldName || !newName) return alert('请填写完整');
+    const { data } = await supabase.from('categories').select('*').eq('name', oldName);
+    if (!data || !data.length) return alert('找不到该板块');
+    await supabase.from('categories').update({name: newName}).eq('name', oldName);
+    alert('板块名已更新'); loadCategories();
+}// ===== 帖子列表 =====
 async function loadPosts() {
-    const div = document.getElementById('post-list'); div.innerHTML = '<div class="card"><h3>加载中...</h3></div>';
-    try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/posts?select=*&order=created_at.desc&limit=100', { headers: { 'apikey': SUPABASE_KEY } });
-        if (!res.ok) { div.innerHTML = `<div class="card"><h3>加载失败(${res.status})</h3></div>`; return; }
-        const data = await res.json();
-        if (!Array.isArray(data) || !data.length) { div.innerHTML = '<div class="card"><h3>暂无帖子</h3></div>'; return; }
-        allPosts = data; allPostsLoaded = true;
-        renderPostList(allPosts);
-    } catch (e) { div.innerHTML = `<div class="card"><h3>网络错误：${e.message}</h3></div>`; }
+    const div = document.getElementById('post-list'); div.innerHTML = '<div class="card">加载中...</div>';
+    let query = supabase.from('posts').select('*').order('created_at', {ascending: false}).limit(80);
+    if (currentCategoryId) query = query.eq('category_id', currentCategoryId);
+    const { data } = await query;
+    if (!data || !data.length) { div.innerHTML = '<div class="card">暂无帖子</div>'; return; }
+    allPosts = data; allPostsLoaded = true;
+    renderPostList(allPosts);
 }
-
 async function renderPostList(posts) {
     const div = document.getElementById('post-list'); let html = '';
     for (const p of posts) {
-        const display = await getDisplayNameAsync(p.author||'未知');
+        const display = await getDisplayName(p.author||'未知');
         html += `<div class="post-item" onclick="openPost(${p.id})">
             <div class="post-avatar">${(p.author||'?')[0].toUpperCase()}</div>
-            <div class="post-info">
-                <h3>${p.title||'(无标题)'}</h3>
-                <div class="desc">${(p.content||'').substring(0,120)}...</div>
-                <div class="meta">${display} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div>
-            </div>
+            <div class="post-info"><h3>${p.title||'(无标题)'}</h3><div class="desc">${(p.content||'').substring(0,100)}...</div><div class="meta">${display} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div></div>
         </div>`;
     }
-    div.innerHTML = html || '<div class="card"><h3>没有找到相关帖子</h3></div>';
+    div.innerHTML = html || '<div class="card">无结果</div>';
 }
-
-document.getElementById('search-input').addEventListener('input', function(e) {
-    const keyword = e.target.value.trim().toLowerCase();
+document.getElementById('search-input').addEventListener('input', e => {
+    const kw = e.target.value.trim().toLowerCase();
     if (!allPostsLoaded) return;
-    if (!keyword) { renderPostList(allPosts); return; }
-    const filtered = allPosts.filter(p => (p.title||'').toLowerCase().includes(keyword) || (p.content||'').toLowerCase().includes(keyword) || (p.author||'').toLowerCase().includes(keyword));
-    renderPostList(filtered);
-});        async function openPost(id) {
-            currentPostId = id; showPage('detail');
-            try {
-                const res = await fetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${id}&select=*`, { headers: { 'apikey': SUPABASE_KEY } });
-                if (!res.ok) throw new Error('HTTP '+res.status);
-                const data = await res.json();
-                if (Array.isArray(data) && data.length) {
-                    const p = data[0]; const display = await getDisplayNameAsync(p.author||'未知');
-                    document.getElementById('detail-content').innerHTML = `<h2>${p.title||'(无标题)'}</h2><div class="meta" style="margin:10px 0;">${display} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div><p style="margin:14px 0;line-height:1.75;">${p.content||''}</p>${isAdmin?`<button class="btn btn-danger btn-sm" onclick="deletePost(${p.id})"><i class="fas fa-trash"></i> 删除</button> <button class="btn btn-danger btn-sm" onclick="banUser('${p.author}')"><i class="fas fa-ban"></i> 封禁</button>`:''}`;
-                }
-                loadComments(id);
-            } catch (e) { document.getElementById('detail-content').innerHTML = `<div class="card"><h3>加载失败</h3></div>`; }
-        }
+    renderPostList(kw ? allPosts.filter(p => (p.title||'').toLowerCase().includes(kw)||(p.content||'').toLowerCase().includes(kw)||(p.author||'').toLowerCase().includes(kw)) : allPosts);
+});
 
-        async function loadComments(postId) {
-            const div = document.getElementById('comments-list'); div.innerHTML = '<p>加载中...</p>';
-            try {
-                const res = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${postId}&select=*&order=created_at.asc`, { headers: { 'apikey': SUPABASE_KEY } });
-                if (!res.ok) throw new Error('HTTP '+res.status);
-                const data = await res.json();
-                if (!Array.isArray(data) || !data.length) { div.innerHTML = '<p>暂无回复</p>'; return; }
-                let html = '';
-                for (const c of data) {
-                    const display = await getDisplayNameAsync(c.author||'匿名');
-                    html += `<div class="comment-item"><div><span class="author">${display}</span>：${c.content||''}</div>${isAdmin?`<div style="margin-left:auto;display:flex;gap:4px;"><button class="btn btn-danger btn-sm" onclick="deleteComment(${c.id})">删除</button><button class="btn btn-danger btn-sm" onclick="banUser('${c.author}')">封禁</button></div>`:''}</div>`;
-                }
-                div.innerHTML = html;
-            } catch (e) { div.innerHTML = `<p>加载失败</p>`; }
-        }
+async function openPost(id) {
+    currentPostId = id;
+    document.getElementById('post-list-section').classList.add('hidden');
+    document.getElementById('page-detail').classList.remove('hidden');
+    const { data } = await supabase.from('posts').select('*').eq('id', id).single();
+    if (data) {
+        const display = await getDisplayName(data.author||'未知');
+        document.getElementById('detail-content').innerHTML = `<h2>${data.title||'(无标题)'}</h2><div class="meta">${display} · ${new Date(data.created_at).toLocaleString('zh-CN')}</div><p style="margin:12px 0;line-height:1.7;">${data.content||''}</p>${isAdmin?`<button class="btn btn-danger btn-sm" onclick="deletePost(${data.id})"><i class="fas fa-trash"></i> 删除</button> <button class="btn btn-danger btn-sm" onclick="banUser('${data.author}')"><i class="fas fa-ban"></i> 封禁</button>`:''}`;
+    }
+    loadComments(id);
+}
+async function loadComments(postId) {
+    const div = document.getElementById('comments-list'); div.innerHTML = '<p>加载中...</p>';
+    const { data } = await supabase.from('comments').select('*').eq('post_id', postId).order('created_at', {ascending: true});
+    if (!data || !data.length) { div.innerHTML = '<p>暂无回复</p>'; return; }
+    let html = '';
+    for (const c of data) {
+        const display = await getDisplayName(c.author||'匿名');
+        html += `<div class="comment-item"><div><span class="author">${display}</span>：${c.content||''}</div>${isAdmin?`<div style="margin-left:auto;"><button class="btn btn-danger btn-sm" onclick="deleteComment(${c.id})">删除</button> <button class="btn btn-danger btn-sm" onclick="banUser('${c.author}')">封禁</button></div>`:''}</div>`;
+    }
+    div.innerHTML = html;
+}async function createPost() {
+    const title = document.getElementById('post-title').value.trim(), content = document.getElementById('post-content').value.trim(), err = document.getElementById('post-error');
+    if (!title || !content) { err.textContent = '标题和内容不能为空'; return; }
+    const { error } = await supabase.from('posts').insert({title, content, author: nickname, category_id: currentCategoryId});
+    if (error) { err.textContent = '发布失败：'+error.message; return; }
+    document.getElementById('post-title').value = ''; document.getElementById('post-content').value = ''; hideNewPost(); loadPosts();
+}
+async function addComment() {
+    const content = document.getElementById('comment-content').value.trim();
+    if (!content || !currentPostId) return;
+    const { error } = await supabase.from('comments').insert({post_id: currentPostId, content, author: nickname});
+    if (error) { alert('回复失败'); return; }
+    document.getElementById('comment-content').value = ''; loadComments(currentPostId);
+}
+async function deletePost(id) { if (!isAdmin) return; if (!confirm('删除帖子？')) return; await supabase.from('posts').delete().eq('id', id); backToCategories(); loadPosts(); }
+async function deleteComment(id) { if (!isAdmin) return; if (!confirm('删除回复？')) return; await supabase.from('comments').delete().eq('id', id); loadComments(currentPostId); }
 
-        async function createPost() {
-            if (await isBanned()) { alert('您已被封禁'); return; }
-            const title = document.getElementById('post-title').value.trim(), content = document.getElementById('post-content').value.trim(), err = document.getElementById('post-error');
-            if (!title || !content) { err.textContent = '标题和内容不能为空'; return; }
-            try {
-                const res = await fetch(SUPABASE_URL + '/rest/v1/posts', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ title, content, author: nickname }) });
-                if (res.ok) { document.getElementById('post-title').value=''; document.getElementById('post-content').value=''; hideNewPost(); loadPosts(); }
-                else { err.textContent = '发布失败：'+await res.text(); }
-            } catch (e) { err.textContent = '网络错误'; }
-        }
+// ===== 封禁 =====
+async function getPublicIP() { try { const r = await fetch('https://api.ipify.org?format=json'); return (await r.json()).ip; } catch (e) { return null; } }
+async function banUser(targetNickname) {
+    if (!isAdmin) return; const reason = prompt('封禁原因：','违规'); if (!reason) return;
+    const ip = await getPublicIP();
+    const { error } = await supabase.from('banned_users').insert({ip_address: ip, nickname: targetNickname, reason});
+    if (error) alert('封禁失败'); else { alert('已封禁'); backToCategories(); loadPosts(); }
+}
+async function unbanUser(id) { if (!isAdmin) return; if (!confirm('解禁？')) return; await supabase.from('banned_users').delete().eq('id', id); alert('已解禁'); showBannedList(); }
+async function showBannedList() {
+    const { data } = await supabase.from('banned_users').select('*').order('banned_at', {ascending: false});
+    if (!data || !data.length) { alert('名单为空'); return; }
+    let h = '<h3>封禁名单</h3>';
+    data.forEach(u => h += `<div class="card" style="display:flex;justify-content:space-between;"><div><strong>${u.nickname||''}</strong><br><small>IP: ${u.ip_address||''}</small></div><button class="btn btn-success btn-sm" onclick="unbanUser(${u.id})">解禁</button></div>`);
+    openDrawer(h);
+}
+function openDrawer(html) { document.getElementById('drawer-content').innerHTML = html; document.getElementById('drawer-overlay').classList.remove('hidden'); document.getElementById('drawer-panel').classList.remove('hidden'); }
+function closeDrawer() { document.getElementById('drawer-overlay').classList.add('hidden'); document.getElementById('drawer-panel').classList.add('hidden'); }// ===== 消息提醒 =====
+async function loadMessages() {
+    const div = document.getElementById('message-list'); div.innerHTML = '<p>加载中...</p>';
+    // 查询所有帖子中 author 为当前昵称的帖子的 ID
+    const { data: myPosts } = await supabase.from('posts').select('id').eq('author', nickname);
+    if (!myPosts || !myPosts.length) { div.innerHTML = '<p>暂无新消息</p>'; return; }
+    const postIds = myPosts.map(p => p.id);
+    // 查询这些帖子下的评论，排除自己的评论，按时间倒序
+    const { data: replies } = await supabase.from('comments').select('*').in('post_id', postIds).neq('author', nickname).order('created_at', {ascending: false}).limit(20);
+    if (!replies || !replies.length) { div.innerHTML = '<p>暂无新消息</p>'; return; }
+    let html = '';
+    for (const r of replies) {
+        const { data: post } = await supabase.from('posts').select('title').eq('id', r.post_id).single();
+        const display = await getDisplayName(r.author||'匿名');
+        html += `<div class="card" onclick="openPostFromMsg(${r.post_id})">
+            <div class="desc">${display} 回复了你的帖子「${post?.title||'(无标题)'}」</div>
+            <div class="meta">${new Date(r.created_at).toLocaleString('zh-CN')}</div>
+        </div>`;
+    }
+    div.innerHTML = html;
+}
+function openPostFromMsg(postId) { showTab('forum'); openCategory(null, ''); openPost(postId); } // 从消息跳转到帖子    // ===== 个人中心 =====
+    function renderProfile() {
+        document.getElementById('profile-nickname').textContent = nickname;
+        document.getElementById('profile-badge').innerHTML = isAdmin ? '<span class="admin-badge">管理员</span>' : '普通用户';
+        document.getElementById('admin-panel').classList.toggle('hidden', !isAdmin);
+    }
+    async function adminRename() {
+        if (!isAdmin) return;
+        const oldName = document.getElementById('admin-rename-old').value.trim();
+        const newName = document.getElementById('admin-rename-new').value.trim();
+        if (!oldName || !newName) return alert('请填写完整');
+        // 更新 posts 表
+        await fetch('https://rgekpmuujozhkkctpdup.supabase.co/rest/v1/posts?author=eq.'+encodeURIComponent(oldName), {
+            method: 'PATCH',
+            headers: {'Content-Type':'application/json','apikey':'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr','Authorization':'Bearer '+(localStorage.getItem('authToken')||'')},
+            body: JSON.stringify({author: newName})
+        });
+        // 更新 comments 表
+        await fetch('https://rgekpmuujozhkkctpdup.supabase.co/rest/v1/comments?author=eq.'+encodeURIComponent(oldName), {
+            method: 'PATCH',
+            headers: {'Content-Type':'application/json','apikey':'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr','Authorization':'Bearer '+(localStorage.getItem('authToken')||'')},
+            body: JSON.stringify({author: newName})
+        });
+        if (oldName === nickname) { nickname = newName; localStorage.setItem('custom_nickname', newName); }
+        alert('昵称已修改'); renderProfile(); backToCategories(); loadPosts();
+    }
 
-        async function addComment() {
-            if (await isBanned()) { alert('您已被封禁'); return; }
-            const content = document.getElementById('comment-content').value.trim();
-            if (!content || !currentPostId) return;
-            try {
-                const res = await fetch(SUPABASE_URL + '/rest/v1/comments', { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY }, body: JSON.stringify({ post_id: currentPostId, content, author: nickname }) });
-                if (res.ok) { document.getElementById('comment-content').value=''; loadComments(currentPostId); }
-                else alert('回复失败');
-            } catch (e) { alert('网络错误'); }
-        }
-
-        async function deletePost(id) { if (!isAdmin) return; if (!confirm('删除帖子？')) return; const res = await fetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${id}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } }); if (res.ok) { alert('已删除'); backToCommunity(); loadPosts(); } else alert('删除失败'); }
-        async function deleteComment(id) { if (!isAdmin) return; if (!confirm('删除回复？')) return; const res = await fetch(SUPABASE_URL + `/rest/v1/comments?id=eq.${id}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY } }); if (res.ok) { alert('已删除'); loadComments(currentPostId); } else alert('删除失败'); }
-
-        const backToTopBtn = document.getElementById('back-to-top');
-        window.addEventListener('scroll', () => { backToTopBtn.classList.toggle('visible', window.scrollY > 400); });
-        backToTopBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
-
-        showPage('home');
-    </script>
+    // ===== 初始化 =====
+    showTab('home');
+</script>
 </body>
 </html>
