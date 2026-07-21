@@ -20,7 +20,7 @@
             flex-wrap: wrap; position: sticky; top: 0; z-index: 100;
         }
         .top-nav a { color: var(--nav-text); text-decoration: none; font-size: 13px; }
-        .logo { font-size: 18px; font-weight: 700; margin-right: auto; }
+        .logo { font-size: 18px; font-weight: 700; margin-right: auto; cursor: default; }
         .nav-links { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
         .nav-links a { padding: 4px 8px; border-radius: 20px; transition: 0.2s; font-size: 13px; }
         .nav-links a.active { background: rgba(255,255,255,0.2); }
@@ -54,8 +54,7 @@
             <a href="#" id="nav-community">社区</a>
             <a href="./tools.html">工具箱</a>
             <a href="./chat.html">聊天室</a>
-            <a href="#" onclick="setNickname(); return false;">⚙️ 设置昵称</a>
-            <a href="#" id="admin-link">管理</a>
+            <a href="#" onclick="setNickname(); return false;">手动设置昵称</a>
         </div>
     </div><div class="container" id="app">
     <!-- 首页（软件列表） -->
@@ -167,7 +166,9 @@
             nickname = newName.trim();
             localStorage.setItem('custom_nickname', nickname);
             alert('昵称已设置为：' + nickname);
-            loadPosts();
+            if (document.getElementById('page-community') && !document.getElementById('page-community').classList.contains('hidden')) {
+                loadPosts();
+            }
         }
     }
 
@@ -178,8 +179,9 @@
             isAdmin = true;
             localStorage.setItem('isAdmin', 'true');
             alert('管理员权限已激活！');
-            updateAdminLink();
-            showPage('community');
+            if (document.getElementById('page-community') && !document.getElementById('page-community').classList.contains('hidden')) {
+                loadPosts();
+            }
         } else {
             alert('密码错误！');
         }
@@ -189,21 +191,29 @@
         isAdmin = false;
         localStorage.removeItem('isAdmin');
         alert('已退出管理员模式');
-        updateAdminLink();
-        showPage('community');
-    }
-
-    function updateAdminLink() {
-        const link = document.getElementById('admin-link');
-        if (link) {
-            link.textContent = isAdmin ? '退出管理' : '管理';
-            link.onclick = function(e) {
-                e.preventDefault();
-                if (isAdmin) { logoutAdmin(); } else { verifyAdmin(); }
-            };
+        if (document.getElementById('page-community') && !document.getElementById('page-community').classList.contains('hidden')) {
+            loadPosts();
         }
     }
-    updateAdminLink();
+
+    // 隐藏管理入口：点击标题5次激活
+    let titleClicks = 0;
+    let clickTimer = null;
+    document.querySelector('.logo').addEventListener('click', function(e) {
+        titleClicks++;
+        if (clickTimer) clearTimeout(clickTimer);
+        clickTimer = setTimeout(() => { titleClicks = 0; }, 2000);
+        if (titleClicks >= 5) {
+            titleClicks = 0;
+            if (isAdmin) {
+                if (confirm('是否退出管理员模式？')) {
+                    logoutAdmin();
+                }
+            } else {
+                verifyAdmin();
+            }
+        }
+    });
 
     // 获取带管理员标签的显示名
     function getDisplayName(name) {
@@ -318,7 +328,7 @@ async function loadComments(postId) {
     } catch (e) {
         div.innerHTML = `<div class="card error-card"><p>加载回复失败：${e.message}</p></div>`;
     }
-        }        // 发帖
+}        // 发帖
         async function createPost() {
             const title = document.getElementById('post-title').value.trim();
             const content = document.getElementById('post-content').value.trim();
