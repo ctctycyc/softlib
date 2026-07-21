@@ -250,7 +250,7 @@ async function loadComments(postId) {
     } catch (e) {
         div.innerHTML = `<div class="card error-card"><p>加载回复失败：${e.message}</p></div>`;
     }
-}        async function createPost() {
+                        }        async function createPost() {
             const title = document.getElementById('post-title').value.trim();
             const content = document.getElementById('post-content').value.trim();
             const err = document.getElementById('post-error');
