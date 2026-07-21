@@ -1,447 +1,270 @@
 <!DOCTYPE html>
-<html lang="zh" data-theme="light">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>软件库 · 实用工具分享站</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <title>软件库 · 社区版</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #f5f7fa;
-            --card: #ffffff;
-            --text: #1e293b;
-            --sub: #475569;
-            --border: #e2e8f0;
-            --accent: #1e40af;
-            --accent-light: #2563eb;
-            --btn: #dc2626;
-            --btn-hover: #b91c1c;
-            --nav-bg: #1e293b;
-            --nav-text: #f8fafc;
-            --radius: 8px;
-            --radius-sm: 4px;
-            --shadow: 0 1px 3px rgba(0,0,0,0.06);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
-            --transition: 0.2s ease;
-        }
-        [data-theme="dark"] {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text: #e2e8f0;
-            --sub: #94a3b8;
-            --border: #334155;
-            --accent: #3b82f6;
-            --accent-light: #60a5fa;
-            --btn: #ef4444;
-            --btn-hover: #dc2626;
-            --nav-bg: #0f172a;
-            --nav-text: #e2e8f0;
-            --shadow: 0 1px 3px rgba(0,0,0,0.3);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+            --bg: #f0f2f5; --card: #ffffff; --text: #1a1a1a; --sub: #555;
+            --border: #e0e0e0; --accent: #1e3c72; --btn: #ff6b35;
+            --nav-bg: #1e3c72; --nav-text: #ffffff; --radius: 8px;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); line-height: 1.5; transition: background 0.3s, color 0.3s; }.top-nav {
-    background: var(--nav-bg); color: var(--nav-text); padding: 0 20px; height: 56px;
-    display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-.logo { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.5px; margin-right: auto; color: #fff; }
-.nav-links { display: flex; gap: 6px; align-items: center; }
-.nav-links a {
-    color: var(--nav-text); text-decoration: none; padding: 6px 14px; border-radius: 20px;
-    font-size: 0.9rem; font-weight: 500; transition: background 0.2s; white-space: nowrap;
-}
-.nav-links a:hover { background: rgba(255,255,255,0.15); }
-.nav-links a.active { background: var(--accent-light); font-weight: 600; }
-.search-wrapper { position: relative; margin-left: 8px; }
-.search-box {
-    padding: 8px 36px 8px 14px; border: 1px solid transparent; border-radius: 20px;
-    outline: none; font-size: 0.9rem; width: 180px; background: rgba(255,255,255,0.15);
-    color: var(--nav-text); transition: all 0.2s;
-}
-.search-box::placeholder { color: rgba(255,255,255,0.6); }
-.search-box:focus { background: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.5); width: 220px; }
-.search-clear {
-    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-    background: none; border: none; color: var(--nav-text); cursor: pointer; font-size: 1rem; opacity: 0.7;
-}.search-clear:hover { opacity: 1; }
-.theme-btn {
-    background: none; border: 1px solid rgba(255,255,255,0.4); color: var(--nav-text);
-    padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: 0.2s;
-    white-space: nowrap;
-}
-.theme-btn:hover { background: rgba(255,255,255,0.2); }
-.hamburger { display: none; background: none; border: none; color: var(--nav-text); font-size: 1.6rem; cursor: pointer; }
-.container { max-width: 960px; margin: 20px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 16px; }
-.card {
-    background: var(--card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow);
-    display: flex; align-items: center; gap: 14px; transition: transform 0.2s, box-shadow 0.2s;
-    border: 1px solid var(--border); cursor: pointer;
-}
-.card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.card-icon {
-    width: 48px; height: 48px; border-radius: 10px; background: #e8ecf2; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--accent);
-}
-[data-theme="dark"] .card-icon { background: #2d3748; }
-.card-info { flex: 1; }
-.card-info h3 { font-size: 1rem; font-weight: 600; margin-bottom: 2px; display: flex; align-items: center; gap: 8px; }
-.card-info .desc { font-size: 0.85rem; color: var(--sub); line-height: 1.4; }
-.download-btn {
-    background: #3390ec;  /* 原来是 var(--btn) 或 #ff6b35 */
-    color: white;
-    border: none;
-    padding: 6px 16px;
-    border-radius: 20px;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    font-size: 13px;
-    white-space: nowrap;
-}
-.download-btn:hover {
-    background: #4da3f5;
-}
-.tag {
-    display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 600;
-    color: white; background: #64748b;
-}
-.tag-software { background: #059669; }
-.tag-tool { background: #4f46e5; }
-.tag-notice { background: #d97706; }
-.sidebar-card {
-    background: var(--card); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-}
-.sidebar-card h3 { font-size: 1rem; margin-bottom: 12px; color: var(--accent); font-weight: 600; }
-.announcement {
-    background: #fef3c7; border-left: 4px solid #d97706; padding: 14px 16px; border-radius: 6px;
-    color: #92400e; font-weight: 500;
-}
-[data-theme="dark"] .announcement { background: #422006; color: #fbbf24; }
-.footer { text-align: center; color: #94a3b8; font-size: 0.8rem; margin-top: 30px; padding: 20px; }
-.hidden { display: none !important; }
-.modal {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);
-    display: flex; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(4px);
-}
-.modal-content {
-    background: var(--card); border-radius: 12px; padding: 24px; width: 90%; max-width: 460px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3); text-align: left;
-}        .modal-content h2 { font-size: 1.3rem; margin-bottom: 12px; }
-        .modal-content p { margin-bottom: 8px; color: var(--sub); font-size: 0.9rem; }
-        .modal-close {
-            background: none; border: none; font-size: 1.3rem; cursor: pointer; float: right; color: var(--sub);
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
+        .top-nav {
+            background: var(--nav-bg); color: var(--nav-text);
+            padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+            flex-wrap: wrap; position: sticky; top: 0; z-index: 100;
         }
-        .skeleton {
-            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
-            background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; height: 80px;
+        .top-nav a { color: var(--nav-text); text-decoration: none; font-size: 13px; }
+        .top-nav a:hover { opacity: 0.8; }
+        .logo { font-size: 18px; font-weight: 700; margin-right: auto; }
+        .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+        .nav-links a { padding: 4px 8px; border-radius: 20px; transition: 0.2s; font-size: 13px; }
+        .nav-links a.active { background: rgba(255,255,255,0.2); }
+        .container { max-width: 800px; margin: 16px auto; padding: 0 16px; }
+        .card {
+            background: var(--card); border-radius: var(--radius);
+            padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow);
+            transition: 0.2s; cursor: pointer; border: 1px solid var(--border);
         }
-        [data-theme="dark"] .skeleton { background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%); }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        .back-to-top {
-            position: fixed; bottom: 24px; right: 24px; background: var(--accent); color: white; border: none;
-            width: 42px; height: 42px; border-radius: 50%; font-size: 1.2rem; cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2); opacity: 0; transform: translateY(20px); transition: 0.3s;
-            pointer-events: none; z-index: 50;
-        }
-        .back-to-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
-        @media (max-width: 768px) {
-            .top-nav { flex-wrap: wrap; height: auto; padding: 10px; }
-            .nav-links { display: none; width: 100%; flex-direction: column; background: var(--nav-bg); padding: 10px; border-radius: 12px; }
-            .nav-links.open { display: flex; }
-            .hamburger { display: block; }
-            .search-wrapper { width: 100%; }
-            .search-box { width: 100%; }
-            .card { flex-direction: column; align-items: flex-start; }
-        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+        .card h3 { font-size: 16px; margin-bottom: 4px; }
+        .card .desc { font-size: 13px; color: var(--sub); }
+        .card .meta { font-size: 12px; color: #999; margin-top: 6px; }
+        .btn { background: var(--btn); color: white; border: none; padding: 8px 18px; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: 13px; }
+        .btn:hover { opacity: 0.9; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .input-group input, .input-group textarea { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
+        .input-group textarea { min-height: 80px; resize: vertical; }
+        .hidden { display: none !important; }
+        .comment { padding: 10px; border-bottom: 1px solid var(--border); font-size: 14px; }
+        .comment .author { font-weight: 600; color: var(--accent); }
     </style>
 </head>
-<body><nav class="top-nav">
-    <div class="logo">软件库</div>
-    <button class="hamburger" id="hamburgerBtn" aria-label="菜单"><i class="fas fa-bars"></i></button>
-    <div class="nav-links" id="navBar">
-        <a href="#" data-category="all" class="active">全部</a>
-        <a href="#" data-category="software">软件</a>
-        <a href="#" data-category="tool">工具</a>
-        <a href="#" data-category="personal">关于</a>
+<body>
+    <div class="top-nav">
+        <div class="logo">软件库</div>
+        <div class="nav-links" id="navBar">
+            <a href="#" data-page="home" class="active">首页</a>
+            <a href="#" data-page="community">社区</a>
+            <a href="./tools.html">工具箱</a>
+            <a href="./chat.html">聊天室</a>
+        </div>
+    </div><div class="container" id="app">
+    <!-- 首页（软件列表 + 最新帖子） -->
+    <div id="page-home">
+        <h2 style="margin-bottom:12px;">软件列表</h2>
+        <div id="software-list">
+            <div class="card"><h3>加载中...</h3></div>
+        </div>
+        <h2 style="margin:20px 0 12px;">社区最新帖子</h2>
+        <div id="recent-posts">
+            <div class="card"><h3>加载中...</h3></div>
+        </div>
     </div>
-    <div class="search-wrapper">
-        <input type="text" class="search-box" id="searchInput" placeholder="搜索软件..." autocomplete="off">
-        <button class="search-clear hidden" id="searchClear"><i class="fas fa-times"></i></button>
-    </div>
-    <button class="theme-btn" id="themeToggle">暗黑模式</button>
-    <a href="./tools.html">MC基岩版服务器查询工具</a>
-    <a href="./chat.html" style="background:#3390ec;padding:4px 12px;border-radius:20px;color:white;text-decoration:none;">聊天室</a>
-    <a href="mailto:dghkkppp@qq.com" style="color:var(--nav-text);text-decoration:none;font-size:0.9rem;"><i class="far fa-envelope"></i></a>
-    <a href="./login.html" id="loginLink" style="color:var(--nav-text);font-size:0.9rem;">登录</a>
-    <span id="userDisplay" class="hidden" style="font-weight:500;color:var(--nav-text);"></span>
-    <a href="#" id="logoutLink" class="hidden" style="color:var(--nav-text);">退出</a>
-</nav>
 
-<div class="container">
-    <div class="announcement" id="announcement">
-        欢迎来到软件库！登录后可下载资源，聊天室支持图片与文件分享。
-    </div>
-    <div style="display: flex; justify-content: flex-end;">
-        <button id="noticeToggleBtn" class="theme-btn" style="background: #475569; color: white; border: none;">查看通知</button>
-    </div>
-    <div id="noticeList" class="hidden" style="margin-bottom: 8px;"></div>    <div id="list">
-        <div class="card skeleton"></div>
-        <div class="card skeleton"></div>
-        <div class="card skeleton"></div>
-    </div>
-    <div class="sidebar-card">
-        <h3>社区统计</h3>
-        <div id="statsContent" style="display: flex; gap: 24px; justify-content: space-around; font-weight: 600;"></div>
-    </div>
-    <div class="sidebar-card">
-        <h3>最新通知</h3>
-        <div id="sidebarNotices">暂无通知</div>
-    </div>
-    <div class="sidebar-card">
-        <h3>联系管理员</h3>
-        <p style="font-size:0.9rem;"><i class="far fa-envelope"></i> dghkkppp@qq.com</p>
-    </div>
-</div>
-
-<div id="detailModal" class="modal hidden">
-    <div class="modal-content">
-        <button class="modal-close" onclick="document.getElementById('detailModal').classList.add('hidden')"><i class="fas fa-times"></i></button>
-        <h2 id="modalTitle"></h2>
-        <p id="modalDesc"></p>
-        <p id="modalType"></p>
-        <p id="modalDate"></p>
-        <div id="modalDownload" style="margin-top:12px;"></div>
-    </div>
-</div>
-<button class="back-to-top" id="backToTop" title="回到顶部"><i class="fas fa-arrow-up"></i></button>
-<div class="footer" id="secretTrigger">软件库 v2.0 · 持续更新</div>
-
-<script>
-    (function() {
-        const themeToggle = document.getElementById('themeToggle');
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        themeToggle.textContent = savedTheme === 'dark' ? '亮色模式' : '暗黑模式';themeToggle.addEventListener('click', () => {
-    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
-    themeToggle.textContent = next === 'dark' ? '亮色模式' : '暗黑模式';
-});
-
-const hamburger = document.getElementById('hamburgerBtn');
-const navBar = document.getElementById('navBar');
-hamburger.addEventListener('click', () => navBar.classList.toggle('open'));
-
-const backBtn = document.getElementById('backToTop');
-window.addEventListener('scroll', () => backBtn.classList.toggle('visible', window.scrollY > 400));
-backBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-
-let clickCount = 0;
-document.getElementById('secretTrigger').addEventListener('click', () => {
-    clickCount++;
-    if (clickCount >= 5) {
-        clickCount = 0;
-        const token = prompt('管理员登录：请输入 GitHub Token');
-        if (token && token.trim()) verifyAdminToken(token.trim());
-    }
-    setTimeout(() => clickCount = 0, 2000);
-});
-
-async function verifyAdminToken(token) {
-    try {
-        const res = await fetch('https://api.github.com/user', { headers: { Authorization: `token ${token}` } });
-        if (res.ok) { localStorage.setItem('adminToken', token); alert('管理功能已激活'); }
-        else alert('Token 无效');
-    } catch (e) { alert('网络错误'); }
-}
-
-const API = 'https://api.github.com/repos/ctctycyc/softlib/issues';
-let allSoftwares = [], currentCategory = 'all';
-
-function getTag(sw) {
-    if (sw.isNotice) return '<span class="tag tag-notice">公告</span>';
-    if (sw.isTool) return '<span class="tag tag-tool">工具</span>';
-    return '<span class="tag tag-software">软件</span>';
-}async function loadSoftwares() {
-    try {
-        const res = await fetch(API + '?labels=approved&state=open&sort=created&direction=desc&per_page=100');
-        const issues = await res.json();
-        allSoftwares = issues.map(issue => {
-            let body = issue.body || '', downloadUrl = '', description = '';
-            const lines = body.split('\n');
-            for (let line of lines) {
-                if (line.trim().startsWith('http') && !/\.(png|jpg|jpeg|gif|svg|ico)(\?.*)?$/.test(line.trim())) downloadUrl = line.trim();
-                else if (line.trim() && !description) description = line.trim();
-            }
-            const labels = issue.labels.map(l => l.name);
-            return {
-                id: issue.number, title: issue.title, description, downloadUrl: labels.includes('notice') ? '' : downloadUrl,
-                created_at: issue.created_at, isNotice: labels.includes('notice'), isTool: labels.includes('tool'),
-                isSoftware: !labels.includes('notice') && !labels.includes('tool')
-            };
-        });
-        allSoftwares.sort((a,b) => (a.isNotice ? -1 : 1));
-        updateStats();
-        renderFilteredSoftwares();
-    } catch(e) {
-        document.getElementById('list').innerHTML = '<div class="card" style="justify-content:center;">加载失败，请刷新重试</div>';
-    }
-}
-
-function updateStats() {
-    const software = allSoftwares.filter(s => s.isSoftware && !s.isNotice).length;
-    const tools = allSoftwares.filter(s => s.isTool).length;
-    const notices = allSoftwares.filter(s => s.isNotice).length;
-    document.getElementById('statsContent').innerHTML = `<div>${software}<br><small>软件</small></div><div>${tools}<br><small>工具</small></div><div>${notices}<br><small>公告</small></div>`;
-}function renderFilteredSoftwares() {
-    let filtered = allSoftwares;
-    if (currentCategory === 'all') filtered = allSoftwares.filter(sw => !sw.isTool);
-    else if (currentCategory === 'software') filtered = allSoftwares.filter(sw => sw.isSoftware && !sw.isNotice);
-    else if (currentCategory === 'tool') filtered = allSoftwares.filter(sw => sw.isTool);
-    else if (currentCategory === 'personal') {
-        document.getElementById('list').innerHTML = `<div class="card" style="justify-content:center; text-align:center;">
-            <div><h3>关于软件库</h3><p>联系邮箱：dghkkppp@qq.com</p></div></div>`;
-        return;
-    }
-    renderSoftwares(filtered);
-}
-
-function renderSoftwares(softwares) {
-    const listDiv = document.getElementById('list');
-    if (!softwares.length) { listDiv.innerHTML = '<div class="card" style="justify-content:center;">暂无内容</div>'; return; }
-    const isLoggedIn = !!localStorage.getItem('authToken');
-    let html = '';
-    softwares.forEach(sw => {
-        const date = sw.created_at ? new Date(sw.created_at).toLocaleDateString('zh-CN') : '';
-        const tagHtml = getTag(sw);
-        let downloadBtn = '';
-        if (sw.downloadUrl && !sw.isNotice) {
-            if (isLoggedIn) downloadBtn = `<a class="download-btn" href="${sw.downloadUrl}" target="_blank">下载</a>`;
-            else downloadBtn = `<span class="download-btn" style="background:#94a3b8;cursor:not-allowed;" onclick="alert('请先登录');location.href='./login.html'">登录后下载</span>`;
-        }        html += `
-        <div class="card" data-id="${sw.id}" data-title="${escapeHtml(sw.title)}" data-desc="${escapeHtml(sw.description || '')}" data-download="${sw.downloadUrl || ''}" data-date="${date}" data-tag="${tagHtml}">
-            <div class="card-icon"><i class="${sw.isTool ? 'fas fa-wrench' : (sw.isNotice ? 'fas fa-bullhorn' : 'fas fa-cube')}"></i></div>
-            <div class="card-info">
-                <h3>${escapeHtml(sw.title)} ${tagHtml}</h3>
-                <div class="desc">${escapeHtml(sw.description || '暂无描述')}</div>
-                <div style="font-size:0.75rem; color:var(--sub); margin-top:4px;">${date}</div>
+    <!-- 社区页面 -->
+    <div id="page-community" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h2>社区</h2>
+            <button class="btn" onclick="showNewPost()">发帖</button>
+        </div>
+        <div id="post-list"></div>
+        <div id="new-post-form" class="hidden">
+            <h3>发新帖</h3>
+            <div class="input-group">
+                <input id="post-title" type="text" placeholder="标题">
             </div>
-            ${downloadBtn}
-        </div>`;
-    });
-    listDiv.innerHTML = html;
-    document.querySelectorAll('.card[data-id]').forEach(card => {
-        card.addEventListener('click', function(e) {
-            if (e.target.closest('.download-btn')) return;
-            showDetailModal(this.dataset);
-        });
-    });
-}
+            <div class="input-group">
+                <textarea id="post-content" placeholder="内容..."></textarea>
+            </div>
+            <button class="btn" onclick="createPost()">发布</button>
+            <button class="btn" style="background:#999;" onclick="hideNewPost()">取消</button>
+            <div id="post-error" style="color:red;margin-top:8px;"></div>
+        </div>
+    </div>
 
-function escapeHtml(text) {
-    const map = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
-    return text.replace(/[&<>"']/g, m => map[m]);
-}
+    <!-- 帖子详情 -->
+    <div id="page-detail" class="hidden">
+        <button class="btn" style="background:#999;margin-bottom:12px;" onclick="backToCommunity()">← 返回社区</button>
+        <div id="detail-content"></div>
+        <h3 style="margin-top:16px;">回复</h3>
+        <div id="comments-list"></div>
+        <div class="input-group" style="margin-top:12px;">
+            <textarea id="comment-content" placeholder="写下你的回复..."></textarea>
+        </div>
+        <button class="btn" onclick="addComment()">发表回复</button>
+    </div>
+    </div><script>
+    const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
 
-function showDetailModal({ title, desc, tag, date, download }) {
-    document.getElementById('modalTitle').textContent = title;
-    document.getElementById('modalDesc').textContent = desc || '暂无详细描述';
-    document.getElementById('modalType').innerHTML = '类型：' + tag;
-    document.getElementById('modalDate').textContent = '添加日期：' + date;    const modalDownload = document.getElementById('modalDownload');
-    if (download) {
-        const isLoggedIn = !!localStorage.getItem('authToken');
-        if (isLoggedIn) {
-            modalDownload.innerHTML = `<a class="download-btn" href="${download}" target="_blank">立即下载</a>`;
-        } else {
-            modalDownload.innerHTML = `<span class="download-btn" style="background:#94a3b8;" onclick="alert('请先登录');location.href='./login.html'">登录后下载</span>`;
+    // 生成游客昵称
+    let nickname = localStorage.getItem('nickname');
+    if (!nickname) {
+        nickname = '游客' + Math.floor(Math.random() * 9000 + 1000);
+        localStorage.setItem('nickname', nickname);
+    }
+
+    // 页面切换
+    const pages = {
+        home: document.getElementById('page-home'),
+        community: document.getElementById('page-community'),
+        detail: document.getElementById('page-detail')
+    };
+    let currentPostId = null;
+
+    document.getElementById('navBar').addEventListener('click', e => {
+        if (e.target.tagName === 'A' && e.target.dataset.page) {
+            e.preventDefault();
+            document.querySelectorAll('#navBar a').forEach(a => a.classList.remove('active'));
+            e.target.classList.add('active');
+            const page = e.target.dataset.page;
+            Object.keys(pages).forEach(k => pages[k].classList.add('hidden'));
+            pages[page].classList.remove('hidden');
+            if (page === 'home') { loadSoftware(); loadRecentPosts(); }
+            if (page === 'community') loadPosts();
         }
+    });
+
+    // ===== 软件列表（保留原有逻辑，这里简化展示） =====
+    async function loadSoftware() {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/softwares?select=*&order=created_at.desc&limit=5', {
+            headers: { 'apikey': SUPABASE_KEY }
+        });
+        const data = await res.json();
+        const div = document.getElementById('software-list');
+        if (Array.isArray(data) && data.length > 0) {
+            div.innerHTML = data.map(s => `<div class="card"><h3>${s.title}</h3><div class="desc">${s.description || ''}</div></div>`).join('');
+        } else {
+            div.innerHTML = '<div class="card"><h3>暂无软件</h3></div>';
+        }
+    }// ===== 社区功能 =====
+async function loadRecentPosts() {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/posts?select=*&order=created_at.desc&limit=5', {
+        headers: { 'apikey': SUPABASE_KEY }
+    });
+    const data = await res.json();
+    const div = document.getElementById('recent-posts');
+    if (Array.isArray(data) && data.length > 0) {
+        div.innerHTML = data.map(p => `
+            <div class="card" onclick="openPost(${p.id})">
+                <h3>${p.title}</h3>
+                <div class="desc">${p.content.substring(0, 80)}...</div>
+                <div class="meta">${p.author} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div>
+            </div>
+        `).join('');
     } else {
-        modalDownload.innerHTML = '';
+        div.innerHTML = '<div class="card"><h3>暂无帖子，去社区发第一个吧！</h3></div>';
     }
-    document.getElementById('detailModal').classList.remove('hidden');
 }
 
-const searchInput = document.getElementById('searchInput');
-const searchClear = document.getElementById('searchClear');
-searchInput.addEventListener('input', function(e) {
-    const keyword = e.target.value.toLowerCase().trim();
-    searchClear.classList.toggle('hidden', keyword === '');
-    let base = allSoftwares;
-    if (currentCategory === 'all') base = base.filter(sw => !sw.isTool);
-    else if (currentCategory === 'software') base = base.filter(sw => sw.isSoftware && !sw.isNotice);
-    else if (currentCategory === 'tool') base = base.filter(sw => sw.isTool);
-    else if (currentCategory === 'personal') return;
-    const filtered = keyword ? base.filter(sw => sw.title.toLowerCase().includes(keyword) || (sw.description && sw.description.toLowerCase().includes(keyword))) : base;
-    renderSoftwares(filtered);
-});
-searchClear.addEventListener('click', () => { searchInput.value = ''; searchInput.dispatchEvent(new Event('input')); });document.getElementById('navBar').addEventListener('click', e => {
-    if (e.target.tagName === 'A') {
-        e.preventDefault();
-        document.querySelectorAll('#navBar a').forEach(a => a.classList.remove('active'));
-        e.target.classList.add('active');
-        currentCategory = e.target.dataset.category;
-        renderFilteredSoftwares();
-        searchInput.value = '';
-        searchClear.classList.add('hidden');
-    }
-});
-
-async function loadNotices() {
-    try {
-        const res = await fetch(API + '?labels=notice&state=open&sort=created&direction=desc&per_page=10');
-        const issues = await res.json();
-        const list = document.getElementById('noticeList');
-        if (!issues.length) { list.innerHTML = '<div class="card">暂无通知</div>'; return; }
-        list.innerHTML = issues.map(issue => `
-            <div class="card" style="background:#fef9c3;border-left:4px solid #d97706;cursor:default;">
-                <strong>${escapeHtml(issue.title)}</strong>
-                <div class="desc">${escapeHtml((issue.body || '').substring(0, 150))}</div>
-            </div>`).join('');
-    } catch(e) { document.getElementById('noticeList').innerHTML = '<p>加载通知失败</p>'; }
-}document.getElementById('noticeToggleBtn').addEventListener('click', function() {
-    const list = document.getElementById('noticeList');
-    if (list.classList.contains('hidden')) {
-        loadNotices();
-        list.classList.remove('hidden');
-        this.textContent = '收起通知';
+async function loadPosts() {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/posts?select=*&order=created_at.desc&limit=50', {
+        headers: { 'apikey': SUPABASE_KEY }
+    });
+    const data = await res.json();
+    const div = document.getElementById('post-list');
+    if (Array.isArray(data) && data.length > 0) {
+        div.innerHTML = data.map(p => `
+            <div class="card" onclick="openPost(${p.id})">
+                <h3>${p.title}</h3>
+                <div class="desc">${p.content.substring(0, 100)}...</div>
+                <div class="meta">${p.author} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div>
+            </div>
+        `).join('');
     } else {
-        list.classList.add('hidden');
-        this.textContent = '查看通知';
+        div.innerHTML = '<div class="card"><h3>暂无帖子，发第一个吧！</h3></div>';
     }
-});
+}
 
-(async function loadSidebarNotices() {
-    try {
-        const res = await fetch(API + '?labels=notice&state=open&sort=created&direction=desc&per_page=3');
-        const issues = await res.json();
-        const div = document.getElementById('sidebarNotices');
-        if (!issues.length) { div.innerHTML = '<p>暂无</p>'; return; }
-        div.innerHTML = '<ul style="padding-left:18px;">' + issues.map(i => `<li><a href="#" onclick="alert('${escapeHtml(i.title)}')">${escapeHtml(i.title)}</a></li>`).join('') + '</ul>';
-    } catch(e) { document.getElementById('sidebarNotices').innerHTML = '<p>加载失败</p>'; }
-})();
+function showNewPost() { document.getElementById('new-post-form').classList.remove('hidden'); }
+function hideNewPost() { document.getElementById('new-post-form').classList.add('hidden'); }
 
-function updateAuthUI() {
-    const email = localStorage.getItem('authEmail');
-    const token = localStorage.getItem('authToken');
-    document.getElementById('loginLink').classList.toggle('hidden', !!email);
-    document.getElementById('userDisplay').classList.toggle('hidden', !email);
-    document.getElementById('logoutLink').classList.toggle('hidden', !email);
-    if (email) document.getElementById('userDisplay').textContent = email;
-}            updateAuthUI();
-            document.getElementById('logoutLink').addEventListener('click', e => {
-                e.preventDefault();
-                localStorage.removeItem('authEmail');
-                localStorage.removeItem('authToken');
-                location.reload();
+async function createPost() {
+    const title = document.getElementById('post-title').value.trim();
+    const content = document.getElementById('post-content').value.trim();
+    const err = document.getElementById('post-error');
+    if (!title || !content) { err.textContent = '标题和内容不能为空'; return; }
+    const res = await fetch(SUPABASE_URL + '/rest/v1/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({ title, content, author: nickname })
+    });
+    if (res.ok) {
+        document.getElementById('post-title').value = '';
+        document.getElementById('post-content').value = '';
+        hideNewPost();
+        loadPosts();
+    } else {
+        err.textContent = '发布失败，请重试';
+    }
+}        async function openPost(id) {
+            currentPostId = id;
+            Object.keys(pages).forEach(k => pages[k].classList.add('hidden'));
+            pages.detail.classList.remove('hidden');
+            const res = await fetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${id}&select=*`, {
+                headers: { 'apikey': SUPABASE_KEY }
             });
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) {
+                const p = data[0];
+                document.getElementById('detail-content').innerHTML = `
+                    <h2>${p.title}</h2>
+                    <div class="meta">${p.author} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div>
+                    <p style="margin-top:12px;line-height:1.6;">${p.content}</p>
+                `;
+            }
+            loadComments(id);
+        }
 
-            loadSoftwares();
-        })();
+        async function loadComments(postId) {
+            const res = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${postId}&select=*&order=created_at.asc`, {
+                headers: { 'apikey': SUPABASE_KEY }
+            });
+            const data = await res.json();
+            const div = document.getElementById('comments-list');
+            if (Array.isArray(data) && data.length > 0) {
+                div.innerHTML = data.map(c => `
+                    <div class="comment">
+                        <span class="author">${c.author}</span>：${c.content}
+                        <div class="meta">${new Date(c.created_at).toLocaleString('zh-CN')}</div>
+                    </div>
+                `).join('');
+            } else {
+                div.innerHTML = '<p style="color:#999;">暂无回复</p>';
+            }
+        }
+
+        async function addComment() {
+            const content = document.getElementById('comment-content').value.trim();
+            if (!content || !currentPostId) return;
+            const res = await fetch(SUPABASE_URL + '/rest/v1/comments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+                body: JSON.stringify({ post_id: currentPostId, content, author: nickname })
+            });
+            if (res.ok) {
+                document.getElementById('comment-content').value = '';
+                loadComments(currentPostId);
+            } else {
+                alert('回复失败');
+            }
+        }
+
+        function backToCommunity() {
+            Object.keys(pages).forEach(k => pages[k].classList.add('hidden'));
+            pages.community.classList.remove('hidden');
+            loadPosts();
+        }
+
+        // 初始加载
+        loadSoftware();
+        loadRecentPosts();
     </script>
 </body>
 </html>
