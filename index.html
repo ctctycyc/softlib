@@ -20,31 +20,64 @@
         .card .desc { font-size: 0.88rem; color: var(--sub); }
         .card .meta { font-size: 0.76rem; color: var(--muted); margin-top: 6px; }
         .btn { display: inline-block; background: var(--accent); color: #fff; border: none; padding: 6px 16px; border-radius: 18px; cursor: pointer; font-size: 0.85rem; }
+        .btn-sm { padding: 4px 12px; font-size: 0.8rem; }
+        .btn-outline { background: transparent; color: var(--sub); border: 1px solid var(--border); }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); display: flex; z-index: 100; }
         .bottom-nav .tab { flex: 1; text-align: center; padding: 8px 0; color: var(--muted); font-size: 0.72rem; cursor: pointer; }
         .bottom-nav .tab i { font-size: 1.3rem; display: block; margin-bottom: 2px; }
         .bottom-nav .tab.active { color: var(--accent); font-weight: 600; }
         .hidden { display: none !important; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 12px; }
+        .input-group input, .input-group textarea { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; background: #fff; color: var(--text); }
+        .input-group textarea { min-height: 80px; resize: vertical; }
+        .comment-item { padding: 10px 0; border-bottom: 1px solid #f0f4f8; font-size: 0.9rem; }
+        .comment-item .author { font-weight: 600; color: var(--accent); }
     </style>
 </head>
 <body>
 <div class="top-bar">软件库</div>
 <div class="container" id="main-content">
+    <!-- 软件页 -->
     <div id="page-home"><h2 style="margin-bottom:12px;">软件</h2><div id="software-list"><div class="card">加载中...</div></div></div>
+    <!-- 广场页 -->
     <div id="page-forum" class="hidden">
         <div id="category-list"></div>
         <div id="post-list-section" class="hidden">
-            <button class="btn" onclick="backToCategories()" style="margin-bottom:12px;">返回板块</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <button class="btn btn-outline btn-sm" onclick="backToCategories()">返回板块</button>
+                <button class="btn btn-sm" onclick="showNewPost()"><i class="fas fa-pen"></i> 发帖</button>
+            </div>
             <div id="post-list"></div>
+            <div id="new-post-form" class="hidden">
+                <h3 style="margin-bottom:8px;">发新帖</h3>
+                <div class="input-group"><input id="post-title" placeholder="标题"></div>
+                <div class="input-group"><textarea id="post-content" placeholder="内容..."></textarea></div>
+                <button class="btn" onclick="createPost()">发布</button>
+                <button class="btn btn-outline" onclick="hideNewPost()">取消</button>
+                <div id="post-error" style="color:red;margin-top:8px;"></div>
+            </div>
+        </div>
+        <div id="page-detail" class="hidden">
+            <button class="btn btn-outline btn-sm" onclick="backToPosts()" style="margin-bottom:12px;">返回帖子</button>
+            <div id="detail-content"></div>
+            <h3 style="margin-top:16px;">回复</h3>
+            <div id="comments-list"></div>
+            <div class="input-group" style="margin-top:12px;"><textarea id="comment-content" placeholder="写下你的回复..."></textarea></div>
+            <button class="btn" onclick="addComment()">发表回复</button>
         </div>
     </div>
 </div>
+<!-- 底部导航 -->
 <div class="bottom-nav">
     <div class="tab active" data-tab="home"><i class="fas fa-download"></i>软件</div>
     <div class="tab" data-tab="forum"><i class="fas fa-comments"></i>广场</div>
 </div><script>
     // ===== 全局变量 =====
     let currentCategoryId = null;
+    let currentPostId = null;
+    // 游客昵称
+    let nickname = localStorage.getItem('custom_nickname') || ('游客' + Math.floor(Math.random()*9000+1000));
+    if (!localStorage.getItem('custom_nickname')) localStorage.setItem('custom_nickname', nickname);
 
     // ===== 页面切换 =====
     function showTab(tab) {
@@ -58,9 +91,21 @@
     }
     document.querySelectorAll('.bottom-nav .tab').forEach(el => el.addEventListener('click', () => showTab(el.dataset.tab)));
 
+    // 广场内部导航
     function backToCategories() {
         document.getElementById('category-list').classList.remove('hidden');
         document.getElementById('post-list-section').classList.add('hidden');
+        document.getElementById('page-detail').classList.add('hidden');
+    }
+    function backToPosts() {
+        document.getElementById('page-detail').classList.add('hidden');
+        document.getElementById('post-list-section').classList.remove('hidden');
+    }
+    function showNewPost() {
+        document.getElementById('new-post-form').classList.remove('hidden');
+    }
+    function hideNewPost() {
+        document.getElementById('new-post-form').classList.add('hidden');
     }
 
     // ===== 软件库（GitHub Issues） =====
@@ -71,39 +116,26 @@
             const res = await fetch('https://api.github.com/repos/ctctycyc/softlib/issues?labels=approved&state=open&sort=created&direction=desc&per_page=20');
             if (!res.ok) throw new Error('HTTP ' + res.status);
             const issues = await res.json();
-            if (!Array.isArray(issues) || !issues.length) {
-                div.innerHTML = '<div class="card">暂无软件</div>';
-                return;
-            }
+            if (!Array.isArray(issues) || !issues.length) { div.innerHTML = '<div class="card">暂无软件</div>'; return; }
             div.innerHTML = issues.map(i => {
-                const body = i.body || '';
-                const lines = body.split('\n').filter(l => l.trim());
-                const desc = lines.find(l => !l.startsWith('http')) || '';
-                const link = lines.find(l => l.startsWith('http')) || '';
-                return `<div class="card"><h3>${i.title}</h3><div class="desc">${desc}</div>${link ? `<a href="${link}" target="_blank" class="btn" style="margin-top:8px;">下载</a>` : ''}</div>`;
+                const body = i.body||'', lines = body.split('\n').filter(l=>l.trim()), desc = lines.find(l=>!l.startsWith('http'))||'', link = lines.find(l=>l.startsWith('http'))||'';
+                return `<div class="card"><h3>${i.title}</h3><div class="desc">${desc}</div>${link?`<a href="${link}" target="_blank" class="btn btn-sm" style="margin-top:8px;">下载</a>`:''}</div>`;
             }).join('');
-        } catch (e) {
-            div.innerHTML = '<div class="card">软件加载失败：' + e.message + '</div>';
-        }
-    }// ===== 板块列表（Supabase） =====
+        } catch (e) { div.innerHTML = '<div class="card">软件加载失败：' + e.message + '</div>'; }
+    }// ===== 板块列表 =====
 async function loadCategories() {
     backToCategories();
     const div = document.getElementById('category-list');
     div.innerHTML = '<div class="card">加载中...</div>';
     try {
-        const res = await fetch('https://rgekpmuujozhkkctpdup.supabase.co/rest/v1/categories?select=*&order=sort_order.asc', {
+        const res = await fetch('https://rgekpmuujozhkkctpdup.supabase.co/rest/v1/categories?select=*', {
             headers: { 'apikey': 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr' }
         });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
-        if (!Array.isArray(data) || !data.length) {
-            div.innerHTML = '<div class="card">暂无板块</div>';
-            return;
-        }
+        if (!Array.isArray(data) || !data.length) { div.innerHTML = '<div class="card">暂无板块</div>'; return; }
         div.innerHTML = data.map(c => `<div class="card" onclick="openCategory(${c.id},'${c.name}')"><h3>${c.name}</h3><div class="desc">${c.description||''}</div></div>`).join('');
-    } catch (e) {
-        div.innerHTML = '<div class="card">板块加载失败：' + e.message + '</div>';
-    }
+    } catch (e) { div.innerHTML = '<div class="card">板块加载失败：' + e.message + '</div>'; }
 }
 
 async function openCategory(id, name) {
@@ -118,30 +150,106 @@ async function loadPosts() {
     const div = document.getElementById('post-list');
     div.innerHTML = '<div class="card">加载中...</div>';
     try {
-        // 正确的排序参数格式：order=created_at.desc.nullslast
         let url = 'https://rgekpmuujozhkkctpdup.supabase.co/rest/v1/posts?select=*&order=created_at.desc.nullslast&limit=80';
-        if (currentCategoryId) {
-            url += '&category_id=eq.' + currentCategoryId;
-        }
-        const res = await fetch(url, {
-            headers: { 'apikey': 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr' }
-        });
-        if (!res.ok) {
-            const errorText = await res.text();
-            throw new Error('HTTP ' + res.status + ': ' + errorText);
-        }
+        if (currentCategoryId) url += '&category_id=eq.' + currentCategoryId;
+        const res = await fetch(url, { headers: { 'apikey': 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr' } });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
         const data = await res.json();
-        if (!Array.isArray(data) || !data.length) {
-            div.innerHTML = '<div class="card">暂无帖子</div>';
-            return;
-        }
+        if (!Array.isArray(data) || !data.length) { div.innerHTML = '<div class="card">暂无帖子</div>'; return; }
         div.innerHTML = data.map(p => {
             const time = p.created_at ? new Date(p.created_at).toLocaleString('zh-CN') : '';
-            return `<div class="card"><h3>${p.title||'(无标题)'}</h3><div class="desc">${(p.content||'').substring(0,100)}...</div><div class="meta">${p.author||'未知'} · ${time}</div></div>`;
+            return `<div class="card" onclick="openPost(${p.id})"><h3>${p.title||'(无标题)'}</h3><div class="desc">${(p.content||'').substring(0,100)}...</div><div class="meta">${p.author||'未知'} · ${time}</div></div>`;
         }).join('');
+    } catch (e) { div.innerHTML = '<div class="card">帖子加载失败：' + e.message + '</div>'; }
+}// ===== 发帖 =====
+async function createPost() {
+    const title = document.getElementById('post-title').value.trim();
+    const content = document.getElementById('post-content').value.trim();
+    const errDiv = document.getElementById('post-error');
+    if (!title || !content) { errDiv.textContent = '标题和内容不能为空'; return; }
+    try {
+        const res = await fetch('https://rgekpmuujozhkkctpdup.supabase.co/rest/v1/posts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr',
+                'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+                title: title,
+                content: content,
+                author: nickname,
+                category_id: currentCategoryId
+            })
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        document.getElementById('post-title').value = '';
+        document.getElementById('post-content').value = '';
+        hideNewPost();
+        loadPosts(); // 刷新帖子列表
     } catch (e) {
-        div.innerHTML = '<div class="card">帖子加载失败：' + e.message + '</div>';
+        errDiv.textContent = '发布失败：' + e.message;
     }
+}
+
+// ===== 帖子详情 =====
+async function openPost(id) {
+    currentPostId = id;
+    document.getElementById('post-list-section').classList.add('hidden');
+    document.getElementById('page-detail').classList.remove('hidden');
+    const detailDiv = document.getElementById('detail-content');
+    detailDiv.innerHTML = '<div class="card">加载中...</div>';
+    try {
+        const res = await fetch('https://rgekpmuujozhkkctpdup.supabase.co/rest/v1/posts?id=eq.' + id, {
+            headers: { 'apikey': 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr' }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (!Array.isArray(data) || !data.length) { detailDiv.innerHTML = '<div class="card">帖子不存在</div>'; return; }
+        const p = data[0];
+        const time = p.created_at ? new Date(p.created_at).toLocaleString('zh-CN') : '';
+        detailDiv.innerHTML = `<h2>${p.title||'(无标题)'}</h2><div class="meta">${p.author||'未知'} · ${time}</div><p style="margin:12px 0;line-height:1.7;">${p.content||''}</p>`;
+        loadComments(id);
+    } catch (e) { detailDiv.innerHTML = '<div class="card">加载失败：' + e.message + '</div>'; }
+}// ===== 回复列表 =====
+async function loadComments(postId) {
+    const div = document.getElementById('comments-list');
+    div.innerHTML = '<p>加载中...</p>';
+    try {
+        const res = await fetch('https://rgekpmuujozhkkctpdup.supabase.co/rest/v1/comments?post_id=eq.' + postId + '&order=created_at.asc', {
+            headers: { 'apikey': 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr' }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (!Array.isArray(data) || !data.length) { div.innerHTML = '<p>暂无回复</p>'; return; }
+        div.innerHTML = data.map(c => {
+            return `<div class="comment-item"><span class="author">${c.author||'匿名'}</span>：${c.content||''}</div>`;
+        }).join('');
+    } catch (e) { div.innerHTML = '<p>加载失败：' + e.message + '</p>'; }
+}
+
+// ===== 发表回复 =====
+async function addComment() {
+    const content = document.getElementById('comment-content').value.trim();
+    if (!content || !currentPostId) return;
+    try {
+        const res = await fetch('https://rgekpmuujozhkkctpdup.supabase.co/rest/v1/comments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr',
+                'Prefer': 'return=minimal'
+            },
+            body: JSON.stringify({
+                post_id: currentPostId,
+                content: content,
+                author: nickname
+            })
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        document.getElementById('comment-content').value = '';
+        loadComments(currentPostId);
+    } catch (e) { alert('回复失败：' + e.message); }
 }    // ===== 初始化 =====
     showTab('home');
 </script>
