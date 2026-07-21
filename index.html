@@ -52,6 +52,7 @@
             <a href="#" id="nav-home" class="active">首页（软件）</a>
             <a href="#" id="nav-community">社区</a>
             <a href="./tools.html">工具箱</a>
+            <a href="#" onclick="setNickname(); return false;">设置昵称</a>
             <a href="./chat.html">聊天室</a>
         </div>
     </div><div class="container" id="app">
@@ -104,11 +105,11 @@
     const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
 
     // 游客昵称
-    let nickname = localStorage.getItem('nickname');
-    if (!nickname) {
-        nickname = '游客' + Math.floor(Math.random() * 9000 + 1000);
-        localStorage.setItem('nickname', nickname);
-    }
+    let nickname = localStorage.getItem('custom_nickname');
+if (!nickname) {
+    nickname = '游客' + Math.floor(Math.random() * 9000 + 1000);
+    localStorage.setItem('custom_nickname', nickname);
+}
 
     let currentPostId = null;
 
@@ -147,8 +148,17 @@
     document.getElementById('new-post-form').classList.remove('hidden');
     // 平滑滚动到发帖表单
     document.getElementById('new-post-form').scrollIntoView({ behavior: 'smooth' });
-    }function hideNewPost() { document.getElementById('new-post-form').classList.add('hidden'); }// ===== 软件库（GitHub Issues） =====
-async function loadSoftwares() {
+    }
+    function hideNewPost() { document.getElementById('new-post-form').classList.add('hidden'); }// ===== 软件库（GitHub Issues） =====
+   function setNickname() {
+    const newName = prompt('请输入你的昵称：', nickname);
+    if (newName && newName.trim()) {
+        nickname = newName.trim();
+        localStorage.setItem('custom_nickname', nickname);
+        alert('昵称已设置为：' + nickname);
+    }
+   }
+        async function loadSoftwares() {
     const div = document.getElementById('software-list');
     if (!div) return;
     div.innerHTML = '<div class="card"><h3>软件加载中...</h3></div>';
