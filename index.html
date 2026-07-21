@@ -131,25 +131,16 @@
         }
     });
 
-    // 加载软件列表（带错误提示）
+    // 直接跳过软件加载，只显示社区帖子
 async function loadSoftware() {
-    const div = document.getElementById('software-list');
-    div.innerHTML = '<div class="card"><h3>加载中...</h3></div>';
-    try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/softwares?select=*&order=created_at.desc&limit=5', {
-            headers: { 'apikey': SUPABASE_KEY }
-        });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-            div.innerHTML = data.map(s => `<div class="card"><h3>${s.title}</h3><div class="desc">${s.description || ''}</div></div>`).join('');
-        } else {
-            div.innerHTML = '<div class="card"><h3>暂无软件（数据库可能没有 softwares 表）</h3></div>';
-        }
-    } catch (e) {
-        div.innerHTML = `<div class="card"><h3>软件加载失败：${e.message}</h3><p>如果数据库没有 softwares 表，这是正常的。</p></div>`;
-    }
-        }// ===== 社区功能 =====
+    document.getElementById('software-list').innerHTML = `
+        <div class="card" style="text-align:center;color:var(--sub);">
+            软件功能暂未启用，请访问社区或工具箱
+        </div>
+    `;
+}
+
+// 加载最新帖子（带兜底，绝不卡死）
 async function loadRecentPosts() {
     const div = document.getElementById('recent-posts');
     div.innerHTML = '<div class="card"><h3>加载中...</h3></div>';
@@ -157,7 +148,11 @@ async function loadRecentPosts() {
         const res = await fetch(SUPABASE_URL + '/rest/v1/posts?select=*&order=created_at.desc&limit=5', {
             headers: { 'apikey': SUPABASE_KEY }
         });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
+        if (!res.ok) {
+            // 如果请求失败，直接显示提示，不卡死
+            div.innerHTML = `<div class="card"><h3>帖子加载失败（HTTP ${res.status}）</h3><p>请检查数据库连接</p></div>`;
+            return;
+        }
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
             div.innerHTML = data.map(p => `
@@ -171,10 +166,9 @@ async function loadRecentPosts() {
             div.innerHTML = '<div class="card"><h3>暂无帖子，去社区发第一个吧！</h3></div>';
         }
     } catch (e) {
-        div.innerHTML = `<div class="card"><h3>加载失败：${e.message}</h3></div>`;
+        div.innerHTML = `<div class="card"><h3>网络错误：${e.message}</h3></div>`;
     }
-}
-
+        }
 // 加载帖子列表（带错误提示）
 async function loadPosts() {
     const div = document.getElementById('post-list');
