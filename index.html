@@ -225,7 +225,8 @@
             <a href="#" id="nav-home" class="active">首页</a>
             <a href="#" id="nav-community">社区</a>
             <a href="./tools.html"><i class="fas fa-tools"></i> 工具箱</a>
-            </div>
+            <a href="#" onclick="setNickname(); return false;">设置昵称</a>
+        </div>
     </div><div class="container" id="app">
     <!-- 首页（软件列表） -->
     <div id="page-home">
@@ -320,7 +321,19 @@
         document.getElementById('new-post-form').scrollIntoView({ behavior: 'smooth' });
     }
     function hideNewPost() { document.getElementById('new-post-form').classList.add('hidden'); }
-
+// 设置昵称
+function setNickname() {
+    const newName = prompt('请输入你的昵称：', nickname);
+    if (newName && newName.trim()) {
+        nickname = newName.trim();
+        localStorage.setItem('custom_nickname', nickname);
+        alert('昵称已设置为：' + nickname);
+        // 如果当前在社区页面，刷新帖子显示新昵称
+        if (!document.getElementById('page-community').classList.contains('hidden')) {
+            loadPosts();
+        }
+    }
+}
     async function verifyAdmin() {
         const pwd = prompt('管理员密码：');
         if (!pwd) return;
