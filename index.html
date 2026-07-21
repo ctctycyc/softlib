@@ -241,19 +241,32 @@ async function createPost() {
         }
 
         async function addComment() {
-            const content = document.getElementById('comment-content').value.trim();
-            if (!content || !currentPostId) return;
-            const res = await fetch(SUPABASE_URL + '/rest/v1/comments', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-                body: JSON.stringify({ post_id: currentPostId, content, author: nickname })
-            });
-            if (res.ok) {
-                document.getElementById('comment-content').value = '';
-                loadComments(currentPostId);
-            } else {
-                alert('回复失败');
-            }
+        async function addComment() {
+    const content = document.getElementById('comment-content').value.trim();
+    if (!content || !currentPostId) return;
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/comments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_KEY
+            },
+            body: JSON.stringify({
+                post_id: currentPostId,
+                content: content,
+                author: nickname
+            })
+        });
+        if (res.ok) {
+            document.getElementById('comment-content').value = '';
+            loadComments(currentPostId);
+        } else {
+            const errText = await res.text();
+            alert('回复失败：' + errText);
+        }
+    } catch (e) {
+        alert('网络错误，请检查连接');
+    }
         }
 
         function backToCommunity() {
