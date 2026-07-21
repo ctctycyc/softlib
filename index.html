@@ -20,7 +20,6 @@
             flex-wrap: wrap; position: sticky; top: 0; z-index: 100;
         }
         .top-nav a { color: var(--nav-text); text-decoration: none; font-size: 13px; }
-        .top-nav a:hover { opacity: 0.8; }
         .logo { font-size: 18px; font-weight: 700; margin-right: auto; }
         .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
         .nav-links a { padding: 4px 8px; border-radius: 20px; transition: 0.2s; font-size: 13px; }
@@ -43,37 +42,27 @@
         .hidden { display: none !important; }
         .comment { padding: 10px; border-bottom: 1px solid var(--border); font-size: 14px; }
         .comment .author { font-weight: 600; color: var(--accent); }
+        .error-card { background: #ffeaea; border-left: 4px solid #e74c3c; }
     </style>
 </head>
 <body>
     <div class="top-nav">
         <div class="logo">软件库</div>
-        <div class="nav-links" id="navBar">
-            <a href="#" data-page="home" class="active">首页</a>
-            <a href="#" data-page="community">社区</a>
+        <div class="nav-links">
+            <a href="#" id="nav-home" class="active">社区首页</a>
             <a href="./tools.html">工具箱</a>
             <a href="./chat.html">聊天室</a>
         </div>
     </div><div class="container" id="app">
-    <!-- 首页（软件列表 + 最新帖子） -->
+    <!-- 社区首页（帖子列表） -->
     <div id="page-home">
-        <h2 style="margin-bottom:12px;">软件列表</h2>
-        <div id="software-list">
-            <div class="card"><h3>加载中...</h3></div>
-        </div>
-        <h2 style="margin:20px 0 12px;">社区最新帖子</h2>
-        <div id="recent-posts">
-            <div class="card"><h3>加载中...</h3></div>
-        </div>
-    </div>
-
-    <!-- 社区页面 -->
-    <div id="page-community" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
             <h2>社区</h2>
             <button class="btn" onclick="showNewPost()">发帖</button>
         </div>
-        <div id="post-list"></div>
+        <div id="post-list">
+            <div class="card"><h3>加载中...</h3></div>
+        </div>
         <div id="new-post-form" class="hidden">
             <h3>发新帖</h3>
             <div class="input-group">
@@ -88,9 +77,9 @@
         </div>
     </div>
 
-    <!-- 帖子详情 -->
+    <!-- 帖子详情页 -->
     <div id="page-detail" class="hidden">
-        <button class="btn" style="background:#999;margin-bottom:12px;" onclick="backToCommunity()">← 返回社区</button>
+        <button class="btn" style="background:#999;margin-bottom:12px;" onclick="backToHome()">← 返回首页</button>
         <div id="detail-content"></div>
         <h3 style="margin-top:16px;">回复</h3>
         <div id="comments-list"></div>
@@ -100,76 +89,36 @@
         <button class="btn" onclick="addComment()">发表回复</button>
     </div>
     </div><script>
+    // Supabase 配置（必须保留）
     const SUPABASE_URL = 'https://rgekpmuujozhkkctpdup.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_uMbII7ITUT5lddC8ZlAZGQ_sRVTFLBr';
 
-    // 生成游客昵称
+    // 游客昵称
     let nickname = localStorage.getItem('nickname');
     if (!nickname) {
         nickname = '游客' + Math.floor(Math.random() * 9000 + 1000);
         localStorage.setItem('nickname', nickname);
     }
 
-    // 页面切换
-    const pages = {
-        home: document.getElementById('page-home'),
-        community: document.getElementById('page-community'),
-        detail: document.getElementById('page-detail')
-    };
     let currentPostId = null;
 
-    document.getElementById('navBar').addEventListener('click', e => {
-        if (e.target.tagName === 'A' && e.target.dataset.page) {
-            e.preventDefault();
-            document.querySelectorAll('#navBar a').forEach(a => a.classList.remove('active'));
-            e.target.classList.add('active');
-            const page = e.target.dataset.page;
-            Object.keys(pages).forEach(k => pages[k].classList.add('hidden'));
-            pages[page].classList.remove('hidden');
-            if (page === 'home') { loadSoftware(); loadRecentPosts(); }
-            if (page === 'community') loadPosts();
-        }
-    });
-
-    // 直接跳过软件加载，只显示社区帖子
-async function loadSoftware() {
-    document.getElementById('software-list').innerHTML = `
-        <div class="card" style="text-align:center;color:var(--sub);">
-            软件功能暂未启用，请访问社区或工具箱
-        </div>
-    `;
-}
-
-// 加载最新帖子（带兜底，绝不卡死）
-async function loadRecentPosts() {
-    const div = document.getElementById('recent-posts');
-    div.innerHTML = '<div class="card"><h3>加载中...</h3></div>';
-    try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/posts?select=*&order=created_at.desc&limit=5', {
-            headers: { 'apikey': SUPABASE_KEY }
-        });
-        if (!res.ok) {
-            // 如果请求失败，直接显示提示，不卡死
-            div.innerHTML = `<div class="card"><h3>帖子加载失败（HTTP ${res.status}）</h3><p>请检查数据库连接</p></div>`;
-            return;
-        }
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-            div.innerHTML = data.map(p => `
-                <div class="card" onclick="openPost(${p.id})">
-                    <h3>${p.title}</h3>
-                    <div class="desc">${(p.content || '').substring(0, 80)}...</div>
-                    <div class="meta">${p.author || '未知'} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div>
-                </div>
-            `).join('');
-        } else {
-            div.innerHTML = '<div class="card"><h3>暂无帖子，去社区发第一个吧！</h3></div>';
-        }
-    } catch (e) {
-        div.innerHTML = `<div class="card"><h3>网络错误：${e.message}</h3></div>`;
+    // 页面切换
+    function showHome() {
+        document.getElementById('page-home').classList.remove('hidden');
+        document.getElementById('page-detail').classList.add('hidden');
+        loadPosts();
     }
-        }
-// 加载帖子列表（带错误提示）
+    function showDetail() {
+        document.getElementById('page-home').classList.add('hidden');
+        document.getElementById('page-detail').classList.remove('hidden');
+    }
+    function backToHome() {
+        showHome();
+    }
+
+    // 发帖表单
+    function showNewPost() { document.getElementById('new-post-form').classList.remove('hidden'); }
+    function hideNewPost() { document.getElementById('new-post-form').classList.add('hidden'); }// 加载帖子列表（绝对可靠，有错误就显示）
 async function loadPosts() {
     const div = document.getElementById('post-list');
     div.innerHTML = '<div class="card"><h3>加载中...</h3></div>';
@@ -177,12 +126,15 @@ async function loadPosts() {
         const res = await fetch(SUPABASE_URL + '/rest/v1/posts?select=*&order=created_at.desc&limit=50', {
             headers: { 'apikey': SUPABASE_KEY }
         });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
+        if (!res.ok) {
+            div.innerHTML = `<div class="card error-card"><h3>加载失败（HTTP ${res.status}）</h3><p>请检查 Supabase 连接</p></div>`;
+            return;
+        }
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
             div.innerHTML = data.map(p => `
                 <div class="card" onclick="openPost(${p.id})">
-                    <h3>${p.title}</h3>
+                    <h3>${p.title || '(无标题)'}</h3>
                     <div class="desc">${(p.content || '').substring(0, 100)}...</div>
                     <div class="meta">${p.author || '未知'} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div>
                 </div>
@@ -191,108 +143,115 @@ async function loadPosts() {
             div.innerHTML = '<div class="card"><h3>暂无帖子，发第一个吧！</h3></div>';
         }
     } catch (e) {
-        div.innerHTML = `<div class="card"><h3>加载失败：${e.message}</h3><p>请检查 Supabase 连接</p></div>`;
+        div.innerHTML = `<div class="card error-card"><h3>网络错误：${e.message}</h3><p>请刷新重试</p></div>`;
     }
 }
 
-
-
-function showNewPost() { document.getElementById('new-post-form').classList.remove('hidden'); }
-function hideNewPost() { document.getElementById('new-post-form').classList.add('hidden'); }
-
-async function createPost() {
-    const title = document.getElementById('post-title').value.trim();
-    const content = document.getElementById('post-content').value.trim();
-    const err = document.getElementById('post-error');
-    if (!title || !content) { err.textContent = '标题和内容不能为空'; return; }
-    const res = await fetch(SUPABASE_URL + '/rest/v1/posts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
-        body: JSON.stringify({ title, content, author: nickname })
-    });
-    if (res.ok) {
-        document.getElementById('post-title').value = '';
-        document.getElementById('post-content').value = '';
-        hideNewPost();
-        loadPosts();
-    } else {
-        err.textContent = '发布失败，请重试';
-    }
-}        async function openPost(id) {
-            currentPostId = id;
-            Object.keys(pages).forEach(k => pages[k].classList.add('hidden'));
-            pages.detail.classList.remove('hidden');
-            const res = await fetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${id}&select=*`, {
-                headers: { 'apikey': SUPABASE_KEY }
-            });
-            const data = await res.json();
-            if (Array.isArray(data) && data.length > 0) {
-                const p = data[0];
-                document.getElementById('detail-content').innerHTML = `
-                    <h2>${p.title}</h2>
-                    <div class="meta">${p.author} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div>
-                    <p style="margin-top:12px;line-height:1.6;">${p.content}</p>
-                `;
-            }
-            loadComments(id);
-        }
-
-        async function loadComments(postId) {
-            const res = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${postId}&select=*&order=created_at.asc`, {
-                headers: { 'apikey': SUPABASE_KEY }
-            });
-            const data = await res.json();
-            const div = document.getElementById('comments-list');
-            if (Array.isArray(data) && data.length > 0) {
-                div.innerHTML = data.map(c => `
-                    <div class="comment">
-                        <span class="author">${c.author}</span>：${c.content}
-                        <div class="meta">${new Date(c.created_at).toLocaleString('zh-CN')}</div>
-                    </div>
-                `).join('');
-            } else {
-                div.innerHTML = '<p style="color:#999;">暂无回复</p>';
-            }
-        }
-
-        async function addComment() {
-        async function addComment() {
-    const content = document.getElementById('comment-content').value.trim();
-    if (!content || !currentPostId) return;
+// 打开帖子详情
+async function openPost(id) {
+    currentPostId = id;
+    showDetail();
     try {
-        const res = await fetch(SUPABASE_URL + '/rest/v1/comments', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'apikey': SUPABASE_KEY
-            },
-            body: JSON.stringify({
-                post_id: currentPostId,
-                content: content,
-                author: nickname
-            })
+        const res = await fetch(SUPABASE_URL + `/rest/v1/posts?id=eq.${id}&select=*`, {
+            headers: { 'apikey': SUPABASE_KEY }
         });
-        if (res.ok) {
-            document.getElementById('comment-content').value = '';
-            loadComments(currentPostId);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+            const p = data[0];
+            document.getElementById('detail-content').innerHTML = `
+                <h2>${p.title || '(无标题)'}</h2>
+                <div class="meta">${p.author || '未知'} · ${new Date(p.created_at).toLocaleString('zh-CN')}</div>
+                <p style="margin-top:12px;line-height:1.6;">${p.content || ''}</p>
+            `;
+        }
+        loadComments(id);
+    } catch (e) {
+        document.getElementById('detail-content').innerHTML = `<div class="card error-card"><h3>加载帖子失败：${e.message}</h3></div>`;
+    }
+}
+
+// 加载评论
+async function loadComments(postId) {
+    const div = document.getElementById('comments-list');
+    div.innerHTML = '<p style="color:#999;">加载回复中...</p>';
+    try {
+        const res = await fetch(SUPABASE_URL + `/rest/v1/comments?post_id=eq.${postId}&select=*&order=created_at.asc`, {
+            headers: { 'apikey': SUPABASE_KEY }
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+            div.innerHTML = data.map(c => `
+                <div class="comment">
+                    <span class="author">${c.author || '匿名'}</span>：${c.content || ''}
+                    <div class="meta">${new Date(c.created_at).toLocaleString('zh-CN')}</div>
+                </div>
+            `).join('');
         } else {
-            const errText = await res.text();
-            alert('回复失败：' + errText);
+            div.innerHTML = '<p style="color:#999;">暂无回复</p>';
         }
     } catch (e) {
-        alert('网络错误，请检查连接');
+        div.innerHTML = `<div class="card error-card"><p>加载回复失败：${e.message}</p></div>`;
     }
+}        // 发帖
+        async function createPost() {
+            const title = document.getElementById('post-title').value.trim();
+            const content = document.getElementById('post-content').value.trim();
+            const err = document.getElementById('post-error');
+            if (!title || !content) { err.textContent = '标题和内容不能为空'; return; }
+            try {
+                const res = await fetch(SUPABASE_URL + '/rest/v1/posts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+                    body: JSON.stringify({ title, content, author: nickname })
+                });
+                if (res.ok) {
+                    document.getElementById('post-title').value = '';
+                    document.getElementById('post-content').value = '';
+                    hideNewPost();
+                    loadPosts();
+                } else {
+                    const errText = await res.text();
+                    err.textContent = '发布失败：' + errText;
+                }
+            } catch (e) {
+                err.textContent = '网络错误：' + e.message;
+            }
         }
 
-        function backToCommunity() {
-            Object.keys(pages).forEach(k => pages[k].classList.add('hidden'));
-            pages.community.classList.remove('hidden');
-            loadPosts();
+        // 回复
+        async function addComment() {
+            const content = document.getElementById('comment-content').value.trim();
+            if (!content || !currentPostId) return;
+            try {
+                const res = await fetch(SUPABASE_URL + '/rest/v1/comments', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+                    body: JSON.stringify({ post_id: currentPostId, content, author: nickname })
+                });
+                if (res.ok) {
+                    document.getElementById('comment-content').value = '';
+                    loadComments(currentPostId);
+                } else {
+                    const errText = await res.text();
+                    alert('回复失败：' + errText);
+                }
+            } catch (e) {
+                alert('网络错误：' + e.message);
+            }
         }
 
-        // 初始加载
-        loadSoftware();
-        loadRecentPosts();
+        // 导航激活样式（简单处理）
+        document.getElementById('nav-home').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+            this.classList.add('active');
+            showHome();
+        });
+
+        // 启动
+        loadPosts();
     </script>
 </body>
 </html>
