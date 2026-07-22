@@ -488,7 +488,7 @@
             data.forEach(u => h += `<div class="card" style="display:flex;justify-content:space-between;"><div><strong>${u.nickname||''}</strong><br><small>原因：${u.reason||''}</small></div><button class="btn btn-success btn-sm" onclick="unbanUser(${u.id})">解禁</button></div>`);
             openDrawer(h);
         }
- async function showReportList() {
+async function showReportList() {
     openDrawer('<h3>举报列表</h3><div id="report-loading">加载中...</div>');
     try {
         const res = await fetch(SUPABASE_URL + '/rest/v1/reports?select=*&order=created_at.desc&limit=50', {
@@ -543,7 +543,7 @@
     } catch (e) {
         document.getElementById('report-loading').innerHTML = '请求异常：' + e.message;
     }
- }
+}
         async function deleteReport(id) { if (!isAdmin) return; await fetch(SUPABASE_URL+'/rest/v1/reports?id=eq.'+id,{method:'DELETE',headers:{'apikey':SUPABASE_KEY}}); showToast('已忽略该举报'); showReportList(); }
 
         function openDrawer(html) { document.getElementById('drawer-content').innerHTML = html; document.getElementById('drawer-overlay').classList.remove('hidden'); document.getElementById('drawer-panel').classList.remove('hidden'); }
