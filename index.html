@@ -433,13 +433,35 @@
         async function deleteComment(id) { if (!isAdmin) return; if (!confirm('删除回复？')) return; await fetch(SUPABASE_URL+'/rest/v1/comments?id=eq.'+id,{method:'DELETE',headers:{'apikey':SUPABASE_KEY}}); loadComments(currentPostId); }
 
         async function reportItem(type, id) {
-            if (await isBannedNickname(nickname)) { alert('您已被封禁，无法举报'); return; }
-            const reason = prompt('举报原因（选填）：');
-            if (reason === null) return;     try {
-                await fetch(SUPABASE_URL + '/rest/v1/reports', { method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Prefer':'return=minimal'}, body:JSON.stringify({target_type:type, target_id:id, reporter:nickname, reason:reason||'未填写原因'}) });
-                showToast('举报已提交');
-            } catch (e) { alert('举报失败：'+e.message); }
+    if (await isBannedNickname(nickname)) { alert('您已被封禁，无法举报'); return; }
+    const reason = prompt('举报原因（选填）：');
+    if (reason === null) return;
+    try {
+        const body = JSON.stringify({
+            target_type: type,
+            target_id: id,
+            reporter: nickname,
+            reason: reason || '未填写原因'
+        });
+        const res = await fetch(SUPABASE_URL + '/rest/v1/reports', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_KEY,
+                'Prefer': 'return=representation'
+            },
+            body: body
+        });
+        if (res.ok) {
+            const saved = await res.json();
+            showToast('举报已提交（ID：' + saved[0].id + '）');
+        } else {
+            alert('举报失败，状态码：' + res.status + '\n请确认表 reports 存在且 RLS 已关闭');
         }
+    } catch (e) {
+        alert('举报请求错误：' + e.message);
+    }
+    }
 
         async function isBannedNickname(name) {
             try {
@@ -467,16 +489,34 @@
             openDrawer(h);
         }
  async function showReportList() {
-            openDrawer('<h3>举报列表</h3><div id="report-loading">加载中...</div>');
-            try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/reports?select=*&order=created_at.desc&limit=50', { headers:{'apikey':SUPABASE_KEY} });
-                const data = await res.json();
-                if (!Array.isArray(data) || !data.length) { document.getElementById('report-loading').innerHTML = '暂无举报'; return; }
-                let html = '';
-                data.forEach(r => { html += `<div class="card" style="font-size:0.85rem;"><div><strong>${r.reporter}</strong> 举报了 <strong>${r.target_type}</strong> #${r.target_id}</div><div>原因：${r.reason||'无'}</div><div class="meta">${new Date(r.created_at).toLocaleString('zh-CN')}</div><button class="btn btn-sm btn-danger" onclick="deleteReport(${r.id})">忽略</button></div>`; });     document.getElementById('report-loading').innerHTML = html;
-            } catch (e) { document.getElementById('report-loading').innerHTML = '加载失败'; }
+    openDrawer('<h3>举报列表</h3><div id="report-loading">加载中...</div>');
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/reports?select=*&order=created_at.desc&limit=50', {
+            headers: { 'apikey': SUPABASE_KEY }
+        });
+        if (!res.ok) {
+            document.getElementById('report-loading').innerHTML = '加载失败，状态码：' + res.status;
+            return;
         }
-
+        const data = await res.json();
+        if (!Array.isArray(data) || !data.length) {
+            document.getElementById('report-loading').innerHTML = '暂无举报（已检查数据库，确实为空）';
+            return;
+        }
+        let html = '';
+        data.forEach(r => {
+            html += `<div class="card" style="font-size:0.85rem;">
+                <div><strong>${r.reporter}</strong> 举报了 <strong>${r.target_type}</strong> #${r.target_id}</div>
+                <div>原因：${r.reason||'无'}</div>
+                <div class="meta">${new Date(r.created_at).toLocaleString('zh-CN')}</div>
+                <button class="btn btn-sm btn-danger" onclick="deleteReport(${r.id})">忽略</button>
+            </div>`;
+        });
+        document.getElementById('report-loading').innerHTML = html;
+    } catch (e) {
+        document.getElementById('report-loading').innerHTML = '请求异常：' + e.message;
+    }
+ }
         async function deleteReport(id) { if (!isAdmin) return; await fetch(SUPABASE_URL+'/rest/v1/reports?id=eq.'+id,{method:'DELETE',headers:{'apikey':SUPABASE_KEY}}); showToast('已忽略该举报'); showReportList(); }
 
         function openDrawer(html) { document.getElementById('drawer-content').innerHTML = html; document.getElementById('drawer-overlay').classList.remove('hidden'); document.getElementById('drawer-panel').classList.remove('hidden'); }
