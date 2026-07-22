@@ -268,7 +268,8 @@
 
     function backToCategories() { document.getElementById('category-list').classList.remove('hidden'); document.getElementById('post-list-section').classList.add('hidden'); document.getElementById('page-detail').classList.add('hidden'); }
     function backToPosts() { document.getElementById('page-detail').classList.add('hidden'); document.getElementById('post-list-section').classList.remove('hidden'); }
-    function showNewPost() { document.getElementById('new-post-form').classList.remove('hidden'); }
+    function showNewPost() { document.getElementById('new-post-form').classList.remove('hidden'); 
+                            document.getElementById('new-post-form').scrollIntoView({ behavior: 'smooth', block: 'start' });}
     function hideNewPost() { document.getElementById('new-post-form').classList.add('hidden'); }
 
     let titleClicks = 0, clickTimer = null;
