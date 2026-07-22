@@ -500,21 +500,45 @@
         }
         const data = await res.json();
         if (!Array.isArray(data) || !data.length) {
-            document.getElementById('report-loading').innerHTML = '暂无举报（已检查数据库，确实为空）';
+            document.getElementById('report-loading').innerHTML = '暂无举报';
             return;
         }
         let html = '';
         data.forEach(r => {
             html += `<div class="card" style="font-size:0.85rem;">
-                <div><strong>${r.reporter}</strong> 举报了 <strong>${r.target_type}</strong> #${r.target_id}</div>
+                <div><strong>${r.reporter}</strong> 举报了 <strong>${r.target_type === 'post' ? '帖子' : '回复'}</strong> #${r.target_id}</div>
                 <div>原因：${r.reason||'无'}</div>
                 <div class="meta">${new Date(r.created_at).toLocaleString('zh-CN')}</div>
-                <button class="btn btn-sm btn-danger" onclick="deleteReport(${r.id})">忽略</button>
+                <div style="margin-top:6px;display:flex;gap:6px;">
+                    <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); goToReportedItem('${r.target_type}', ${r.target_id})">🔍 查看</button>
+                    <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteReport(${r.id})">忽略</button>
+                </div>
             </div>`;
         });
         document.getElementById('report-loading').innerHTML = html;
     } catch (e) {
         document.getElementById('report-loading').innerHTML = '请求异常：' + e.message;
+    }
+    }async function goToReportedItem(type, id) {
+    closeDrawer(); // 关闭举报列表抽屉
+    if (type === 'post') {
+        // 直接打开帖子详情
+        openPost(id);
+    } else if (type === 'comment') {
+        // 先查出这条评论属于哪个帖子，再跳转
+        try {
+            const res = await fetch(SUPABASE_URL + '/rest/v1/comments?id=eq.' + id + '&select=post_id', {
+                headers: { 'apikey': SUPABASE_KEY }
+            });
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) {
+                openPost(data[0].post_id);
+            } else {
+                alert('找不到该回复所属的帖子，可能已被删除');
+            }
+        } catch (e) {
+            alert('跳转失败：' + e.message);
+        }
     }
  }
         async function deleteReport(id) { if (!isAdmin) return; await fetch(SUPABASE_URL+'/rest/v1/reports?id=eq.'+id,{method:'DELETE',headers:{'apikey':SUPABASE_KEY}}); showToast('已忽略该举报'); showReportList(); }
