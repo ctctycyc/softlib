@@ -229,6 +229,7 @@
                 <div class="input-group"><input id="admin-category-old" placeholder="旧板块名"><input id="admin-category-new" placeholder="新板块名"><button class="btn btn-sm" onclick="adminRenameCategory()">改板块名</button></div>
                 <button class="btn btn-danger btn-sm" onclick="showBannedList()">封禁名单</button>
                 <button class="btn btn-danger btn-sm" onclick="showReportList()" style="margin-left:4px;">举报列表</button>
+                <button class="btn btn-sm" onclick="debugBannedList()" style="background:#555;color:#fff;">🔍调试封禁</button>
             </div>
         </div>
     </div>
@@ -529,6 +530,17 @@ async function showReportList() {
         document.getElementById('report-loading').innerHTML = '请求异常：' + e.message;
     }
 }
+    async function debugBannedList() {
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/banned_users?select=*', {
+            headers: { 'apikey': SUPABASE_KEY }
+        });
+        const text = await res.text();
+        alert('状态码：' + res.status + '\n完整响应：\n' + text.substring(0, 500));
+    } catch (e) {
+        alert('请求失败：' + e.message);
+    }
+    }
     async function jumpToReport(type, id) {
     // 确保论坛页面结构正确
     document.getElementById('category-list').classList.add('hidden');
