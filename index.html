@@ -505,35 +505,45 @@ async function showReportList() {
         }
         let html = '';
         data.forEach(r => {
-            // 根据举报类型构造跳转代码
-            if (r.target_type === 'post') {
-                html += `<div class="card" style="font-size:0.85rem;">
-                    <div><strong>${r.reporter}</strong> 举报了 <strong>帖子</strong> #${r.target_id}</div>
-                    <div>原因：${r.reason||'无'}</div>
-                    <div class="meta">${new Date(r.created_at).toLocaleString('zh-CN')}</div>
-                    <div style="margin-top:6px;display:flex;gap:6px;">
-                        <button class="btn btn-sm btn-outline" onclick="closeDrawer();setTimeout(function(){ openPost(${r.target_id}); }, 200);">查看</button>
-                        <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteReport(${r.id})">忽略</button>
-                    </div>
-                </div>`;
-            } else {
-                // 举报的是评论，需要先查帖子ID再跳转
-                html += `<div class="card" style="font-size:0.85rem;">
-                    <div><strong>${r.reporter}</strong> 举报了 <strong>回复</strong> #${r.target_id}</div>
-                    <div>原因：${r.reason||'无'}</div>
-                    <div class="meta">${new Date(r.created_at).toLocaleString('zh-CN')}</div>
-                    <div style="margin-top:6px;display:flex;gap:6px;">
-                        <button class="btn btn-sm btn-outline" onclick="closeDrawer();setTimeout(async function(){ try{ const resp = await fetch('${SUPABASE_URL}/rest/v1/comments?id=eq.${r.target_id}&select=post_id', {headers:{'apikey':'${SUPABASE_KEY}'}}); const d = await resp.json(); if(d.length) openPost(d[0].post_id); else alert('该回复已被删除'); }catch(e){ alert('跳转失败'); } }, 200);">🔍 查看</button>
-                        <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteReport(${r.id})">忽略</button>
-                    </div>
-                </div>`;
-            }
+            html += `<div class="card" style="font-size:0.85rem;">
+                <div><strong>${r.reporter}</strong> 举报了 <strong>${r.target_type === 'post' ? '帖子' : '回复'}</strong> #${r.target_id}</div>
+                <div>原因：${r.reason||'无'}</div>
+                <div class="meta">${new Date(r.created_at).toLocaleString('zh-CN')}</div>
+                <div style="margin-top:6px;display:flex;gap:6px;">
+                    <button class="btn btn-sm btn-outline" onclick="closeDrawer();showTab('forum');setTimeout(function(){ jumpToReport('${r.target_type}', ${r.target_id}); }, 300);">查看</button>
+                    <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteReport(${r.id})">忽略</button>
+                </div>
+            </div>`;
         });
         document.getElementById('report-loading').innerHTML = html;
     } catch (e) {
         document.getElementById('report-loading').innerHTML = '请求异常：' + e.message;
     }
 }
+    async function jumpToReport(type, id) {
+    // 确保论坛页面结构正确
+    document.getElementById('category-list').classList.add('hidden');
+    document.getElementById('post-list-section').classList.add('hidden');
+    document.getElementById('page-detail').classList.remove('hidden');
+    
+    if (type === 'post') {
+        openPost(id);
+    } else if (type === 'comment') {
+        try {
+            const resp = await fetch(SUPABASE_URL + '/rest/v1/comments?id=eq.' + id + '&select=post_id', {
+                headers: { 'apikey': SUPABASE_KEY }
+            });
+            const data = await resp.json();
+            if (Array.isArray(data) && data.length > 0) {
+                openPost(data[0].post_id);
+            } else {
+                alert('该回复已被删除');
+            }
+        } catch (e) {
+            alert('跳转失败：' + e.message);
+        }
+    }
+    }
     async function deleteReport(id) { if (!isAdmin) return; await fetch(SUPABASE_URL+'/rest/v1/reports?id=eq.'+id,{method:'DELETE',headers:{'apikey':SUPABASE_KEY}}); showToast('已忽略该举报'); showReportList(); }
 
         function openDrawer(html) { document.getElementById('drawer-content').innerHTML = html; document.getElementById('drawer-overlay').classList.remove('hidden'); document.getElementById('drawer-panel').classList.remove('hidden'); }
