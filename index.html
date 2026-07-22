@@ -323,7 +323,7 @@
     }
 
     async function showUserPosts(userName) {
-        openDrawer(`<h3>👤 ${userName} 的帖子</h3><div id="user-posts-loading">加载中...</div>`);
+        openDrawer(`<h3>${userName} 的帖子</h3><div id="user-posts-loading">加载中...</div>`);
         try {
             const res = await fetch(SUPABASE_URL + '/rest/v1/posts?author=eq.' + encodeURIComponent(userName) + '&order=created_at.desc&limit=50', { headers: { 'apikey': SUPABASE_KEY } });
             const data = await res.json();
