@@ -510,7 +510,7 @@
                 <div>原因：${r.reason||'无'}</div>
                 <div class="meta">${new Date(r.created_at).toLocaleString('zh-CN')}</div>
                 <div style="margin-top:6px;display:flex;gap:6px;">
-                    <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); goToReportedItem('${r.target_type}', ${r.target_id})">🔍 查看</button>
+                    <button class="btn btn-sm btn-outline" onclick="event.stopPropagation(); goToReportedItem('${r.target_type}', ${r.target_id})">查看</button>
                     <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteReport(${r.id})">忽略</button>
                 </div>
             </div>`;
