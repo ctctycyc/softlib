@@ -471,14 +471,23 @@
             } catch (e) { return false; }
         }
    async function banUser(targetNickname) {
-            if (!isAdmin) return;
-            const reason = prompt('封禁原因：','违规'); if (!reason) return;
-            try {
-                const res = await fetch(SUPABASE_URL + '/rest/v1/banned_users', { method:'POST', headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY}, body:JSON.stringify({nickname:targetNickname, reason}) });
-                if (res.ok) { showToast('已封禁'); backToCategories(); loadPosts(); }
-                else alert('封禁失败');
-            } catch (e) { alert('网络错误'); }
+    if (!isAdmin) return;
+    const reason = prompt('封禁原因：','违规'); if (!reason) return;
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/banned_users', {
+            method:'POST',
+            headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Prefer':'return=representation'},
+            body:JSON.stringify({nickname:targetNickname, reason})
+        });
+        if (res.ok) {
+            const inserted = await res.json();
+            showToast('已封禁，ID：' + inserted[0].id);
+            backToCategories(); loadPosts();
+        } else {
+            alert('封禁失败，状态码：' + res.status);
         }
+    } catch (e) { alert('网络错误：' + e.message); }
+    }
 
         async function unbanUser(id) { if (!isAdmin) return; if (!confirm('解禁？')) return; await fetch(SUPABASE_URL+'/rest/v1/banned_users?id=eq.'+id,{method:'DELETE',headers:{'apikey':SUPABASE_KEY}}); showToast('已解禁'); showBannedList(); }   async function showBannedList() {
             const res = await fetch(SUPABASE_URL + '/rest/v1/banned_users?select=*&order=created_at.desc', { headers:{'apikey':SUPABASE_KEY} });
