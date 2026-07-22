@@ -277,7 +277,11 @@
         document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
         if (tab === 'home') loadSoftwares();
         if (tab === 'forum') loadCategories();
-        if (tab === 'messages') { loadMessages(); document.getElementById('msg-badge')?.classList.add('hidden'); }
+        if (tab === 'messages') {
+    loadMessages();
+    document.getElementById('msg-badge')?.classList.add('hidden');
+    localStorage.setItem('last_read_messages', new Date().toISOString());
+        }
         if (tab === 'profile') renderProfile();
         if (tab !== 'messages') updateMessageBadge();
     }
@@ -496,18 +500,35 @@
         }
 
         function openPostFromMsg(postId) { showTab('forum'); openCategory(null, ''); openPost(postId); }    async function updateMessageBadge() {
-            const badge = document.getElementById('msg-badge');
-            if (!badge) return;
-            try {
-                const resPosts = await fetch(SUPABASE_URL + '/rest/v1/posts?select=id&author=eq.' + encodeURIComponent(nickname), { headers:{'apikey':SUPABASE_KEY} });
-                const myPosts = await resPosts.json();
-                if (!Array.isArray(myPosts) || !myPosts.length) { badge.classList.add('hidden'); return; }
-                const postIds = myPosts.map(p => p.id);  const resReplies = await fetch(SUPABASE_URL + '/rest/v1/comments?select=id&post_id=in.(' + postIds.join(',') + ')&author=neq.' + encodeURIComponent(nickname) + '&limit=1', { headers:{'apikey':SUPABASE_KEY} });
-                const replies = await resReplies.json();
-                if (Array.isArray(replies) && replies.length > 0) badge.classList.remove('hidden');
-                else badge.classList.add('hidden');
-            } catch (e) { badge.classList.add('hidden'); }
+    const badge = document.getElementById('msg-badge');
+    if (!badge) return;
+    try {
+        const resPosts = await fetch(SUPABASE_URL + '/rest/v1/posts?select=id&author=eq.' + encodeURIComponent(nickname), {
+            headers: { 'apikey': SUPABASE_KEY }
+        });
+        const myPosts = await resPosts.json();
+        if (!Array.isArray(myPosts) || !myPosts.length) {
+            badge.classList.add('hidden');
+            return;
         }
+        const postIds = myPosts.map(p => p.id);
+        // 核心改动：查询地址加上时间过滤
+        let url = SUPABASE_URL + '/rest/v1/comments?select=id&post_id=in.(' + postIds.join(',') + ')&author=neq.' + encodeURIComponent(nickname) + '&limit=1';
+        const lastRead = localStorage.getItem('last_read_messages');
+        if (lastRead) {
+            url += '&created_at=gt.' + encodeURIComponent(lastRead);
+        }
+        const resReplies = await fetch(url, { headers: { 'apikey': SUPABASE_KEY } });
+        const replies = await resReplies.json();
+        if (Array.isArray(replies) && replies.length > 0) {
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    } catch (e) {
+        badge.classList.add('hidden');
+    }
+    }
 
         function renderProfile() {
             document.getElementById('profile-nickname').textContent = nickname;
