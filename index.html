@@ -489,7 +489,6 @@
             openDrawer(h);
         }
  async function showReportList() {
- async function showReportList() {
     openDrawer('<h3>举报列表</h3><div id="report-loading">加载中...</div>');
     try {
         const res = await fetch(SUPABASE_URL + '/rest/v1/reports?select=*&order=created_at.desc&limit=50', {
