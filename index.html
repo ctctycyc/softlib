@@ -223,6 +223,14 @@
         <div class="card">
             <p>昵称：<strong id="profile-nickname"></strong></p>
             <p>身份：<span id="profile-badge"></span></p>
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+    <p style="font-size:0.8rem;color:var(--muted);margin-bottom:4px;">自定义头衔（所有人可见）</p>
+    <div class="input-group">
+        <input id="custom-title-input" placeholder="输入头衔（如：软件达人）" maxlength="20">
+        <button class="btn btn-sm" onclick="setUserTitle()">保存头衔</button>
+    </div>
+    <p id="current-title-display" style="font-size:0.78rem;color:var(--accent);margin-top:4px;"></p>
+            </div>
             <div id="admin-panel" class="hidden" style="margin-top:12px;">
                 <h4>管理面板</h4>
                 <div class="input-group"><input id="admin-rename-old" placeholder="旧昵称"><input id="admin-rename-new" placeholder="新昵称"><button class="btn btn-sm" onclick="adminRename()">改昵称</button></div>
@@ -317,10 +325,53 @@
     }
 
     async function getDisplayName(name) {
-        const admins = await getAdminNicknames();
-        const badge = admins.includes(name) ? ' <span class="admin-badge">管理</span>' : '';
-        return `<a href="javascript:void(0)" onclick="showUserPosts('${name}')" style="color:var(--accent);text-decoration:none;font-weight:600;">${name}</a>${badge}`;
+    const admins = await getAdminNicknames();
+    const badge = admins.includes(name) ? ' <span class="admin-badge">管理</span>' : '';
+    const title = await getUserTitle(name);
+    const titleSpan = title ? ` <span style="color:#e8833a;font-size:0.72rem;font-weight:500;background:#fef5ee;padding:1px 6px;border-radius:4px;">${title}</span>` : '';
+    return `<a href="javascript:void(0)" onclick="showUserPosts('${name}')" style="color:var(--accent);text-decoration:none;font-weight:600;">${name}</a>${badge}${titleSpan}`;
     }
+    // 获取用户头衔缓存
+const titleCache = {};
+async function getUserTitle(name) {
+    if (titleCache[name] !== undefined) return titleCache[name];
+    try {
+        const res = await fetch(SUPABASE_URL + '/rest/v1/user_titles?nickname=eq.' + encodeURIComponent(name) + '&select=title', {
+            headers: { 'apikey': SUPABASE_KEY }
+        });
+        const data = await res.json();
+        const title = (Array.isArray(data) && data.length > 0) ? data[0].title : '';
+        titleCache[name] = title;
+        return title;
+    } catch (e) { return ''; }
+}
+
+// 设置自己的头衔
+async function setUserTitle() {
+    const title = document.getElementById('custom-title-input').value.trim();
+    if (!title) { alert('头衔不能为空'); return; }
+    if (title.length > 20) { alert('头衔最多20个字'); return; }
+    try {
+        await fetch(SUPABASE_URL + '/rest/v1/user_titles', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'resolution=merge-duplicates' },
+            body: JSON.stringify({ nickname: nickname, title: title })
+        });
+        titleCache[nickname] = title;
+        showToast('头衔已设置：' + title);
+        renderProfile();
+        // 重新加载当前页面以刷新显示
+        if (currentPostId) loadComments(currentPostId);
+        if (document.getElementById('post-list-section').classList.contains('hidden') === false) loadPosts();
+    } catch (e) { alert('设置失败：' + e.message); }
+}
+
+// 加载当前用户的头衔到输入框
+async function loadMyTitle() {
+    const title = await getUserTitle(nickname);
+    document.getElementById('custom-title-input').value = title;
+    document.getElementById('current-title-display').textContent = title ? '当前头衔：' + title : '尚未设置头衔';
+}
 
     async function showUserPosts(userName) {
         openDrawer(`<h3>${userName} 的帖子</h3><div id="user-posts-loading">加载中...</div>`);
@@ -620,6 +671,7 @@ async function showReportList() {
         function renderProfile() {
             document.getElementById('profile-nickname').textContent = nickname;
             document.getElementById('profile-badge').innerHTML = isAdmin ? '<span class="admin-badge">管理员</span>' : '普通用户';   document.getElementById('admin-panel').classList.toggle('hidden', !isAdmin);
+            loadMyTitle();
         }
 
         async function adminRename() {
