@@ -619,23 +619,44 @@ async function deletePost(id) { if (!isAdmin) return; if (!confirm('删除帖子
             document.getElementById('admin-title-color').value = color;
             document.getElementById('admin-title-status').textContent = title ? '当前头衔：' + title : '尚未设置头衔';
         }   async function setUserTitleAdmin() {
-            if (!isAdmin) return;
-            const targetNickname = document.getElementById('admin-title-nickname').value.trim();
-            const title = document.getElementById('admin-title-value').value.trim();
-            const color = document.getElementById('admin-title-color').value || '#e8833a';
-            if (!targetNickname || !title) { alert('请填写用户昵称和头衔'); return; }
-            if (title.length > 20) { alert('头衔最多20个字'); return; }
-            try {
-                await fetch(SUPABASE_URL + '/rest/v1/user_titles', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'resolution=merge-duplicates' },
-                    body: JSON.stringify({ nickname: targetNickname, title: title, color: color })
-                });
-                titleCache[targetNickname] = { title, color };
-                showToast('已为 ' + targetNickname + ' 设置头衔：' + title);
-                document.getElementById('admin-title-status').textContent = '设置成功';
-            } catch (e) { alert('设置失败：' + e.message); }
-    }   async function adminRename() {
+    if (!isAdmin) return;
+    const targetNickname = document.getElementById('admin-title-nickname').value.trim();
+    const title = document.getElementById('admin-title-value').value.trim();
+    const color = document.getElementById('admin-title-color').value || '#e8833a';
+    if (!targetNickname || !title) { alert('请填写用户昵称和头衔'); return; }
+    if (title.length > 20) { alert('头衔最多20个字'); return; }
+    try {
+        // 1. 先查这条记录是否已存在
+        const getRes = await fetch(SUPABASE_URL + '/rest/v1/user_titles?nickname=eq.' + encodeURIComponent(targetNickname) + '&select=id', {
+            headers: { 'apikey': SUPABASE_KEY }
+        });
+        const existing = await getRes.json();
+        let res;
+        if (Array.isArray(existing) && existing.length > 0) {
+            // 已存在，用 id 更新
+            const id = existing[0].id;
+            res = await fetch(SUPABASE_URL + '/rest/v1/user_titles?id=eq.' + id, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=representation' },
+                body: JSON.stringify({ title: title, color: color })
+            });
+        } else {
+            // 不存在，新建
+            res = await fetch(SUPABASE_URL + '/rest/v1/user_titles', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'return=representation' },
+                body: JSON.stringify({ nickname: targetNickname, title: title, color: color })
+            });
+        }
+        if (res.ok) {
+            titleCache[targetNickname] = { title, color };
+            showToast('已为 ' + targetNickname + ' 设置头衔：' + title);
+            document.getElementById('admin-title-status').textContent = '设置成功';
+        } else {
+            alert('保存失败，状态码：' + res.status);
+        }
+    } catch (e) { alert('网络错误：' + e.message); }
+        }  async function adminRename() {
             if (!isAdmin) return;
             const oldName = document.getElementById('admin-rename-old').value.trim();
             const newName = document.getElementById('admin-rename-new').value.trim();
