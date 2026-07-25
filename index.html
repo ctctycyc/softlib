@@ -223,20 +223,21 @@
         <div class="card">
             <p>昵称：<strong id="profile-nickname"></strong></p>
             <p>身份：<span id="profile-badge"></span></p>
-            <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
-    <p style="font-size:0.8rem;color:var(--muted);margin-bottom:4px;">自定义头衔（所有人可见）</p>
-    <div class="input-group">
-        <input id="custom-title-input" placeholder="输入头衔（如：软件达人）" maxlength="20">
-        <button class="btn btn-sm" onclick="setUserTitle()">保存头衔</button>
-    </div>
-    <p id="current-title-display" style="font-size:0.78rem;color:var(--accent);margin-top:4px;"></p>
-            </div>
             <div id="admin-panel" class="hidden" style="margin-top:12px;">
                 <h4>管理面板</h4>
                 <div class="input-group"><input id="admin-rename-old" placeholder="旧昵称"><input id="admin-rename-new" placeholder="新昵称"><button class="btn btn-sm" onclick="adminRename()">改昵称</button></div>
                 <div class="input-group"><input id="admin-category-old" placeholder="旧板块名"><input id="admin-category-new" placeholder="新板块名"><button class="btn btn-sm" onclick="adminRenameCategory()">改板块名</button></div>
                 <button class="btn btn-danger btn-sm" onclick="showReportList()" style="margin-left:4px;">举报列表</button>
                 <button class="btn btn-sm" onclick="debugBannedList()" style="background:#555;color:#fff;">调试封禁列表查询手动后台解封</button>
+                <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+    <p style="font-size:0.8rem;color:var(--muted);margin-bottom:4px;">设置用户头衔（管理员可见）</p>
+    <div class="input-group">
+        <input id="admin-title-nickname" placeholder="用户昵称">
+        <input id="admin-title-value" placeholder="头衔（如：软件达人）" maxlength="20">
+        <button class="btn btn-sm" onclick="setUserTitleAdmin()">保存头衔</button>
+    </div>
+    <p id="admin-title-status" style="font-size:0.78rem;color:var(--accent);margin-top:4px;"></p>
+                </div>
             </div>
         </div>
     </div>
@@ -327,8 +328,13 @@
     async function getDisplayName(name) {
     const admins = await getAdminNicknames();
     const badge = admins.includes(name) ? ' <span class="admin-badge">管理</span>' : '';
-    const title = await getUserTitle(name);
-    const titleSpan = title ? ` <span style="color:#e8833a;font-size:0.72rem;font-weight:500;background:#fef5ee;padding:1px 6px;border-radius:4px;">${title}</span>` : '';
+    let titleSpan = '';
+    if (isAdmin) {
+        const title = await getUserTitle(name);
+        if (title) {
+            titleSpan = ` <span style="color:#e8833a;font-size:0.72rem;font-weight:500;background:#fef5ee;padding:1px 6px;border-radius:4px;">${title}</span>`;
+        }
+    }
     return `<a href="javascript:void(0)" onclick="showUserPosts('${name}')" style="color:var(--accent);text-decoration:none;font-weight:600;">${name}</a>${badge}${titleSpan}`;
     }
     // 获取用户头衔缓存
@@ -348,21 +354,21 @@ async function getUserTitle(name) {
 
 // 设置自己的头衔
 async function setUserTitle() {
-    const title = document.getElementById('custom-title-input').value.trim();
-    if (!title) { alert('头衔不能为空'); return; }
+async function setUserTitleAdmin() {
+    if (!isAdmin) return;
+    const targetNickname = document.getElementById('admin-title-nickname').value.trim();
+    const title = document.getElementById('admin-title-value').value.trim();
+    if (!targetNickname || !title) { alert('请填写用户昵称和头衔'); return; }
     if (title.length > 20) { alert('头衔最多20个字'); return; }
     try {
         await fetch(SUPABASE_URL + '/rest/v1/user_titles', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Prefer': 'resolution=merge-duplicates' },
-            body: JSON.stringify({ nickname: nickname, title: title })
+            body: JSON.stringify({ nickname: targetNickname, title: title })
         });
-        titleCache[nickname] = title;
-        showToast('头衔已设置：' + title);
-        renderProfile();
-        // 重新加载当前页面以刷新显示
-        if (currentPostId) loadComments(currentPostId);
-        if (document.getElementById('post-list-section').classList.contains('hidden') === false) loadPosts();
+        titleCache[targetNickname] = title;
+        showToast('已为 ' + targetNickname + ' 设置头衔：' + title);
+        document.getElementById('admin-title-status').textContent = '设置成功';
     } catch (e) { alert('设置失败：' + e.message); }
 }
 
