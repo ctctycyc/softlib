@@ -180,8 +180,11 @@
     <div class="top-bar" id="logo-text">软件库</div>
     <div class="container" id="main-content">
         <div id="page-home" class="page">
-            <h2 style="margin-bottom:12px;">软件</h2>
-            <div id="software-list"><div class="card"><span class="spinner"></span>加载中...</div></div>
+    <h2 style="margin-bottom:12px;">软件</h2>
+    <div style="margin-bottom:12px;">
+        <input type="text" id="software-search" placeholder="搜索软件名称或描述..." oninput="filterSoftwares()" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:0.9rem;background:#fff;color:var(--text);">
+    </div>
+    <div id="software-list"><div class="card"><span class="spinner"></span>加载中...</div></div>
         </div>
         <div id="page-forum" class="page hidden">
             <div id="category-list"></div>
@@ -374,20 +377,62 @@ async function showUserPosts(userName) {
     } catch (e) { document.getElementById('user-posts-loading').innerHTML = '加载失败'; }
 }
 
+// 存储所有已加载的软件数据
+let allSoftwares = [];
+
 async function loadSoftwares() {
     const div = document.getElementById('software-list');
     div.innerHTML = '<div class="card"><span class="spinner"></span>加载中...</div>';
     try {
-        const res = await fetch('https://api.github.com/repos/ctctycyc/softlib/issues?labels=approved&state=open&sort=created&direction=desc&per_page=20');
+        const res = await fetch('https://api.github.com/repos/ctctycyc/softlib/issues?labels=approved&state=open&sort=created&direction=desc&per_page=50');
         if (!res.ok) throw new Error('HTTP '+res.status);
         const issues = await res.json();
-        if (!Array.isArray(issues) || !issues.length) { div.innerHTML = '<div class="card">暂无软件</div>'; return; }
-        div.innerHTML = issues.map(i => {
-            const body = i.body||'', lines = body.split('\n').filter(l=>l.trim()), desc = lines.find(l=>!l.startsWith('http'))||'', link = lines.find(l=>l.startsWith('http'))||'';
-            return `<div class="card"><h3>${i.title}</h3><div class="desc">${desc}</div>${link?`<a href="${link}" target="_blank" class="btn btn-sm" style="margin-top:8px;">下载</a>`:''}</div>`;
-        }).join('');
-    } catch (e) { div.innerHTML = '<div class="card">软件加载失败：'+e.message+'</div>'; }
+        if (!Array.isArray(issues) || !issues.length) {
+            div.innerHTML = '<div class="card">暂无软件</div>';
+            allSoftwares = [];
+            return;
+        }
+        // 保存原始数据
+        allSoftwares = issues.map(i => {
+            const body = i.body||'';
+            const lines = body.split('\n').filter(l=>l.trim());
+            return {
+                title: i.title,
+                desc: lines.find(l=>!l.startsWith('http'))||'',
+                link: lines.find(l=>l.startsWith('http'))||''
+            };
+        });
+        renderSoftwares(allSoftwares);
+    } catch (e) {
+        div.innerHTML = '<div class="card">软件加载失败：'+e.message+'</div>';
+        allSoftwares = [];
+    }
 }
+
+function renderSoftwares(list) {
+    const div = document.getElementById('software-list');
+    if (!list.length) {
+        div.innerHTML = '<div class="card">没有匹配的软件</div>';
+        return;
+    }
+    div.innerHTML = list.map(item => {
+        return `<div class="card"><h3>${item.title}</h3><div class="desc">${item.desc}</div>${item.link?`<a href="${item.link}" target="_blank" class="btn btn-sm" style="margin-top:8px;">下载</a>`:''}</div>`;
+    }).join('');
+}
+
+function filterSoftwares() {
+    const keyword = document.getElementById('software-search').value.trim().toLowerCase();
+    if (!allSoftwares.length) return; // 还没加载完，不处理
+    if (!keyword) {
+        renderSoftwares(allSoftwares);
+        return;
+    }
+    const filtered = allSoftwares.filter(item =>
+        item.title.toLowerCase().includes(keyword) ||
+        item.desc.toLowerCase().includes(keyword)
+    );
+    renderSoftwares(filtered);
+    }
 
 async function loadCategories() {
     backToCategories();
