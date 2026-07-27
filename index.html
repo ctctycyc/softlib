@@ -417,7 +417,7 @@ function renderSoftwares(list) {
         return;
     }
     div.innerHTML = list.map(item => {
-        return `<div class="card"><h3>${item.title}</h3><div class="desc">${item.desc}</div>${item.link?`<a href="${item.link}" target="_blank" class="btn btn-sm" style="margin-top:8px;">下载</a>`:''}</div>`;
+        return `<div class="card"><h3>${item.title}</h3><div class="desc">${item.desc}</div>${item.link?`<a href="${item.link}" target="_blank" class="btn btn-sm" style="margin-top:8px;text-decoration:none;">下载</a>`:''}</div>`;
     }).join('');
 }
 
