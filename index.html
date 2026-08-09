@@ -196,6 +196,9 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 const supabase = createClient('https://plwljusbfqkvlhpclvsv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsd2xqdXNiZnFrdmxocGNsdnN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyNzk1MTUsImV4cCI6MjEwMTg1NTUxNX0.BDVqL87UWewkYt1j-z8O3Am_3tML954F4Pyi71T_Rd0')
 
+const TINYAPI_KEY = 'sk_18ca43cb8eceb7d240a6597b8f3509e'
+const FREE_API = 'http://www.yx520.1td/API/dwz/api.php'
+
 let allFiles = [], currentFilter = 'all', currentUser = null, uploadTasks = [], shareFileData = null
 const shareCode = new URLSearchParams(location.search).get('code')
 
@@ -359,25 +362,28 @@ window.renderFiles = function() {
       const code = Math.random().toString(36).substring(2, 6).toUpperCase()
       await supabase.from('share_links').insert({ file_id: btn.dataset.share, creator_id: currentUser.id, code, expires_at: new Date(Date.now() + 7*24*60*60*1000) })
       const longLink = `${location.origin}${location.pathname}?code=${code}`
-      const services = [
-        { url: `https://is.gd/create.php?format=simple&url=${encodeURIComponent(longLink)}` },
-        { url: `https://tinyurl.com/api-create.php?url=${encodeURIComponent(longLink)}` },
-        { url: `https://clck.ru/--?url=${encodeURIComponent(longLink)}` },
-        { url: `https://suo.im/api.htm?format=simple&url=${encodeURIComponent(longLink)}` }
-      ]
-      let short = null
-      for (const svc of services) {
+      let shortLink = null
+      // 尝试 TinyAPI
+      try {
+        const res = await fetch(`https://api.tinyaii.top/v1/shorten?url=${encodeURIComponent(longLink)}`, {
+          headers: { 'Authorization': `Bearer ${TINYAPI_KEY}` }
+        })
+        const json = await res.json()
+        if (json.code === 200 && json.data.url) shortLink = json.data.url
+      } catch (e) {}
+      // 尝试免费接口
+      if (!shortLink) {
         try {
-          const res = await fetch(svc.url)
+          const res = await fetch(`${FREE_API}?url=${encodeURIComponent(longLink)}`)
           const text = await res.text()
-          if (text.startsWith('http')) { short = text; break }
+          if (text.startsWith('http')) shortLink = text.trim()
         } catch (e) {}
       }
-      if (short) {
-        prompt('分享链接：', short)
-        navigator.clipboard.writeText(short).catch(()=>{})
+      if (shortLink) {
+        prompt('分享链接：', shortLink)
+        navigator.clipboard.writeText(shortLink).catch(()=>{})
       } else {
-        prompt('短链接生成失败，已复制长链接：', longLink)
+        prompt('分享链接（已复制到剪贴板）：', longLink)
         navigator.clipboard.writeText(longLink).catch(()=>{})
       }
     }
