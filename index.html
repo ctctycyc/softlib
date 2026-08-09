@@ -359,11 +359,23 @@ window.renderFiles = function() {
   })
   document.querySelectorAll('[data-share]').forEach(btn => {
     btn.onclick = async () => {
+      const days = prompt('请输入过期天数（0=永久有效，默认7天）：', '7')
+      if (days === null) return
+      const dayNum = parseInt(days)
+      if (isNaN(dayNum) || dayNum < 0) { alert('请输入有效天数（0 或正整数）'); return }
+
       const code = Math.random().toString(36).substring(2, 6).toUpperCase()
-      await supabase.from('share_links').insert({ file_id: btn.dataset.share, creator_id: currentUser.id, code, expires_at: new Date(Date.now() + 7*24*60*60*1000) })
+      const expiresAt = dayNum === 0 ? null : new Date(Date.now() + dayNum * 24 * 60 * 60 * 1000)
+
+      await supabase.from('share_links').insert({
+        file_id: btn.dataset.share,
+        creator_id: currentUser.id,
+        code,
+        expires_at: expiresAt
+      })
+
       const longLink = `${location.origin}${location.pathname}?code=${code}`
       let shortLink = null
-      // 尝试 TinyAPI
       try {
         const res = await fetch(`https://api.tinyaii.top/v1/shorten?url=${encodeURIComponent(longLink)}`, {
           headers: { 'Authorization': `Bearer ${TINYAPI_KEY}` }
@@ -371,7 +383,6 @@ window.renderFiles = function() {
         const json = await res.json()
         if (json.code === 200 && json.data.url) shortLink = json.data.url
       } catch (e) {}
-      // 尝试免费接口
       if (!shortLink) {
         try {
           const res = await fetch(`${FREE_API}?url=${encodeURIComponent(longLink)}`)
