@@ -146,7 +146,7 @@
   </div>
   <div class="share-info-card" id="share-info-card">
     <div style="width:40px;height:40px;border-radius:50%;background:#4e6ef2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px">U</div>
-    <div style="flex:1"><div style="font-weight:500" id="share-user-email"></div><div style="font-size:12px;color:var(--text2)">分享的文件</div></div>
+    <div style="flex:1"><div style="font-weight:500" id="share-user-email">用户</div><div style="font-size:12px;color:var(--text2)">分享的文件</div></div>
     <div style="background:#f0f2ff;padding:4px 8px;border-radius:12px;font-size:12px;color:#4e6ef2">来自分享</div>
   </div>
   <div class="share-controls">
@@ -217,7 +217,6 @@ function hideSplash() {
   setTimeout(() => {
     splash.style.display = 'none'
     skipBtn.style.display = 'none'
-    // 确保任何无关面板都关闭
     document.getElementById('upload-panel').classList.remove('open')
     document.getElementById('overlay').classList.remove('show')
     if (shareCode) {
@@ -482,28 +481,57 @@ function buildDynamicPage(){ document.getElementById('page-dynamic').innerHTML =
 
 function showSharePage() {
   document.getElementById('share-page').style.display = 'block'
-  // 再次确保上传面板关闭
   document.getElementById('upload-panel').classList.remove('open')
   document.getElementById('overlay').classList.remove('show')
   loadShare(shareCode)
 }
 
 async function loadShare(code) {
-  const { data: links } = await supabase.from('share_links').select('*, files(*)').eq('code', code).maybeSingle()
-  if (!links || (links.expires_at && new Date(links.expires_at) < new Date())) {
-    document.getElementById('share-file-item').style.display = 'none'
-    document.getElementById('login-save-btn').style.display = 'none'
-    document.getElementById('share-info-card').innerHTML = '<div style="color:#e74c3c;text-align:center">分享不存在或已过期</div>'
+  const shareFileItem = document.getElementById('share-file-item')
+  const loginSaveBtn = document.getElementById('login-save-btn')
+  const infoCard = document.getElementById('share-info-card')
+
+  const { data: links, error } = await supabase
+    .from('share_links')
+    .select('*, files(*)')
+    .eq('code', code)
+    .maybeSingle()
+
+  if (error || !links) {
+    shareFileItem.style.display = 'none'
+    loginSaveBtn.style.display = 'none'
+    infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center;width:100%">分享不存在或已失效</div>'
     return
   }
+
+  if (links.expires_at && new Date(links.expires_at) < new Date()) {
+    shareFileItem.style.display = 'none'
+    loginSaveBtn.style.display = 'none'
+    infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center;width:100%">分享已过期</div>'
+    return
+  }
+
   shareFileData = links.files
+  if (!shareFileData) {
+    shareFileItem.style.display = 'none'
+    loginSaveBtn.style.display = 'none'
+    infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center;width:100%">文件数据丢失</div>'
+    return
+  }
+
+  // 填充文件信息
   document.getElementById('share-user-email').textContent = '用户'
   document.getElementById('share-file-name').textContent = shareFileData.name
   document.getElementById('share-file-meta').textContent = formatSize(shareFileData.size)
   document.getElementById('share-file-icon').innerHTML = getFileIconHTML(shareFileData.type)
-  document.getElementById('login-save-btn').onclick = () => {
-    if (currentUser) saveFileToMyAccount()
-    else {
+
+  shareFileItem.style.display = 'flex'
+  loginSaveBtn.style.display = 'flex'
+
+  loginSaveBtn.onclick = () => {
+    if (currentUser) {
+      saveFileToMyAccount()
+    } else {
       document.getElementById('auth-page').style.display = 'block'
       isLogin = true
       document.getElementById('auth-title').textContent = '登录'
@@ -520,7 +548,7 @@ async function saveFileToMyAccount() {
   showToast('正在保存...')
   const newPath = `${currentUser.id}/${Date.now()}_${shareFileData.name}`
   const { error: copyError } = await supabase.storage.from('user-files').copy(shareFileData.storage_path, newPath)
-  if (copyError) { showToast('保存失败'); return }
+  if (copyError) { showToast('保存失败：' + copyError.message); return }
   await supabase.from('files').insert({ user_id: currentUser.id, name: shareFileData.name, size: shareFileData.size, type: shareFileData.type, storage_path: newPath })
   showToast('文件已保存到你的网盘')
 }
