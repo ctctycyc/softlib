@@ -22,138 +22,78 @@
       transition:background .3s;animation: bodyFadeIn .5s ease;
     }
     @keyframes bodyFadeIn { from{opacity:0} to{opacity:1} }
-    .page{
-      display:none;height:100vh;overflow-y:auto;padding-bottom:70px;
-      animation: pageSlideUp .3s ease;
-    }
-    @keyframes pageSlideUp { from{transform:translateY(10px);opacity:0} to{transform:translateY(0);opacity:1} }
+    .page{display:none;height:100vh;overflow-y:auto;padding-bottom:70px}
     .page.active{display:block}
     .bottom-nav{
       position:fixed;bottom:0;left:0;right:0;height:60px;background:var(--card-bg);
-      display:flex;border-top:1px solid var(--border);z-index:100;transition:background .3s;
-      animation: navSlideUp .4s ease;
+      display:none;border-top:1px solid var(--border);z-index:100;transition:background .3s;
     }
-    @keyframes navSlideUp { from{transform:translateY(60px)} to{transform:translateY(0)} }
     .nav-item{
       flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
       font-size:11px;color:var(--text2);cursor:pointer;transition:color .2s, transform .2s;
     }
     .nav-item.active{color:#4e6ef2;transform:scale(1.05)}
-    .nav-item:active{transform:scale(0.95)}
-    .nav-item .nav-icon{width:24px;height:24px;margin-bottom:2px;transition:stroke .3s}
+    .nav-item .nav-icon{width:24px;height:24px;margin-bottom:2px}
     .btn-primary{
       background:#4e6ef2;color:#fff;border:none;border-radius:8px;padding:10px 20px;
-      font-size:14px;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(78,110,242,.3);
+      font-size:14px;cursor:pointer;box-shadow:0 2px 8px rgba(78,110,242,.3);
     }
-    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(78,110,242,.4)}
-    .btn-primary:active{transform:scale(0.96)}
     .fab{
       position:fixed;right:20px;bottom:80px;width:50px;height:50px;border-radius:50%;
       background:#4e6ef2;color:#fff;border:none;font-size:24px;
       box-shadow:0 4px 12px rgba(78,110,242,.4);z-index:99;cursor:pointer;
       display:flex;align-items:center;justify-content:center;
-      transition:all .3s;animation: fabBounce .6s ease;
     }
-    @keyframes fabBounce { 0%{transform:scale(0)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
-    .fab:active{transform:scale(0.9) rotate(90deg)}
     input{
       width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;
       font-size:14px;outline:none;background:var(--input-bg);color:var(--text);
-      transition:all .3s;
     }
     input:focus{border-color:#4e6ef2;box-shadow:0 0 0 3px rgba(78,110,242,.1)}
     .card{
       background:var(--card-bg);border-radius:12px;padding:16px;margin:12px 16px;
-      box-shadow:var(--shadow);transition:all .3s;animation: cardFadeIn .4s ease;
+      box-shadow:var(--shadow);
     }
-    @keyframes cardFadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-    .card:active{transform:scale(0.98)}
     .file-row{
       display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);
-      transition:background .2s;
     }
-    .file-row:hover{background:rgba(0,0,0,.02)}
-    .file-row:last-child{border-bottom:none}
     .file-icon{
       width:40px;height:40px;margin-right:12px;display:flex;align-items:center;
-      justify-content:center;background:#f0f2ff;border-radius:8px;transition:transform .2s;
+      justify-content:center;background:#f0f2ff;border-radius:8px;
     }
-    .file-row:hover .file-icon{transform:scale(1.1)}
     .file-info{flex:1;min-width:0}
-    .file-name{
-      font-size:14px;color:var(--text);overflow:hidden;text-overflow:ellipsis;
-      white-space:nowrap;
-    }
+    .file-name{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .file-meta{font-size:12px;color:var(--text2);margin-top:2px}
     .chip-scroll{display:flex;gap:8px;overflow-x:auto;padding:12px 16px;white-space:nowrap}
     .chip{
       padding:6px 14px;border-radius:16px;font-size:13px;background:var(--chip-bg);
-      border:1px solid var(--chip-border);cursor:pointer;flex-shrink:0;color:var(--text);
-      transition:all .3s;
+      border:1px solid var(--chip-border);cursor:pointer;color:var(--text);
     }
-    .chip.active{background:var(--chip-active-bg);color:var(--chip-active-text);border-color:var(--chip-active-bg)}
-    .chip:active{transform:scale(0.95)}
+    .chip.active{background:#4e6ef2;color:#fff;border-color:#4e6ef2}
     .progress-bar{height:6px;background:rgba(0,0,0,.1);border-radius:3px;margin:8px 0;overflow:hidden}
-    .progress-fill{height:100%;background:#4e6ef2;border-radius:3px;transition:width .6s ease}
+    .progress-fill{height:100%;background:#4e6ef2;border-radius:3px}
     .splash{
       position:fixed;top:0;left:0;right:0;bottom:0;background:#4e6ef2;
       display:flex;flex-direction:column;align-items:center;justify-content:center;
       z-index:9999;animation: splashFadeIn 1s ease;
     }
     @keyframes splashFadeIn { from{opacity:0} to{opacity:1} }
-    .splash h1{color:#fff;font-size:28px;margin-bottom:8px;font-weight:300;letter-spacing:2px}
-    .splash p{color:rgba(255,255,255,.8);font-size:14px;font-weight:300}
+    .splash h1{color:#fff;font-size:28px;margin-bottom:8px;font-weight:300}
+    .splash p{color:rgba(255,255,255,.8);font-size:14px}
     .skip-btn{
       position:fixed;top:20px;right:20px;background:rgba(255,255,255,.2);
       color:#fff;border:1px solid rgba(255,255,255,.5);padding:6px 14px;
       border-radius:16px;font-size:13px;z-index:10000;cursor:pointer;
-      transition:background .3s;
     }
     .svg-icon{width:20px;height:20px;display:inline-block;vertical-align:middle}
-    .back-btn{
-      display:flex;align-items:center;gap:6px;color:#4e6ef2;cursor:pointer;
-      margin-bottom:16px;font-size:14px;transition:opacity .2s;
-    }
-    .back-btn:hover{opacity:.7}
+    .back-btn{display:flex;align-items:center;gap:6px;color:#4e6ef2;cursor:pointer;margin-bottom:16px;font-size:14px}
     .toast{
       position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#222;
       color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;z-index:9999;
       opacity:0;transition:opacity .3s;
     }
     .toast.show{opacity:1}
-    .section-title{font-size:14px;color:var(--text2);margin:16px 16px 8px}
-    .home-header{
-      display:flex;align-items:center;justify-content:space-between;padding:60px 16px 0;
-      animation: fadeDown .4s ease;
-    }
-    @keyframes fadeDown { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
-    .avatar{
-      width:36px;height:36px;border-radius:50%;background:#4e6ef2;color:#fff;
-      display:flex;align-items:center;justify-content:center;font-weight:300;
-      font-size:16px;cursor:pointer;transition:transform .2s;flex-shrink:0;
-    }
-    .avatar:active{transform:scale(0.9)}
-    .upload-panel{
-      position:fixed;top:0;right:0;width:300px;max-width:85vw;height:100vh;
-      background:var(--card-bg);box-shadow:-2px 0 10px rgba(0,0,0,.1);
-      z-index:150;transform:translateX(100%);transition:transform .3s ease;
-      display:flex;flex-direction:column;
-    }
-    .upload-panel.open{transform:translateX(0)}
-    .upload-panel-header{
-      padding:16px;border-bottom:1px solid var(--border);display:flex;
-      justify-content:space-between;align-items:center;
-    }
-    .upload-panel-body{flex:1;overflow-y:auto;padding:16px}
-    .upload-task{margin-bottom:12px}
-    .upload-task-name{font-size:14px;margin-bottom:4px;display:flex;justify-content:space-between}
-    .upload-task-status{font-size:12px;color:var(--text2)}
-    .upload-task .progress-bar{margin:4px 0}
-    .overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);z-index:149;display:none}
-    .overlay.show{display:block}
     .auth-container{
       display:flex;align-items:center;justify-content:center;height:100vh;
-      flex-direction:column;gap:16px;
     }
     .auth-card{
       background:var(--card-bg);padding:32px 24px;border-radius:16px;
@@ -162,10 +102,8 @@
     .auth-card h2{font-size:22px;font-weight:500;margin-bottom:4px}
     .auth-card .sub{color:var(--text2);margin-bottom:20px;font-size:14px}
     .auth-card input{margin-bottom:12px}
-    .auth-card .btn-primary{margin-top:4px}
     .auth-toggle{text-align:center;margin-top:12px;font-size:14px;color:var(--text2)}
     .auth-toggle span{color:#4e6ef2;cursor:pointer}
-    @keyframes modalZoomIn { from{transform:scale(0.9);opacity:0} to{transform:scale(1);opacity:1} }
   </style>
 </head>
 <body>
@@ -189,14 +127,16 @@
   </div>
 </div>
 
-<div class="page" id="page-home"></div>
-<div class="page" id="page-files"></div>
-<div class="page" id="page-me"></div>
-<div class="page" id="page-settings"></div>
-<div class="page" id="page-feedback"></div>
-<div class="page" id="page-shareHistory"></div>
-<div class="page" id="page-trash"></div>
-<div class="page" id="page-dynamic"></div>
+<div id="main-container" style="display:none">
+  <div class="page active" id="page-home"></div>
+  <div class="page" id="page-files"></div>
+  <div class="page" id="page-me"></div>
+  <div class="page" id="page-settings"></div>
+  <div class="page" id="page-feedback"></div>
+  <div class="page" id="page-shareHistory"></div>
+  <div class="page" id="page-trash"></div>
+  <div class="page" id="page-dynamic"></div>
+</div>
 
 <div id="share-page" style="display:none">
   <div style="display:flex;align-items:center;justify-content:center;height:100vh">
@@ -208,7 +148,7 @@
 </div>
 
 <div id="pwd-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center">
-  <div style="background:var(--card-bg);border-radius:12px;padding:24px;width:300px;animation:modalZoomIn .2s ease">
+  <div style="background:var(--card-bg);border-radius:12px;padding:24px;width:300px">
     <h3 style="margin-bottom:16px">修改密码</h3>
     <input type="password" id="old-password" placeholder="旧密码">
     <input type="password" id="new-password1" placeholder="新密码">
@@ -229,7 +169,7 @@
 </div>
 <div class="overlay" id="overlay"></div>
 
-<div class="bottom-nav" id="bottom-nav" style="display:none">
+<div class="bottom-nav" id="bottom-nav">
   <div class="nav-item active" data-tab="home">
     <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
     首页
@@ -251,13 +191,7 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
 const supabase = createClient('https://plwljusbfqkvlhpclvsv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsd2xqdXNiZnFrdmxocGNsdnN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyNzk1MTUsImV4cCI6MjEwMTg1NTUxNX0.BDVqL87UWewkYt1j-z8O3Am_3tML954F4Pyi71T_Rd0')
 
-let allFiles = []
-let currentFilter = 'all'
-let currentTab = 'home'
-let currentUser = null
-let uploadTasks = []
-let isLogin = true
-
+let allFiles = [], currentFilter = 'all', currentTab = 'home', currentUser = null, uploadTasks = [], isLogin = true
 const shareCode = new URLSearchParams(location.search).get('code')
 
 const splash = document.getElementById('splash')
@@ -269,33 +203,23 @@ function startSplash() {
   skipBtn.textContent = countdown + 's 跳过'
   splashTimer = setInterval(() => {
     countdown--
-    if (countdown <= 0) {
-      clearInterval(splashTimer)
-      hideSplash()
-    } else {
-      skipBtn.textContent = countdown + 's 跳过'
-    }
+    if (countdown <= 0) { clearInterval(splashTimer); hideSplash() }
+    else skipBtn.textContent = countdown + 's 跳过'
   }, 1000)
 }
 
 function hideSplash() {
-  splash.style.opacity = '0'
   splash.style.transition = 'opacity 0.5s'
+  splash.style.opacity = '0'
   setTimeout(() => {
     splash.style.display = 'none'
     skipBtn.style.display = 'none'
-    if (shareCode) {
-      showSharePage()
-    } else {
-      checkAuth()
-    }
+    if (shareCode) showSharePage()
+    else checkAuth()
   }, 500)
 }
 
-skipBtn.addEventListener('click', () => {
-  clearInterval(splashTimer)
-  hideSplash()
-})
+skipBtn.addEventListener('click', () => { clearInterval(splashTimer); hideSplash() })
 startSplash()
 
 function showSharePage() {
@@ -305,11 +229,13 @@ function showSharePage() {
 
 function showAuthPage() {
   document.getElementById('auth-page').style.display = 'block'
+  document.getElementById('main-container').style.display = 'none'
   document.getElementById('bottom-nav').style.display = 'none'
 }
 
 function showMainPages() {
   document.getElementById('auth-page').style.display = 'none'
+  document.getElementById('main-container').style.display = 'block'
   document.getElementById('bottom-nav').style.display = 'flex'
   switchTab('home')
   loadFiles()
@@ -338,17 +264,7 @@ document.getElementById('auth-btn').addEventListener('click', async () => {
 })
 
 document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', () => {
-    switchTab(item.dataset.tab)
-  })
-})
-
-document.getElementById('fab-btn')?.addEventListener('click', () => {
-  document.getElementById('hidden-upload').click()
-})
-
-document.getElementById('home-upload-btn')?.addEventListener('click', () => {
-  document.getElementById('hidden-upload').click()
+  item.addEventListener('click', () => switchTab(item.dataset.tab))
 })
 
 document.getElementById('hidden-upload').addEventListener('change', async (e) => {
@@ -360,35 +276,9 @@ document.getElementById('hidden-upload').addEventListener('change', async (e) =>
   document.getElementById('hidden-upload').value = ''
 })
 
-document.querySelectorAll('.chip').forEach(chip => {
-  chip.addEventListener('click', () => {
-    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'))
-    chip.classList.add('active')
-    currentFilter = chip.dataset.filter
-    renderFiles()
-  })
-})
-
-document.getElementById('upload-progress-icon')?.addEventListener('click', () => {
-  document.getElementById('upload-panel').classList.add('open')
-  document.getElementById('overlay').classList.add('show')
-})
-
-document.getElementById('close-upload-panel').addEventListener('click', closeUploadPanel)
-document.getElementById('overlay').addEventListener('click', closeUploadPanel)
-
-function closeUploadPanel() {
-  document.getElementById('upload-panel').classList.remove('open')
-  document.getElementById('overlay').classList.remove('show')
-}
-
 function addUploadTask(file) {
-  if (file.size > 50 * 1024 * 1024) {
-    alert('文件不能超过 50MB')
-    return
-  }
-  const taskId = Date.now() + Math.random()
-  const task = { id: taskId, name: file.name, progress: 0, status: 'waiting', file }
+  if (file.size > 50 * 1024 * 1024) return alert('文件不能超过 50MB')
+  const task = { id: Date.now() + Math.random(), name: file.name, progress: 0, status: 'waiting', file }
   uploadTasks.push(task)
   renderUploadTasks()
   startUpload(task)
@@ -399,32 +289,18 @@ async function startUpload(task) {
   task.status = 'uploading'
   renderUploadTasks()
   const path = `${currentUser.id}/${Date.now()}_${task.file.name}`
-  const progressInterval = setInterval(() => {
-    if (task.progress < 90) {
-      task.progress += Math.random() * 15
-      if (task.progress > 90) task.progress = 90
-      renderUploadTasks()
-    }
+  const interval = setInterval(() => {
+    if (task.progress < 90) { task.progress += Math.random() * 15; if (task.progress > 90) task.progress = 90; renderUploadTasks() }
   }, 300)
   try {
-    const { error } = await supabase.storage
-      .from('user-files')
-      .upload(path, task.file, { contentType: 'application/octet-stream' })
-    clearInterval(progressInterval)
+    const { error } = await supabase.storage.from('user-files').upload(path, task.file, { contentType: 'application/octet-stream' })
+    clearInterval(interval)
     if (error) throw error
-    await supabase.from('files').insert({
-      user_id: currentUser.id,
-      name: task.file.name,
-      size: task.file.size,
-      type: task.file.type,
-      storage_path: path
-    })
-    task.progress = 100
-    task.status = 'success'
+    await supabase.from('files').insert({ user_id: currentUser.id, name: task.file.name, size: task.file.size, type: task.file.type, storage_path: path })
+    task.progress = 100; task.status = 'success'
   } catch (err) {
-    clearInterval(progressInterval)
-    task.status = 'error'
-    task.errorMsg = err.message
+    clearInterval(interval)
+    task.status = 'error'; task.errorMsg = err.message
   }
   renderUploadTasks()
   loadFiles()
@@ -432,201 +308,153 @@ async function startUpload(task) {
 }
 
 function renderUploadTasks() {
-  const container = document.getElementById('upload-task-list')
-  container.innerHTML = uploadTasks.map(t => `
+  document.getElementById('upload-task-list').innerHTML = uploadTasks.map(t => `
     <div class="upload-task">
-      <div class="upload-task-name">
-        <span>${t.name}</span>
-        <span class="upload-task-status" style="color:${t.status==='success'?'#27ae60':t.status==='error'?'#e74c3c':'var(--text2)'}">${t.status==='waiting'?'等待中':t.status==='uploading'?'上传中...':t.status==='success'?'已完成':'失败'}</span>
-      </div>
+      <div style="display:flex;justify-content:space-between"><span>${t.name}</span><span>${t.status==='waiting'?'等待':t.status==='uploading'?'上传中':t.status==='success'?'完成':'失败'}</span></div>
       <div class="progress-bar"><div class="progress-fill" style="width:${t.progress}%;background:${t.status==='error'?'#e74c3c':'#4e6ef2'}"></div></div>
       ${t.status==='error'?`<div style="font-size:12px;color:#e74c3c">${t.errorMsg}</div>`:''}
     </div>
   `).join('')
 }
 
-window.showPasswordModal = function() {
-  document.getElementById('pwd-modal').style.display = 'flex'
-}
-
-window.closePwdModal = function() {
-  document.getElementById('pwd-modal').style.display = 'none'
-}
-
-window.changePassword = async function() {
-  const oldPwd = document.getElementById('old-password').value
-  const new1 = document.getElementById('new-password1').value
-  const new2 = document.getElementById('new-password2').value
-  if (!oldPwd || !new1 || !new2) return alert('请填写完整')
-  if (new1 !== new2) return alert('两次新密码不一致')
-  try {
-    const { error } = await supabase.auth.updateUser({ password: new1 })
-    if (error) throw error
-    showToast('密码修改成功')
-    closePwdModal()
-  } catch (e) {
-    alert('修改失败：' + e.message)
-  }
-}
-
-window.toggleTheme = function() {
-  document.body.classList.toggle('dark')
-  const status = document.getElementById('theme-status')
-  status.textContent = document.body.classList.contains('dark') ? '深色' : '浅色'
-  localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light')
-}
-
-window.copyQQ = function() {
-  navigator.clipboard.writeText('2872136504').then(() => showToast('QQ号已复制'))
-}
-
-window.navigateTo = function(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
-  document.getElementById('page-' + page).classList.add('active')
-  if (page === 'shareHistory') loadShareHistory()
-  if (page === 'trash') loadTrash()
-  if (page === 'dynamic') loadDynamic()
-}
-
 window.switchTab = function(tab) {
   currentTab = tab
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
-  document.getElementById('page-' + tab).classList.add('active')
-  const targetNav = document.querySelector(`.nav-item[data-tab="${tab}"]`)
-  if (targetNav) targetNav.classList.add('active')
-  if (tab === 'files' || tab === 'me') loadFiles()
-  if (tab === 'home') loadHomeData()
-  if (tab === 'files') {
-    document.getElementById('page-files').innerHTML = `
-      <div style="padding:12px 16px;background:var(--card-bg);border-bottom:1px solid var(--border)">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <h3 style="font-weight:500">云文件</h3>
-          <span style="color:var(--text2);font-size:13px">排序</span>
+  const page = document.getElementById('page-' + tab)
+  if (page) page.classList.add('active')
+  document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add('active')
+  if (tab === 'home') buildHomePage()
+  if (tab === 'files') buildFilesPage()
+  if (tab === 'me') buildMePage()
+  if (tab === 'settings') buildSettingsPage()
+  if (tab === 'feedback') buildFeedbackPage()
+  if (tab === 'shareHistory') buildShareHistoryPage()
+  if (tab === 'trash') buildTrashPage()
+  if (tab === 'dynamic') buildDynamicPage()
+}
+
+function buildHomePage() {
+  document.getElementById('page-home').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:60px 16px 0">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="avatar" style="width:36px;height:36px;border-radius:50%;background:#4e6ef2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px">${currentUser?.email?.charAt(0)?.toUpperCase()||'U'}</div>
+        <span style="font-weight:500">${currentUser?.email||''}</span>
+      </div>
+      <div style="display:flex;gap:12px">
+        <div onclick="document.getElementById('upload-panel').classList.add('open');document.getElementById('overlay').classList.add('show')">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         </div>
-        <input type="text" id="search-input" placeholder="搜索文件..." oninput="renderFiles()">
+        <div class="fab" style="position:static;width:36px;height:36px;font-size:18px" onclick="document.getElementById('hidden-upload').click()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
       </div>
-      <div class="chip-scroll">
-        <div class="chip active" data-filter="all">全部</div>
-        <div class="chip" data-filter="folder">文件夹</div>
-        <div class="chip" data-filter="image">图片</div>
-        <div class="chip" data-filter="video">视频</div>
-        <div class="chip" data-filter="archive">压缩包</div>
-        <div class="chip" data-filter="other">其他</div>
-      </div>
-      <div id="file-container" style="padding:0 16px"></div>
-      <button class="fab" id="fab-btn">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </button>
-    `
-    document.getElementById('fab-btn')?.addEventListener('click', () => {
-      document.getElementById('hidden-upload').click()
+    </div>
+    <div class="section-title" style="margin:16px 16px 8px">最近浏览</div>
+    <div class="card" id="recent-browse"></div>
+    <div class="section-title" style="margin:16px 16px 8px">最近上传</div>
+    <div class="card" id="recent-upload"></div>
+    <div class="section-title" style="margin:16px 16px 8px">最近分享</div>
+    <div class="card" id="recent-share"></div>
+  `
+  loadHomeData()
+}
+
+function buildFilesPage() {
+  document.getElementById('page-files').innerHTML = `
+    <div style="padding:12px 16px;background:var(--card-bg);border-bottom:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px"><h3>云文件</h3><span style="color:var(--text2)">排序</span></div>
+      <input type="text" id="search-input" placeholder="搜索文件..." oninput="renderFiles()">
+    </div>
+    <div class="chip-scroll">
+      <div class="chip active" data-filter="all">全部</div>
+      <div class="chip" data-filter="image">图片</div>
+      <div class="chip" data-filter="video">视频</div>
+      <div class="chip" data-filter="archive">压缩包</div>
+      <div class="chip" data-filter="other">其他</div>
+    </div>
+    <div id="file-container" style="padding:0 16px"></div>
+    <button class="fab" id="fab-btn" onclick="document.getElementById('hidden-upload').click()">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+  `
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'))
+      chip.classList.add('active')
+      currentFilter = chip.dataset.filter
+      renderFiles()
     })
-    document.querySelectorAll('.chip').forEach(chip => {
-      chip.addEventListener('click', () => {
-        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'))
-        chip.classList.add('active')
-        currentFilter = chip.dataset.filter
-        renderFiles()
-      })
-    })
-    renderFiles()
-  }
-  if (tab === 'me') {
-    document.getElementById('page-me').innerHTML = `
-      <div class="card" style="display:flex;align-items:center;gap:12px">
-        <div style="width:48px;height:48px;border-radius:50%;background:#4e6ef2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:300">U</div>
-        <div>
-          <div style="font-weight:500" id="me-email"></div>
-          <div style="font-size:12px;color:var(--text2)">关注 0 | 粉丝 0</div>
-        </div>
-      </div>
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-          <span style="font-size:14px">已用 <span id="used-size">0 B</span> / 1 GB</span>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
-      </div>
-      <div class="card">
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center">
-          <div onclick="navigateTo('shareHistory')" style="cursor:pointer">
-            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            <div style="font-size:12px;margin-top:4px">分享历史</div>
-          </div>
-          <div onclick="navigateTo('dynamic')" style="cursor:pointer">
-            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <div style="font-size:12px;margin-top:4px">动态</div>
-          </div>
-          <div onclick="navigateTo('trash')" style="cursor:pointer">
-            <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-            <div style="font-size:12px;margin-top:4px">垃圾站</div>
-          </div>
-        </div>
-      </div>
-      <div class="card" onclick="navigateTo('settings')" style="cursor:pointer">
-        <div style="display:flex;align-items:center;gap:8px">
-          <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-          <span>设置</span>
-        </div>
-      </div>
-      <div class="card" onclick="navigateTo('feedback')" style="cursor:pointer">
-        <div style="display:flex;align-items:center;gap:8px">
-          <svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <span>反馈</span>
-        </div>
-      </div>
-    `
-    loadFiles()
-  }
-  if (tab === 'settings') {
-    document.getElementById('page-settings').innerHTML = `
-      <div class="back-btn" onclick="navigateTo('me')">‹ 返回</div>
-      <div class="card" onclick="showPasswordModal()">账号</div>
-      <div class="card" onclick="toggleTheme()">外观 (当前: <span id="theme-status">浅色</span>)</div>
-      <div class="card">版本 1.0</div>
-    `
-    document.getElementById('theme-status').textContent = document.body.classList.contains('dark') ? '深色' : '浅色'
-  }
-  if (tab === 'feedback') {
-    document.getElementById('page-feedback').innerHTML = `
-      <div class="back-btn" onclick="navigateTo('me')">‹ 返回</div>
-      <div class="card" style="text-align:center">
-        <p style="margin-bottom:12px">如有问题请联系开发者</p>
-        <p style="font-size:20px;font-weight:bold;color:#4e6ef2">QQ: 2872136504</p>
-        <button class="btn-primary" style="margin-top:16px;width:auto" onclick="copyQQ()">复制QQ号</button>
-      </div>
-    `
-  }
-  if (tab === 'shareHistory') {
-    document.getElementById('page-shareHistory').innerHTML = `
-      <div class="back-btn" onclick="navigateTo('me')">‹ 返回</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:0 16px;margin-bottom:8px">
-        <h3>分享历史</h3>
-        <button class="btn-primary" style="width:auto;padding:6px 14px;background:#e74c3c" onclick="clearShareHistory()">清空记录</button>
-      </div>
-      <div id="share-history-list" style="padding:0 16px"></div>
-    `
-    loadShareHistory()
-  }
-  if (tab === 'trash') {
-    document.getElementById('page-trash').innerHTML = `
-      <div class="back-btn" onclick="navigateTo('me')">‹ 返回</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:0 16px;margin-bottom:8px">
-        <h3>垃圾站</h3>
-        <button class="btn-primary" style="width:auto;padding:6px 14px;background:#e74c3c" onclick="clearTrash()">清空</button>
-      </div>
-      <div id="trash-list" style="padding:0 16px"></div>
-    `
-    loadTrash()
-  }
-  if (tab === 'dynamic') {
-    document.getElementById('page-dynamic').innerHTML = `
-      <div class="back-btn" onclick="navigateTo('me')">‹ 返回</div>
-      <h3 style="margin:0 16px 12px">动态</h3>
-      <div id="dynamic-list" style="padding:0 16px"></div>
-    `
-    loadDynamic()
-  }
+  })
+  renderFiles()
+}
+
+function buildMePage() {
+  document.getElementById('page-me').innerHTML = `
+    <div class="card" style="display:flex;align-items:center;gap:12px">
+      <div style="width:48px;height:48px;border-radius:50%;background:#4e6ef2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px">U</div>
+      <div><div style="font-weight:500">${currentUser?.email||''}</div><div style="font-size:12px;color:var(--text2)">关注 0 | 粉丝 0</div></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between"><span>已用 <span id="used-size">0 B</span> / 1 GB</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="card" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center">
+      <div onclick="switchTab('shareHistory')"><svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg><div style="font-size:12px">分享历史</div></div>
+      <div onclick="switchTab('dynamic')"><svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><div style="font-size:12px">动态</div></div>
+      <div onclick="switchTab('trash')"><svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg><div style="font-size:12px">垃圾站</div></div>
+    </div>
+    <div class="card" onclick="switchTab('settings')"><div style="display:flex;align-items:center;gap:8px"><svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>设置</span></div></div>
+    <div class="card" onclick="switchTab('feedback')"><div style="display:flex;align-items:center;gap:8px"><svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>反馈</span></div></div>
+  `
+  loadFiles()
+}
+
+function buildSettingsPage() {
+  document.getElementById('page-settings').innerHTML = `
+    <div class="back-btn" onclick="switchTab('me')">‹ 返回</div>
+    <div class="card" onclick="showPasswordModal()">账号</div>
+    <div class="card" onclick="toggleTheme()">外观 (当前: <span id="theme-status">浅色</span>)</div>
+    <div class="card">版本 1.0</div>
+  `
+}
+
+function buildFeedbackPage() {
+  document.getElementById('page-feedback').innerHTML = `
+    <div class="back-btn" onclick="switchTab('me')">‹ 返回</div>
+    <div class="card" style="text-align:center">
+      <p style="margin-bottom:12px">如有问题请联系开发者</p>
+      <p style="font-size:20px;font-weight:bold;color:#4e6ef2">QQ: 2872136504</p>
+      <button class="btn-primary" style="margin-top:16px;width:auto" onclick="copyQQ()">复制QQ号</button>
+    </div>
+  `
+}
+
+function buildShareHistoryPage() {
+  document.getElementById('page-shareHistory').innerHTML = `
+    <div class="back-btn" onclick="switchTab('me')">‹ 返回</div>
+    <div style="display:flex;justify-content:space-between;padding:0 16px;margin-bottom:8px"><h3>分享历史</h3><button class="btn-primary" style="background:#e74c3c" onclick="clearShareHistory()">清空</button></div>
+    <div id="share-history-list" style="padding:0 16px"></div>
+  `
+  loadShareHistory()
+}
+
+function buildTrashPage() {
+  document.getElementById('page-trash').innerHTML = `
+    <div class="back-btn" onclick="switchTab('me')">‹ 返回</div>
+    <div style="display:flex;justify-content:space-between;padding:0 16px;margin-bottom:8px"><h3>垃圾站</h3><button class="btn-primary" style="background:#e74c3c" onclick="clearTrash()">清空</button></div>
+    <div id="trash-list" style="padding:0 16px"></div>
+  `
+  loadTrash()
+}
+
+function buildDynamicPage() {
+  document.getElementById('page-dynamic').innerHTML = `
+    <div class="back-btn" onclick="switchTab('me')">‹ 返回</div>
+    <h3 style="margin:0 16px 12px">动态</h3>
+    <div id="dynamic-list" style="padding:0 16px"></div>
+  `
+  loadDynamic()
 }
 
 window.renderFiles = function() {
@@ -636,7 +464,6 @@ window.renderFiles = function() {
   if (currentFilter === 'image') filtered = filtered.filter(f => f.type?.startsWith('image/'))
   else if (currentFilter === 'video') filtered = filtered.filter(f => f.type?.startsWith('video/'))
   else if (currentFilter === 'archive') filtered = filtered.filter(f => /zip|rar|7z|tar|gz/.test(f.type||''))
-  else if (currentFilter === 'folder') filtered = filtered.filter(f => !f.type)
   else if (currentFilter === 'other') filtered = filtered.filter(f => f.type && !f.type.startsWith('image/') && !f.type.startsWith('video/') && !/zip|rar|7z|tar|gz/.test(f.type))
   const container = document.getElementById('file-container')
   if (!container) return
@@ -673,25 +500,22 @@ window.renderFiles = function() {
     btn.onclick = async () => {
       const code = Math.random().toString(36).substring(2, 6).toUpperCase()
       await supabase.from('share_links').insert({
-        file_id: btn.dataset.share,
-        creator_id: currentUser.id,
-        code,
+        file_id: btn.dataset.share, creator_id: currentUser.id, code,
         expires_at: new Date(Date.now() + 7*24*60*60*1000)
       })
       const link = `${location.origin}${location.pathname}?code=${code}`
-      prompt('分享链接（已复制到剪贴板）：', link)
+      prompt('分享链接：', link)
       navigator.clipboard.writeText(link).catch(()=>{})
-      loadHomeData()
     }
   })
   document.querySelectorAll('[data-delete]').forEach(btn => {
     btn.onclick = async () => {
       if (!confirm('确定删除？')) return
-      addTrashItem({ id: btn.dataset.delete, name: btn.dataset.name, path: btn.dataset.path, time: new Date().toLocaleString() })
+      addTrashItem({ name: btn.dataset.name, time: new Date().toLocaleString() })
       await supabase.from('files').delete().eq('id', btn.dataset.delete)
       await supabase.storage.from('user-files').remove([btn.dataset.path])
       loadFiles()
-      loadHomeData()
+      if (currentTab === 'home') loadHomeData()
     }
   })
 }
@@ -722,49 +546,25 @@ function loadTrash() {
   const trash = JSON.parse(localStorage.getItem('trash') || '[]')
   const container = document.getElementById('trash-list')
   if (!container) return
-  if (trash.length === 0) {
-    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2)">垃圾站为空</div>'
-    return
-  }
-  container.innerHTML = trash.map(item => `
-    <div class="file-row">
-      <div class="file-info">
-        <div class="file-name">${item.name}</div>
-        <div class="file-meta">删除于 ${item.time}</div>
-      </div>
-    </div>
-  `).join('')
+  container.innerHTML = trash.length === 0 ? '<div style="text-align:center;padding:40px;color:var(--text2)">垃圾站为空</div>' :
+    trash.map(i => `<div class="file-row"><div class="file-info"><div class="file-name">${i.name}</div><div class="file-meta">${i.time}</div></div></div>`).join('')
 }
 
-window.clearTrash = function() {
-  localStorage.removeItem('trash')
-  loadTrash()
-  showToast('已清空')
-}
+window.clearTrash = () => { localStorage.removeItem('trash'); loadTrash(); showToast('已清空') }
 
 async function loadShareHistory() {
   const { data } = await supabase.from('share_links').select('files(name), code, created_at').eq('creator_id', currentUser?.id).order('created_at', { ascending: false })
   const container = document.getElementById('share-history-list')
   if (!container) return
-  if (!data || data.length === 0) {
-    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2)">暂无分享记录</div>'
-    return
-  }
-  container.innerHTML = data.map(s => `
-    <div class="file-row">
-      <div class="file-info">
-        <div class="file-name">${s.files?.name || '未知文件'}</div>
-        <div class="file-meta">提取码: ${s.code} · ${new Date(s.created_at).toLocaleDateString()}</div>
-      </div>
-    </div>
-  `).join('')
+  container.innerHTML = (!data || data.length === 0) ? '<div style="text-align:center;padding:40px;color:var(--text2)">暂无分享记录</div>' :
+    data.map(s => `<div class="file-row"><div class="file-info"><div class="file-name">${s.files?.name||'未知'}</div><div class="file-meta">提取码: ${s.code} · ${new Date(s.created_at).toLocaleDateString()}</div></div></div>`).join('')
 }
 
-window.clearShareHistory = async function() {
-  if (!confirm('确定清空所有分享记录吗？')) return
+window.clearShareHistory = async () => {
+  if (!confirm('清空所有分享记录？')) return
   await supabase.from('share_links').delete().eq('creator_id', currentUser.id)
   loadShareHistory()
-  showToast('分享记录已清空')
+  showToast('已清空')
 }
 
 async function loadDynamic() {
@@ -772,76 +572,40 @@ async function loadDynamic() {
     supabase.from('files').select('name, created_at').eq('user_id', currentUser?.id).order('created_at', { ascending: false }).limit(10),
     supabase.from('share_links').select('files(name), created_at').eq('creator_id', currentUser?.id).order('created_at', { ascending: false }).limit(10)
   ])
-  let activities = []
-  if (filesRes.data) filesRes.data.forEach(f => activities.push({ type: 'upload', name: f.name, time: f.created_at }))
-  if (sharesRes.data) sharesRes.data.forEach(s => activities.push({ type: 'share', name: s.files?.name || '未知', time: s.created_at }))
-  activities.sort((a, b) => new Date(b.time) - new Date(a.time))
+  let acts = []
+  if (filesRes.data) filesRes.data.forEach(f => acts.push({ type:'upload', name: f.name, time: f.created_at }))
+  if (sharesRes.data) sharesRes.data.forEach(s => acts.push({ type:'share', name: s.files?.name||'未知', time: s.created_at }))
+  acts.sort((a,b) => new Date(b.time) - new Date(a.time))
   const container = document.getElementById('dynamic-list')
   if (!container) return
-  if (activities.length === 0) {
-    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2)">暂无动态</div>'
-    return
-  }
-  container.innerHTML = activities.slice(0, 15).map(a => `
-    <div class="file-row">
-      <div class="file-info">
-        <div class="file-name">${a.type === 'upload' ? '上传了' : '分享了'} ${a.name}</div>
-        <div class="file-meta">${new Date(a.time).toLocaleString()}</div>
-      </div>
-    </div>
-  `).join('')
+  container.innerHTML = acts.length === 0 ? '<div style="text-align:center;padding:40px;color:var(--text2)">暂无动态</div>' :
+    acts.slice(0,15).map(a => `<div class="file-row"><div class="file-info"><div class="file-name">${a.type==='upload'?'上传了':'分享了'} ${a.name}</div><div class="file-meta">${new Date(a.time).toLocaleString()}</div></div></div>`).join('')
 }
 
 async function loadHomeData() {
   if (!currentUser) return
-  document.getElementById('home-username').textContent = currentUser.email
-  document.getElementById('home-avatar').textContent = currentUser.email.charAt(0).toUpperCase()
-  let history = JSON.parse(localStorage.getItem('browseHistory') || '[]')
-  const historyDiv = document.getElementById('recent-browse')
-  if (history.length === 0) {
-    historyDiv.innerHTML = '<div style="color:var(--text2);text-align:center">暂无浏览记录</div>'
-  } else {
-    historyDiv.innerHTML = history.slice(0,5).map(h => `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:14px">${h.name} <span style="color:var(--text2);float:right">${h.time}</span></div>`).join('')
-  }
+  const history = JSON.parse(localStorage.getItem('browseHistory') || '[]')
+  document.getElementById('recent-browse').innerHTML = history.length === 0 ? '<div style="color:var(--text2);text-align:center">暂无浏览记录</div>' :
+    history.slice(0,5).map(h => `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:14px">${h.name} <span style="color:var(--text2);float:right">${h.time}</span></div>`).join('')
 
-  const uploadDiv = document.getElementById('recent-upload')
   const { data: uploads } = await supabase.from('files').select('name,created_at').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(3)
-  if (uploads && uploads.length > 0) {
-    uploadDiv.innerHTML = uploads.map(f => `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:14px">${f.name} <span style="color:var(--text2);float:right">${new Date(f.created_at).toLocaleDateString()}</span></div>`).join('')
-  } else {
-    uploadDiv.innerHTML = '<div style="color:var(--text2);text-align:center">暂无上传记录</div>'
-  }
+  document.getElementById('recent-upload').innerHTML = (uploads && uploads.length > 0) ?
+    uploads.map(f => `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:14px">${f.name} <span style="color:var(--text2);float:right">${new Date(f.created_at).toLocaleDateString()}</span></div>`).join('') :
+    '<div style="color:var(--text2);text-align:center">暂无上传记录</div>'
 
-  const shareDiv = document.getElementById('recent-share')
   const { data: shares } = await supabase.from('share_links').select('files(name), created_at').eq('creator_id', currentUser.id).order('created_at', { ascending: false }).limit(3)
-  if (shares && shares.length > 0) {
-    shareDiv.innerHTML = shares.map(s => `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:14px">${s.files?.name || '未知'} <span style="color:var(--text2);float:right">${new Date(s.created_at).toLocaleDateString()}</span></div>`).join('')
-  } else {
-    shareDiv.innerHTML = '<div style="color:var(--text2);text-align:center">暂无分享记录</div>'
-  }
+  document.getElementById('recent-share').innerHTML = (shares && shares.length > 0) ?
+    shares.map(s => `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:14px">${s.files?.name||'未知'} <span style="color:var(--text2);float:right">${new Date(s.created_at).toLocaleDateString()}</span></div>`).join('') :
+    '<div style="color:var(--text2);text-align:center">暂无分享记录</div>'
 }
 
 async function loadShare(code) {
-  const { data: links, error } = await supabase
-    .from('share_links')
-    .select('*, files(*)')
-    .eq('code', code)
-    .maybeSingle()
-
-  if (error || !links) {
-    document.getElementById('share-content').innerHTML = '<p style="color:#e74c3c">分享不存在或已失效</p>'
-    return
-  }
-  if (links.expires_at && new Date(links.expires_at) < new Date()) {
-    document.getElementById('share-content').innerHTML = '<p style="color:#e74c3c">分享已过期</p>'
-    return
-  }
+  const { data: links, error } = await supabase.from('share_links').select('*, files(*)').eq('code', code).maybeSingle()
+  const content = document.getElementById('share-content')
+  if (error || !links) { content.innerHTML = '<p style="color:#e74c3c">分享不存在或已失效</p>'; return }
+  if (links.expires_at && new Date(links.expires_at) < new Date()) { content.innerHTML = '<p style="color:#e74c3c">分享已过期</p>'; return }
   const file = links.files
-  document.getElementById('share-content').innerHTML = `
-    <div style="font-size:18px;margin-bottom:8px;color:var(--text)">${file.name}</div>
-    <div style="color:var(--text2);margin-bottom:24px">${formatSize(file.size)}</div>
-    <button class="btn-primary" id="download-share-btn">下载文件</button>
-  `
+  content.innerHTML = `<div style="font-size:18px;margin-bottom:8px">${file.name}</div><div style="color:var(--text2);margin-bottom:24px">${formatSize(file.size)}</div><button class="btn-primary" id="download-share-btn">下载文件</button>`
   document.getElementById('download-share-btn').onclick = async () => {
     const { data } = await supabase.storage.from('user-files').createSignedUrl(file.storage_path, 60)
     if (data?.signedUrl) window.open(data.signedUrl, '_blank')
@@ -858,7 +622,7 @@ function showToast(msg) {
 
 function formatSize(bytes) {
   if (!bytes) return '0 B'
-  const k = 1024, sizes = ['B', 'KB', 'MB', 'GB']
+  const k = 1024, sizes = ['B','KB','MB','GB']
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
@@ -867,10 +631,7 @@ async function checkAuth() {
   const { data: { session } } = await supabase.auth.getSession()
   if (session) {
     currentUser = session.user
-    if (localStorage.getItem('theme') === 'dark') {
-      document.body.classList.add('dark')
-    }
-    document.getElementById('theme-status').textContent = document.body.classList.contains('dark') ? '深色' : '浅色'
+    if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark')
     showMainPages()
   } else {
     showAuthPage()
@@ -882,6 +643,37 @@ async function loadFiles() {
   const { data } = await supabase.from('files').select('*').order('created_at', { ascending: false })
   allFiles = data || []
 }
+
+window.showPasswordModal = () => document.getElementById('pwd-modal').style.display = 'flex'
+window.closePwdModal = () => document.getElementById('pwd-modal').style.display = 'none'
+window.changePassword = async () => {
+  const old = document.getElementById('old-password').value
+  const new1 = document.getElementById('new-password1').value
+  const new2 = document.getElementById('new-password2').value
+  if (!old || !new1 || !new2) return alert('请填写完整')
+  if (new1 !== new2) return alert('两次新密码不一致')
+  try {
+    const { error } = await supabase.auth.updateUser({ password: new1 })
+    if (error) throw error
+    showToast('密码修改成功')
+    closePwdModal()
+  } catch (e) { alert('修改失败：' + e.message) }
+}
+window.toggleTheme = () => {
+  document.body.classList.toggle('dark')
+  localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light')
+  document.getElementById('theme-status').textContent = document.body.classList.contains('dark') ? '深色' : '浅色'
+}
+window.copyQQ = () => { navigator.clipboard.writeText('2872136504').then(() => showToast('QQ号已复制')) }
+
+document.getElementById('close-upload-panel').addEventListener('click', () => {
+  document.getElementById('upload-panel').classList.remove('open')
+  document.getElementById('overlay').classList.remove('show')
+})
+document.getElementById('overlay').addEventListener('click', () => {
+  document.getElementById('upload-panel').classList.remove('open')
+  document.getElementById('overlay').classList.remove('show')
+})
 
 if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark')
 </script>
