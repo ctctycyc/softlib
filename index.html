@@ -219,11 +219,8 @@ function hideSplash() {
     skipBtn.style.display = 'none'
     document.getElementById('upload-panel').classList.remove('open')
     document.getElementById('overlay').classList.remove('show')
-    if (shareCode) {
-      showSharePage()
-    } else {
-      checkAuth()
-    }
+    if (shareCode) showSharePage()
+    else checkAuth()
   }, 500)
 }
 
@@ -307,7 +304,6 @@ function renderUploadTasks() {
   `).join('')
 }
 
-// 全局函数
 window.switchTab = function(tab) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
@@ -554,7 +550,7 @@ async function saveFileToMyAccount() {
 
 async function loadFiles() {
   if (!currentUser) return
-  const { data } = await supabase.from('files').select('*').order('created_at', { ascending: false })
+  const { data } = await supabase.from('files').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false })
   allFiles = data || []
   updateMeStorage()
 }
