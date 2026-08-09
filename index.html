@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>极简云盘</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:#f0f2f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh}
+    .container{width:100%;max-width:900px;margin:30px auto;padding:0 15px}
+    .panel{background:#fff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.06);overflow:hidden}
+    .panel-header{background:#fff;padding:18px 24px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between}
+    .panel-header h2{font-size:20px;font-weight:500;color:#222}
+    .panel-body{padding:24px}
+    .hidden{display:none!important}
+    .login-form{max-width:400px;margin:30px auto}
+    .login-form h2{font-size:24px;font-weight:500;margin-bottom:8px;color:#222}
+    .login-form .sub{color:#999;margin-bottom:24px;font-size:14px}
+    .login-form input{width:100%;padding:12px 14px;margin-bottom:14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;transition:.2s}
+    .login-form input:focus{border-color:#4e6ef2;box-shadow:0 0 0 2px rgba(78,110,242,.15)}
+    .btn{display:inline-block;width:100%;padding:12px;background:#4e6ef2;color:#fff;border:none;border-radius:8px;font-size:15px;cursor:pointer;transition:.2s;text-align:center}
+    .btn:hover{background:#4462d0}
+    .btn-sm{width:auto;padding:6px 14px;font-size:13px;border-radius:6px;margin-left:8px;background:#f5f5f5;color:#333;border:1px solid #ddd}
+    .btn-sm.primary{background:#4e6ef2;color:#fff;border:none}
+    .btn-sm.danger{background:#fff;color:#e74c3c;border:1px solid #e74c3c}
+    .toggle-link{color:#4e6ef2;cursor:pointer;text-decoration:none;font-size:14px}
+    .top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+    .user-info{font-size:14px;color:#666}
+    .upload-zone{margin-bottom:20px;display:flex;align-items:center;gap:10px}
+    .file-table{width:100%;border-collapse:collapse}
+    .file-table th,.file-table td{text-align:left;padding:12px 8px;border-bottom:1px solid #f0f0f0;font-size:14px}
+    .file-table th{color:#999;font-weight:400}
+    .file-name{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
+    .file-icon{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;margin-right:8px;vertical-align:middle}
+    .file-icon svg{width:18px;height:18px}
+    .actions{display:flex;gap:6px}
+    .copied-toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+    .copied-toast.show{opacity:1}
+    .error-message{color:#e74c3c;font-size:14px;margin-top:10px;text-align:center}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="panel hidden" id="share-panel">
+      <div class="panel-header"><h2>你收到了一个文件</h2></div>
+      <div class="panel-body" id="share-content"></div>
+    </div>
+
+    <div class="panel hidden" id="auth-panel">
+      <div class="login-form">
+        <h2 id="auth-title">登录</h2>
+        <p class="sub" id="auth-sub">欢迎回来</p>
+        <input type="email" id="email" placeholder="邮箱" autocomplete="email">
+        <input type="password" id="password" placeholder="密码">
+        <button class="btn" id="auth-btn">登录</button>
+        <div style="margin-top:16px;text-align:center">
+          <span id="toggle-text" style="color:#999;font-size:14px">没有账号？</span>
+          <a class="toggle-link" id="toggle-link">注册</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel hidden" id="app-panel">
+      <div class="panel-header">
+        <h2>我的文件</h2>
+        <div style="display:flex;align-items:center;gap:16px">
+          <span id="user-email-display" style="color:#666;font-size:14px"></span>
+          <button class="btn-sm danger" id="logout-btn">退出</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="upload-zone">
+          <button class="btn" style="width:auto;padding:10px 24px" id="upload-btn">+ 上传文件</button>
+          <input type="file" id="upload-input" multiple style="display:none">
+          <span style="color:#999;font-size:13px">支持所有文件类型</span>
+        </div>
+        <div id="file-list-container">
+          <table class="file-table">
+            <thead><tr><th style="width:40%">文件名</th><th style="width:15%">大小</th><th style="width:20%">上传时间</th><th style="width:25%">操作</th></tr></thead>
+            <tbody id="file-tbody"></tbody>
+          </table>
+          <div id="empty-tip" style="text-align:center;padding:40px;color:#999;font-size:14px">暂无文件，点击上方按钮上传</div>
+        </div>
+      </div>
+    </div>
+    <div class="copied-toast" id="copied-toast">链接已复制到剪贴板</div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+    const supabase = createClient('YOUR_SUPABASE_URL', 'YOUR_ANON_KEY')
+
+    const sharePanel = document.getElementById('share-panel')
+    const authPanel = document.getElementById('auth-panel')
+    const appPanel = document.getElementById('app-panel')
+    const shareContent = document.getElementById('share-content')
+    const authTitle = document.getElementById('auth-title')
+    const authSub = document.getElementById('auth-sub')
+    const authBtn = document.getElementById('auth-btn')
+    const toggleText = document.getElementById('toggle-text')
+    const toggleLink = document.getElementById('toggle-link')
+    const emailInput = document.getElementById('email')
+    const passwordInput = document.getElementById('password')
+    const userEmailDisplay = document.getElementById('user-email-display')
+    const fileTbody = document.getElementById('file-tbody')
+    const emptyTip = document.getElementById('empty-tip')
+    const uploadBtn = document.getElementById('upload-btn')
+    const uploadInput = document.getElementById('upload-input')
+    const copiedToast = document.getElementById('copied-toast')
+    let isLogin = true
+
+    const params = new URLSearchParams(location.search)
+    const shareCode = params.get('code')
+
+    if (shareCode) {
+      sharePanel.classList.remove('hidden')
+      loadShare(shareCode)
+    } else {
+      checkAuth()
+    }
+
+    toggleLink.addEventListener('click', () => {
+      isLogin = !isLogin
+      authTitle.textContent = isLogin ? '登录' : '注册'
+      authSub.textContent = isLogin ? '欢迎回来' : '创建新账号'
+      authBtn.textContent = isLogin ? '登录' : '注册'
+      toggleText.textContent = isLogin ? '没有账号？' : '已有账号？'
+      toggleLink.textContent = isLogin ? '注册' : '登录'
+    })
+
+    authBtn.addEventListener('click', async () => {
+      const email = emailInput.value.trim()
+      const password = passwordInput.value
+      if (!email || !password) return alert('请填写邮箱和密码')
+      const { error } = isLogin
+        ? await supabase.auth.signInWithPassword({ email, password })
+        : await supabase.auth.signUp({ email, password })
+      if (error) return alert(error.message)
+      if (!isLogin) alert('注册成功，已自动登录')
+      checkAuth()
+    })
+
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await supabase.auth.signOut()
+      checkAuth()
+    })
+
+    uploadBtn.addEventListener('click', () => uploadInput.click())
+    uploadInput.addEventListener('change', async (e) => {
+      const files = e.target.files
+      for (const file of files) await uploadFile(file)
+      uploadInput.value = ''
+    })
+
+    async function uploadFile(file) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const path = `${user.id}/${Date.now()}_${file.name}`
+      const { error } = await supabase.storage.from('user-files').upload(path, file)
+      if (error) return alert('上传失败：' + error.message)
+      await supabase.from('files').insert({
+        user_id: user.id,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        storage_path: path
+      })
+      loadFiles()
+    }
+
+    async function loadFiles() {
+      const { data } = await supabase.from('files').select('*').order('created_at', { ascending: false })
+      if (!data || data.length === 0) {
+        fileTbody.innerHTML = ''
+        emptyTip.classList.remove('hidden')
+        return
+      }
+      emptyTip.classList.add('hidden')
+      fileTbody.innerHTML = data.map(f => `
+        <tr>
+          <td><span class="file-icon">${getFileIconSVG(f.type)}</span><span class="file-name" title="${f.name}">${f.name}</span></td>
+          <td>${formatSize(f.size)}</td>
+          <td>${new Date(f.created_at).toLocaleDateString()}</td>
+          <td class="actions">
+            <button class="btn-sm" data-download="${f.storage_path}">下载</button>
+            <button class="btn-sm primary" data-share="${f.id}">分享</button>
+            <button class="btn-sm danger" data-delete="${f.id}" data-path="${f.storage_path}">删除</button>
+          </td>
+        </tr>
+      `).join('')
+
+      document.querySelectorAll('[data-download]').forEach(btn => {
+        btn.onclick = () => downloadFile(btn.dataset.download)
+      })
+      document.querySelectorAll('[data-share]').forEach(btn => {
+        btn.onclick = () => createShare(btn.dataset.share)
+      })
+      document.querySelectorAll('[data-delete]').forEach(btn => {
+        btn.onclick = () => deleteFile(btn.dataset.delete, btn.dataset.path)
+      })
+    }
+
+    async function downloadFile(path) {
+      const { data } = await supabase.storage.from('user-files').createSignedUrl(path, 60)
+      if (data?.signedUrl) window.open(data.signedUrl, '_blank')
+    }
+
+    async function deleteFile(id, path) {
+      if (!confirm('确定删除该文件吗？')) return
+      await supabase.from('files').delete().eq('id', id)
+      await supabase.storage.from('user-files').remove([path])
+      loadFiles()
+    }
+
+    async function createShare(fileId) {
+      const code = Math.random().toString(36).substring(2, 8).toUpperCase()
+      const { error } = await supabase.from('share_links').insert({
+        file_id: fileId,
+        creator_id: (await supabase.auth.getUser()).data.user.id,
+        code,
+        expires_at: new Date(Date.now() + 7*24*60*60*1000)
+      })
+      if (error) return alert('分享失败：' + error.message)
+      const longLink = `${location.origin}${location.pathname}?code=${code}`
+      try {
+        const res = await fetch(`https://suo.im/api.htm?format=simple&url=${encodeURIComponent(longLink)}`)
+        const shortLink = await res.text()
+        if (shortLink.startsWith('http')) {
+          await navigator.clipboard.writeText(shortLink)
+          copiedToast.classList.add('show')
+          setTimeout(() => copiedToast.classList.remove('show'), 2000)
+        } else {
+          alert('分享链接：' + longLink)
+        }
+      } catch (e) {
+        alert('分享链接：' + longLink)
+      }
+    }
+
+    async function loadShare(code) {
+      const { data: links, error } = await supabase
+        .from('share_links')
+        .select('*, files(*)')
+        .eq('code', code)
+        .maybeSingle()
+
+      if (error || !links) {
+        shareContent.innerHTML = '<p class="error-message">分享不存在或已失效</p>'
+        return
+      }
+      if (links.expires_at && new Date(links.expires_at) < new Date()) {
+        shareContent.innerHTML = '<p class="error-message">分享已过期</p>'
+        return
+      }
+      const file = links.files
+      shareContent.innerHTML = `
+        <div style="text-align:center">
+          <div style="font-size:18px;margin-bottom:8px;color:#222">${file.name}</div>
+          <div style="color:#999;margin-bottom:24px">${formatSize(file.size)}</div>
+          <button class="btn" style="width:auto;padding:10px 32px" id="download-share-btn">下载文件</button>
+        </div>
+      `
+      document.getElementById('download-share-btn').onclick = async () => {
+        const { data } = await supabase.storage.from('user-files').createSignedUrl(file.storage_path, 60)
+        if (data?.signedUrl) window.open(data.signedUrl, '_blank')
+        else alert('无法获取下载链接')
+      }
+    }
+
+    function getFileIconSVG(type) {
+      const svgImage = '<svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'
+      const svgVideo = '<svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>'
+      const svgPdf = '<svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/></svg>'
+      const svgArchive = '<svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2"><path d="M21 8v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8"/><polyline points="11 12 11 2 13 2 13 12"/><line x1="7" y1="6" x2="17" y2="6"/></svg>'
+      if (!type) return '📁'
+      if (type.startsWith('image/')) return svgImage
+      if (type.startsWith('video/')) return svgVideo
+      if (type.includes('pdf')) return svgPdf
+      if (type.includes('zip') || type.includes('rar') || type.includes('7z') || type.includes('tar') || type.includes('gz')) return svgArchive
+      return '📁'
+    }
+
+    function formatSize(bytes) {
+      if (!bytes) return '0 B'
+      const k = 1024
+      const sizes = ['B', 'KB', 'MB', 'GB']
+      const i = Math.floor(Math.log(bytes) / Math.log(k))
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
+    }
+
+    async function checkAuth() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        authPanel.classList.add('hidden')
+        appPanel.classList.remove('hidden')
+        sharePanel.classList.add('hidden')
+        userEmailDisplay.textContent = session.user.email
+        loadFiles()
+      } else {
+        authPanel.classList.remove('hidden')
+        appPanel.classList.add('hidden')
+        sharePanel.classList.add('hidden')
+      }
+    }
+  </script>
+</body>
+</html>
