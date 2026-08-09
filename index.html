@@ -20,19 +20,16 @@
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
       background:var(--bg);height:100vh;overflow:hidden;color:var(--text);
       transition:background .3s;
-      animation: bodyFadeIn .5s ease;
     }
-    @keyframes bodyFadeIn { from{opacity:0} to{opacity:1} }
     .page{display:none;height:100vh;overflow-y:auto;padding-bottom:70px}
-    .page.active{display:block;animation: pageSlideUp .3s ease}
-    @keyframes pageSlideUp { from{transform:translateY(10px);opacity:0} to{transform:translateY(0);opacity:1} }
+    .page.active{display:block}
     .bottom-nav{
       position:fixed;bottom:0;left:0;right:0;height:60px;background:var(--card-bg);
       display:none;border-top:1px solid var(--border);z-index:100;
     }
     .nav-item{
       flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-      font-size:11px;color:var(--text2);cursor:pointer;transition:color .2s;
+      font-size:11px;color:var(--text2);cursor:pointer;
     }
     .nav-item.active{color:#4e6ef2}
     .nav-item .nav-icon{width:24px;height:24px;margin-bottom:2px}
@@ -45,18 +42,15 @@
       background:#4e6ef2;color:#fff;border:none;font-size:24px;z-index:99;
       display:flex;align-items:center;justify-content:center;
       box-shadow:0 4px 12px rgba(78,110,242,.4);
-      animation: fabIn .5s ease;
     }
-    @keyframes fabIn { from{transform:scale(0)} to{transform:scale(1)} }
     input{
       width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;
       font-size:14px;outline:none;background:var(--input-bg);color:var(--text);
     }
     .card{
       background:var(--card-bg);border-radius:12px;padding:16px;margin:12px 16px;
-      box-shadow:var(--shadow);animation: cardFadeIn .4s ease;
+      box-shadow:var(--shadow);
     }
-    @keyframes cardFadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
     .file-row{
       display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);
     }
@@ -119,6 +113,11 @@
     .upload-panel-body{flex:1;overflow-y:auto;padding:16px}
     .overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);z-index:149;display:none}
     .overlay.show{display:block}
+    .share-header{display:flex;align-items:center;padding:16px;background:var(--card-bg);border-bottom:1px solid var(--border)}
+    .share-info-card{display:flex;align-items:center;gap:12px;padding:16px;background:var(--card-bg);margin:12px 16px;border-radius:12px}
+    .share-controls{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--card-bg);margin:0 16px;border-radius:12px}
+    .share-file-item{display:flex;align-items:center;padding:12px 16px;background:var(--card-bg);margin:0 16px;border-radius:12px;margin-top:8px}
+    .save-bar{position:fixed;bottom:0;left:0;right:0;padding:12px 16px;background:var(--card-bg);border-top:1px solid var(--border);display:flex;justify-content:flex-start}
   </style>
 </head>
 <body>
@@ -154,11 +153,36 @@
 </div>
 
 <div id="share-page" style="display:none">
-  <div style="display:flex;align-items:center;justify-content:center;height:100vh">
-    <div class="card" style="width:90%;max-width:400px;text-align:center">
-      <h2>你收到了一个文件</h2>
-      <div id="share-content"></div>
+  <div class="share-header">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4e6ef2" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+    <span style="font-weight:500;margin-left:8px;color:#4e6ef2">极简云</span>
+  </div>
+  <div class="share-info-card" id="share-info-card">
+    <div style="width:40px;height:40px;border-radius:50%;background:#4e6ef2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px">U</div>
+    <div style="flex:1"><div style="font-weight:500" id="share-user-email"></div><div style="font-size:12px;color:var(--text2)">分享的文件</div></div>
+    <div style="background:#f0f2ff;padding:4px 8px;border-radius:12px;font-size:12px;color:#4e6ef2">来自分享</div>
+  </div>
+  <div class="share-controls">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-weight:500">文件列表</span>
+      <span style="font-size:12px;color:var(--text2)">1项</span>
     </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <input type="checkbox" style="width:18px;height:18px;accent-color:#4e6ef2">
+    </div>
+  </div>
+  <div class="share-file-item" id="share-file-item">
+    <div class="file-icon" id="share-file-icon"></div>
+    <div class="file-info">
+      <div class="file-name" id="share-file-name"></div>
+      <div class="file-meta" id="share-file-meta"></div>
+    </div>
+    <input type="checkbox" style="width:18px;height:18px;accent-color:#4e6ef2" checked>
+  </div>
+  <div class="save-bar">
+    <button class="btn-primary" id="login-save-btn">登录并保存</button>
   </div>
 </div>
 
@@ -207,6 +231,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 const supabase = createClient('https://plwljusbfqkvlhpclvsv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsd2xqdXNiZnFrdmxocGNsdnN2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyNzk1MTUsImV4cCI6MjEwMTg1NTUxNX0.BDVqL87UWewkYt1j-z8O3Am_3tML954F4Pyi71T_Rd0')
 
 let allFiles = [], currentFilter = 'all', currentUser = null, uploadTasks = [], isLogin = true
+let shareFileData = null
 const shareCode = new URLSearchParams(location.search).get('code')
 
 const splash = document.getElementById('splash')
@@ -265,7 +290,11 @@ document.getElementById('auth-btn').addEventListener('click', async () => {
     : await supabase.auth.signUp({ email, password })
   if (error) return alert(error.message)
   if (!isLogin) alert('注册成功，已自动登录')
-  checkAuth()
+  if (shareCode && isLogin) {
+    await handleSaveAfterLogin()
+  } else {
+    checkAuth()
+  }
 })
 
 document.querySelectorAll('.nav-item').forEach(item => {
@@ -616,17 +645,63 @@ async function loadHomeData() {
 }
 
 async function loadShare(code) {
-  const { data: links, error } = await supabase.from('share_links').select('*, files(*)').eq('code', code).maybeSingle()
-  const content = document.getElementById('share-content')
-  if (error || !links) { content.innerHTML = '<p style="color:#e74c3c">分享不存在或已失效</p>'; return }
-  if (links.expires_at && new Date(links.expires_at) < new Date()) { content.innerHTML = '<p style="color:#e74c3c">分享已过期</p>'; return }
-  const file = links.files
-  content.innerHTML = `<div style="font-size:18px;margin-bottom:8px">${file.name}</div><div style="color:var(--text2);margin-bottom:24px">${formatSize(file.size)}</div><button class="btn-primary" id="download-share-btn">下载文件</button>`
-  document.getElementById('download-share-btn').onclick = async () => {
-    const { data } = await supabase.storage.from('user-files').createSignedUrl(file.storage_path, 60)
-    if (data?.signedUrl) window.open(data.signedUrl, '_blank')
-    else alert('无法获取下载链接')
+  const { data: links, error } = await supabase.from('share_links').select('*, files(*, creator:user_id(email))').eq('code', code).maybeSingle()
+  if (error || !links) { showShareError('分享不存在或已失效'); return }
+  if (links.expires_at && new Date(links.expires_at) < new Date()) { showShareError('分享已过期'); return }
+  shareFileData = links.files
+  document.getElementById('share-user-email').textContent = shareFileData.creator?.email || '用户'
+  document.getElementById('share-file-name').textContent = shareFileData.name
+  document.getElementById('share-file-meta').textContent = formatSize(shareFileData.size)
+  document.getElementById('share-file-icon').innerHTML = getFileIconHTML(shareFileData.type)
+  document.getElementById('login-save-btn').addEventListener('click', async () => {
+    if (currentUser) {
+      await saveFileToMyAccount()
+    } else {
+      document.getElementById('auth-page').style.display = 'block'
+      document.getElementById('auth-btn').dataset.mode = 'save'
+      isLogin = true
+      document.getElementById('auth-title').textContent = '登录'
+      document.getElementById('auth-sub').textContent = '登录后保存文件'
+      document.getElementById('auth-btn').textContent = '登录并保存'
+      document.getElementById('toggle-text').textContent = '没有账号？'
+      document.getElementById('toggle-link').textContent = '注册'
+    }
+  })
+}
+
+function showShareError(msg) {
+  document.getElementById('share-file-item').style.display = 'none'
+  document.getElementById('login-save-btn').style.display = 'none'
+  const card = document.getElementById('share-info-card')
+  card.innerHTML = `<div style="color:#e74c3c;text-align:center;width:100%">${msg}</div>`
+}
+
+async function saveFileToMyAccount() {
+  if (!shareFileData || !currentUser) return
+  showToast('正在保存...')
+  const newPath = `${currentUser.id}/${Date.now()}_${shareFileData.name}`
+  const { data: copyData, error: copyError } = await supabase.storage.from('user-files').copy(shareFileData.storage_path, newPath)
+  if (copyError) {
+    showToast('保存失败：' + copyError.message)
+    return
   }
+  const { error: insertError } = await supabase.from('files').insert({
+    user_id: currentUser.id,
+    name: shareFileData.name,
+    size: shareFileData.size,
+    type: shareFileData.type,
+    storage_path: newPath
+  })
+  if (insertError) {
+    showToast('文件记录失败：' + insertError.message)
+  } else {
+    showToast('文件已保存到你的网盘')
+  }
+}
+
+async function handleSaveAfterLogin() {
+  document.getElementById('auth-page').style.display = 'none'
+  if (shareFileData) await saveFileToMyAccount()
 }
 
 function showToast(msg) {
