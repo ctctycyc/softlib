@@ -1,9 +1,0 @@
-{
-  "name": "软件库",
-  "short_name": "软件库",
-  "description": "软件库 - 收集实用软件与工具",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#f4f6f9",
-  "theme_color": "#3b6ff5"
-}
