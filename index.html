@@ -515,11 +515,10 @@ async function loadShare(code) {
   if (!shareFileData) {
     shareFileItem.style.display = 'none'
     loginSaveBtn.style.display = 'none'
-    infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center;width:100%">文件数据丢失</div>'
+    infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center;width:100%">文件已被删除，无法下载</div>'
     return
   }
 
-  // 填充文件信息
   document.getElementById('share-user-email').textContent = '用户'
   document.getElementById('share-file-name').textContent = shareFileData.name
   document.getElementById('share-file-meta').textContent = formatSize(shareFileData.size)
