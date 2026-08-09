@@ -367,7 +367,6 @@ window.renderFiles = function() {
         <button class="btn-primary btn-sm btn-danger" data-delete="${f.id}" data-path="${f.storage_path}" data-name="${f.name}">删除</button>
       </div>
     </div>`).join('')
-  // 绑定事件
   document.querySelectorAll('[data-view]').forEach(btn => {
     btn.onclick = () => supabase.storage.from('user-files').createSignedUrl(btn.dataset.view, 60).then(({ data }) => {
       if (data?.signedUrl) { window.open(data.signedUrl, '_blank'); addBrowseHistory(btn.dataset.name); if (document.getElementById('page-home').classList.contains('active')) loadHomeData() }
