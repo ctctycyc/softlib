@@ -541,11 +541,39 @@ async function loadShare(code) {
 async function saveFileToMyAccount() {
   if (!shareFileData || !currentUser) return
   showToast('正在保存...')
-  const newPath = `${currentUser.id}/${Date.now()}_${shareFileData.name}`
-  const { error: copyError } = await supabase.storage.from('user-files').copy(shareFileData.storage_path, newPath)
-  if (copyError) { showToast('保存失败：' + copyError.message); return }
-  await supabase.from('files').insert({ user_id: currentUser.id, name: shareFileData.name, size: shareFileData.size, type: shareFileData.type, storage_path: newPath })
-  showToast('文件已保存到你的网盘')
+
+  try {
+    // 获取源文件的下载链接
+    const { data: urlData, error: urlError } = await supabase.storage
+      .from('user-files')
+      .createSignedUrl(shareFileData.storage_path, 60)
+    if (urlError || !urlData?.signedUrl) throw new Error('无法获取源文件链接')
+
+    // 下载文件内容
+    const res = await fetch(urlData.signedUrl)
+    if (!res.ok) throw new Error('下载源文件失败')
+    const blob = await res.blob()
+
+    // 上传到当前用户的存储
+    const newPath = `${currentUser.id}/${Date.now()}_${shareFileData.name}`
+    const { error: uploadError } = await supabase.storage
+      .from('user-files')
+      .upload(newPath, blob, { contentType: blob.type || 'application/octet-stream' })
+    if (uploadError) throw uploadError
+
+    // 插入文件记录
+    await supabase.from('files').insert({
+      user_id: currentUser.id,
+      name: shareFileData.name,
+      size: blob.size,
+      type: blob.type,
+      storage_path: newPath
+    })
+
+    showToast('文件已保存到你的网盘')
+  } catch (err) {
+    showToast('保存失败：' + err.message)
+  }
 }
 
 async function loadFiles() {
