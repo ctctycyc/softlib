@@ -290,6 +290,10 @@ document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('cl
 
 document.getElementById('hidden-upload').addEventListener('change', async (e) => {
   for (const file of e.target.files) {
+    if (file.size > 50 * 1024 * 1024) {
+      alert('文件超过50MB，请压缩或使用其他方式')
+      continue
+    }
     const safeFile = new File([file], file.name.replace(/[^a-zA-Z0-9._-]/g, '_'), { type: file.type })
     addUploadTask(safeFile)
   }
@@ -297,7 +301,6 @@ document.getElementById('hidden-upload').addEventListener('change', async (e) =>
 })
 
 function addUploadTask(file) {
-  if (file.size > 50 * 1024 * 1024) return alert('文件不能超过 50MB')
   const task = { id: Date.now(), name: file.name, progress: 0, status: 'waiting', file }
   uploadTasks.push(task)
   renderUploadTasks()
@@ -333,6 +336,7 @@ function renderUploadTasks() {
     </div>`).join('')
 }
 
+// 确保所有函数挂载到 window
 window.switchTab = function(tab) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
@@ -442,7 +446,7 @@ function buildFilesPage() {
   document.getElementById('page-files').innerHTML = `
     <div style="padding:14px 16px;background:var(--card-bg);border-bottom:1px solid var(--border)">
       <h3 style="font-weight:500">云文件</h3>
-      <input type="text" id="search-input" placeholder="搜索文件..." oninput="renderFiles()" style="margin-top:8px">
+      <input type="text" id="search-input" placeholder="搜索文件..." oninput="window.renderFiles()" style="margin-top:8px">
     </div>
     <div class="chip-scroll">
       <div class="chip active" data-filter="all">全部</div><div class="chip" data-filter="image">图片</div><div class="chip" data-filter="video">视频</div><div class="chip" data-filter="archive">压缩包</div><div class="chip" data-filter="other">其他</div>
@@ -454,9 +458,9 @@ function buildFilesPage() {
     document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'))
     chip.classList.add('active')
     currentFilter = chip.dataset.filter
-    renderFiles()
+    window.renderFiles()
   }))
-  renderFiles()
+  window.renderFiles()
 }
 
 function buildMePage() {
@@ -477,7 +481,7 @@ function buildSettingsPage() {
   document.getElementById('page-settings').innerHTML = `
     <div style="padding:16px;cursor:pointer;font-weight:500" onclick="switchTab('me')">‹ 返回</div>
     <div class="card" onclick="showPasswordModal()">修改密码</div>
-    <div class="card" onclick="toggleTheme()">深色模式 (当前: <span id="theme-status">关闭</span>)</div>
+    <div class="card" onclick="window.toggleTheme()">深色模式 (当前: <span id="theme-status">关闭</span>)</div>
     <div class="card">版本 1.0</div>
   `
   document.getElementById('theme-status').textContent = document.body.classList.contains('dark') ? '开启' : '关闭'
