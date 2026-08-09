@@ -243,7 +243,7 @@ const FREE_API = 'http://www.yx520.1td/API/dwz/api.php'
 let allFiles = [], currentFilter = 'all', currentUser = null, uploadTasks = [], shareFileData = null
 const shareCode = new URLSearchParams(location.search).get('code')
 
-
+// Splash
 const splash = document.getElementById('splash')
 const skipBtn = document.getElementById('skip-btn')
 let countdown = 5
@@ -264,7 +264,7 @@ function hideSplash() {
   }, 500)
 }
 
-
+// Auth
 let isLogin = true
 document.getElementById('toggle-link').addEventListener('click', () => {
   isLogin = !isLogin
@@ -285,7 +285,7 @@ document.getElementById('auth-btn').addEventListener('click', async () => {
   else checkAuth()
 })
 
-
+// Navigation
 document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => switchTab(item.dataset.tab)))
 
 document.getElementById('hidden-upload').addEventListener('change', async (e) => {
@@ -367,7 +367,7 @@ window.renderFiles = function() {
         <button class="btn-primary btn-sm btn-danger" data-delete="${f.id}" data-path="${f.storage_path}" data-name="${f.name}">删除</button>
       </div>
     </div>`).join('')
-  
+  // 绑定事件
   document.querySelectorAll('[data-view]').forEach(btn => {
     btn.onclick = () => supabase.storage.from('user-files').createSignedUrl(btn.dataset.view, 60).then(({ data }) => {
       if (data?.signedUrl) { window.open(data.signedUrl, '_blank'); addBrowseHistory(btn.dataset.name); if (document.getElementById('page-home').classList.contains('active')) loadHomeData() }
@@ -478,7 +478,7 @@ function buildSettingsPage() {
   document.getElementById('page-settings').innerHTML = `
     <div style="padding:16px;cursor:pointer;font-weight:500" onclick="switchTab('me')">‹ 返回</div>
     <div class="card" onclick="showPasswordModal()">修改密码</div>
-    <div class="card" onclick="toggleTheme()">深色模式 (当前: <span id="theme-status">浅色</span>)</div>
+    <div class="card" onclick="toggleTheme()">深色模式 (当前: <span id="theme-status">关闭</span>)</div>
     <div class="card">版本 1.0</div>
   `
   document.getElementById('theme-status').textContent = document.body.classList.contains('dark') ? '开启' : '关闭'
@@ -528,7 +528,24 @@ function buildFeedbackPage() {
   `
 }
 
-function buildShareHistoryPage(){ document.getElementById('page-shareHistory').innerHTML = `<div style="padding:16px;cursor:pointer;font-weight:500" onclick="switchTab('me')">‹ 返回</div><div id="share-history-list"></div>`; loadShareHistory() }
+function buildShareHistoryPage() {
+  document.getElementById('page-shareHistory').innerHTML = `
+    <div style="padding:16px;cursor:pointer;font-weight:500" onclick="switchTab('me')">‹ 返回</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:0 16px;margin-bottom:8px">
+      <h3 style="font-weight:500">分享历史</h3>
+      <button class="btn-primary btn-sm" style="background:#e74c3c" onclick="clearShareHistory()">清空记录</button>
+    </div>
+    <div id="share-history-list" style="padding:0 16px"></div>
+  `
+  loadShareHistory()
+}
+
+async function clearShareHistory() {
+  if (!confirm('确定清空所有分享记录吗？')) return
+  await supabase.from('share_links').delete().eq('creator_id', currentUser.id)
+  loadShareHistory()
+  showToast('分享记录已清空')
+}
 
 function showSharePage() {
   document.getElementById('share-page').style.display = 'block'
