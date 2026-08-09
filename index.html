@@ -233,8 +233,14 @@ function hideSplash() {
   setTimeout(() => {
     splash.style.display = 'none'
     skipBtn.style.display = 'none'
-    if (shareCode) showSharePage()
-    else checkAuth()
+    if (shareCode) {
+      // 确保分享页面干净，关闭所有无关面板
+      document.getElementById('upload-panel').classList.remove('open')
+      document.getElementById('overlay').classList.remove('show')
+      showSharePage()
+    } else {
+      checkAuth()
+    }
   }, 500)
 }
 
@@ -361,7 +367,6 @@ window.renderFiles = function() {
         </div>
       </div>
     `).join('')
-  // 绑定事件
   document.querySelectorAll('[data-view]').forEach(btn => {
     btn.onclick = () => {
       supabase.storage.from('user-files').createSignedUrl(btn.dataset.view, 60).then(({ data }) => {
@@ -423,7 +428,6 @@ function formatSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
 
-// 页面构建
 function buildHomePage() {
   document.getElementById('page-home').innerHTML = `
     <div style="padding:60px 16px 0;display:flex;align-items:center;justify-content:space-between">
@@ -492,7 +496,10 @@ function buildShareHistoryPage(){ document.getElementById('page-shareHistory').i
 function buildTrashPage(){ document.getElementById('page-trash').innerHTML = `<div style="padding:16px;cursor:pointer" onclick="switchTab('me')">‹ 返回</div><div id="trash-list"></div>`; loadTrash() }
 function buildDynamicPage(){ document.getElementById('page-dynamic').innerHTML = `<div style="padding:16px;cursor:pointer" onclick="switchTab('me')">‹ 返回</div><div id="dynamic-list"></div>`; loadDynamic() }
 
-function showSharePage() { document.getElementById('share-page').style.display = 'block'; loadShare(shareCode) }
+function showSharePage() {
+  document.getElementById('share-page').style.display = 'block'
+  loadShare(shareCode)
+}
 
 async function loadShare(code) {
   const { data: links } = await supabase.from('share_links').select('*, files(*)').eq('code', code).maybeSingle()
