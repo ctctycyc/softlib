@@ -199,7 +199,6 @@ const supabase = createClient('https://plwljusbfqkvlhpclvsv.supabase.co', 'eyJhb
 let allFiles = [], currentFilter = 'all', currentUser = null, uploadTasks = [], shareFileData = null
 const shareCode = new URLSearchParams(location.search).get('code')
 
-// Splash
 const splash = document.getElementById('splash')
 const skipBtn = document.getElementById('skip-btn')
 let countdown = 5
@@ -224,7 +223,6 @@ function hideSplash() {
   }, 500)
 }
 
-// Auth
 let isLogin = true
 document.getElementById('toggle-link').addEventListener('click', () => {
   isLogin = !isLogin
@@ -250,7 +248,6 @@ document.getElementById('auth-btn').addEventListener('click', async () => {
   }
 })
 
-// Navigation
 document.querySelectorAll('.nav-item').forEach(item => {
   item.addEventListener('click', () => switchTab(item.dataset.tab))
 })
@@ -283,7 +280,7 @@ async function startUpload(task) {
     const { error } = await supabase.storage.from('user-files').upload(path, task.file, { contentType: 'application/octet-stream' })
     clearInterval(interval)
     if (error) throw error
-    await supabase.from('files').insert({ user_id: currentUser.id, name: task.file.name, size: task.file.size, type: task.file.type, storage_path: path })
+    await supabase.from('files').insert({ user_id: currentUser.id, name: task.file.name, size: task.file.size, type: task.file.type, storage_path: path, source: 'upload' })
     task.progress = 100; task.status = 'success'
   } catch (err) {
     clearInterval(interval)
@@ -361,9 +358,28 @@ window.renderFiles = function() {
     btn.onclick = async () => {
       const code = Math.random().toString(36).substring(2, 6).toUpperCase()
       await supabase.from('share_links').insert({ file_id: btn.dataset.share, creator_id: currentUser.id, code, expires_at: new Date(Date.now() + 7*24*60*60*1000) })
-      const link = `${location.origin}${location.pathname}?code=${code}`
-      prompt('分享链接：', link)
-      navigator.clipboard.writeText(link).catch(()=>{})
+      const longLink = `${location.origin}${location.pathname}?code=${code}`
+      const services = [
+        { url: `https://is.gd/create.php?format=simple&url=${encodeURIComponent(longLink)}` },
+        { url: `https://tinyurl.com/api-create.php?url=${encodeURIComponent(longLink)}` },
+        { url: `https://clck.ru/--?url=${encodeURIComponent(longLink)}` },
+        { url: `https://suo.im/api.htm?format=simple&url=${encodeURIComponent(longLink)}` }
+      ]
+      let short = null
+      for (const svc of services) {
+        try {
+          const res = await fetch(svc.url)
+          const text = await res.text()
+          if (text.startsWith('http')) { short = text; break }
+        } catch (e) {}
+      }
+      if (short) {
+        prompt('分享链接：', short)
+        navigator.clipboard.writeText(short).catch(()=>{})
+      } else {
+        prompt('短链接生成失败，已复制长链接：', longLink)
+        navigator.clipboard.writeText(longLink).catch(()=>{})
+      }
     }
   })
   document.querySelectorAll('[data-delete]').forEach(btn => {
@@ -418,7 +434,7 @@ function buildHomePage() {
     </div>
     <div class="section-header">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      最近上传
+      最近上传/转存
     </div>
     <div class="card" id="recent-upload"></div>
     <div class="section-header">
@@ -543,31 +559,28 @@ async function saveFileToMyAccount() {
   showToast('正在保存...')
 
   try {
-    // 获取源文件的下载链接
     const { data: urlData, error: urlError } = await supabase.storage
       .from('user-files')
       .createSignedUrl(shareFileData.storage_path, 60)
     if (urlError || !urlData?.signedUrl) throw new Error('无法获取源文件链接')
 
-    // 下载文件内容
     const res = await fetch(urlData.signedUrl)
     if (!res.ok) throw new Error('下载源文件失败')
     const blob = await res.blob()
 
-    // 上传到当前用户的存储
     const newPath = `${currentUser.id}/${Date.now()}_${shareFileData.name}`
     const { error: uploadError } = await supabase.storage
       .from('user-files')
       .upload(newPath, blob, { contentType: blob.type || 'application/octet-stream' })
     if (uploadError) throw uploadError
 
-    // 插入文件记录
     await supabase.from('files').insert({
       user_id: currentUser.id,
       name: shareFileData.name,
       size: blob.size,
       type: blob.type,
-      storage_path: newPath
+      storage_path: newPath,
+      source: 'save'
     })
 
     showToast('文件已保存到你的网盘')
@@ -606,10 +619,12 @@ async function checkAuth() {
 
 async function loadHomeData() {
   if (!currentUser) return
-  const { data: uploads } = await supabase.from('files').select('name, created_at').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(5)
+  const { data: recent } = await supabase.from('files').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(10)
   const uploadDiv = document.getElementById('recent-upload')
   if (uploadDiv) {
-    uploadDiv.innerHTML = (uploads && uploads.length > 0) ? uploads.map(f => `<div class="home-item"><span class="name">${f.name}</span><span class="time">${new Date(f.created_at).toLocaleDateString()}</span></div>`).join('') : '<div class="home-item" style="color:var(--text2)">暂无上传</div>'
+    const items = recent || []
+    uploadDiv.innerHTML = items.length === 0 ? '<div class="home-item" style="color:var(--text2)">暂无记录</div>' :
+      items.map(f => `<div class="home-item"><span class="name">${f.name}</span><span class="time">${f.source==='save'?'转存':'上传'} · ${new Date(f.created_at).toLocaleDateString()}</span></div>`).join('')
   }
 
   const { data: shares } = await supabase.from('share_links').select('files(name), created_at').eq('creator_id', currentUser.id).order('created_at', { ascending: false }).limit(5)
