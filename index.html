@@ -545,92 +545,105 @@ function buildShareHistoryPage() {
 }
 
 
+let tempEmailAddr = ''
+let tempEmailToken = ''
+let tempEmailPolling = null
+
 function buildTempmailPage() {
   const page = document.getElementById('page-tempmail')
   page.innerHTML = `
     <div style="padding:16px;cursor:pointer;font-weight:500" onclick="switchTab('settings')">‹ 返回设置</div>
     <div class="card" style="text-align:center">
-      <p style="font-size:14px;color:var(--text2);margin-bottom:12px">临时邮箱 (10分钟有效)</p>
+      <p style="font-size:14px;color:var(--text2);margin-bottom:12px">临时邮箱（自动刷新）</p>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        <input type="text" id="tempmail-address" readonly placeholder="点击生成" style="flex:1;text-align:center;font-weight:500">
+        <input type="text" id="tempmail-address" readonly placeholder="点击生成" style="flex:1;text-align:center;font-weight:500" value="${tempEmailAddr}">
         <button class="btn-primary btn-sm" id="copy-tempmail" style="width:auto">复制</button>
       </div>
-      <button class="btn-primary" id="generate-tempmail" style="width:auto">生成临时邮箱</button>
-      <button class="btn-primary" id="refresh-mails" style="width:auto;margin-left:8px">刷新邮件</button>
-      <p id="tempmail-timer" style="font-size:12px;color:var(--text2);margin-top:8px"></p>
+      <button class="btn-primary" id="generate-tempmail" style="width:auto">${tempEmailAddr ? '重新生成' : '生成临时邮箱'}</button>
     </div>
     <div class="card" id="tempmail-list" style="min-height:200px">
       <p style="text-align:center;color:var(--text2)">暂无邮件，生成邮箱后自动刷新</p>
     </div>
   `
   document.getElementById('generate-tempmail').addEventListener('click', generateTempmail)
-  document.getElementById('refresh-mails').addEventListener('click', () => {
-    const email = document.getElementById('tempmail-address').value
-    if (email) fetchTempmails(email)
-  })
   document.getElementById('copy-tempmail').addEventListener('click', () => {
-    const email = document.getElementById('tempmail-address').value
-    if (email) { navigator.clipboard.writeText(email).then(() => showToast('邮箱已复制')) }
+    if (tempEmailAddr) { navigator.clipboard.writeText(tempEmailAddr).then(() => showToast('邮箱已复制')) }
   })
-}
-
-async function generateTempmail() {
-  try {
-    const res = await fetch('https://api.tinyapi.to/p/v1/tempmail/generate', {
-      headers: { 'Authorization': `Bearer ${TINYAPI_KEY}` }
-    })
-    const json = await res.json()
-    if (json.code === 200 && json.data.email) {
-      document.getElementById('tempmail-address').value = json.data.email
-      showToast('临时邮箱已生成')
-      let seconds = json.data.expires_in
-      const timerEl = document.getElementById('tempmail-timer')
-      const countdown = setInterval(() => {
-        seconds--
-        if (seconds <= 0) {
-          clearInterval(countdown)
-          timerEl.textContent = '已过期'
-          document.getElementById('tempmail-address').value = ''
-        } else {
-          const m = Math.floor(seconds / 60)
-          const s = seconds % 60
-          timerEl.textContent = `剩余 ${m}:${s.toString().padStart(2, '0')}`
-        }
-      }, 1000)
-      fetchTempmails(json.data.email)
-    } else {
-      alert('生成失败：' + json.message)
-    }
-  } catch (e) {
-    alert('请求失败：' + e.message)
+  if (tempEmailAddr) {
+    fetchTempmails()
   }
 }
 
-async function fetchTempmails(email) {
+async function generateTempmail() {
+  if (tempEmailPolling) clearInterval(tempEmailPolling)
+  try {
+    const domainRes = await fetch('https://api.mail.tm/domains')
+    const domains = await domainRes.json()
+    const domain = domains['hydra:member'][0].domain
+    const username = Math.random().toString(36).substring(2, 10)
+    const password = Math.random().toString(36).substring(2, 15)
+    const accountRes = await fetch('https://api.mail.tm/accounts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address: username + '@' + domain, password })
+    })
+    const account = await accountRes.json()
+    const tokenRes = await fetch('https://api.mail.tm/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address: account.address, password })
+    })
+    const tokenData = await tokenRes.json()
+    tempEmailAddr = account.address
+    tempEmailToken = tokenData.token
+    document.getElementById('tempmail-address').value = tempEmailAddr
+    showToast('临时邮箱已生成')
+    fetchTempmails()
+    tempEmailPolling = setInterval(fetchTempmails, 10000)
+  } catch (e) {
+    alert('生成失败，请检查网络')
+  }
+}
+
+async function fetchTempmails() {
+  if (!tempEmailToken) return
   const listEl = document.getElementById('tempmail-list')
+  if (!listEl) return
   listEl.innerHTML = '<p style="text-align:center;color:var(--text2)">加载中...</p>'
   try {
-    const res = await fetch(`https://api.tinyapi.to/p/v1/tempmail/mails?email=${encodeURIComponent(email)}`, {
-      headers: { 'Authorization': `Bearer ${TINYAPI_KEY}` }
+    const res = await fetch('https://api.mail.tm/messages', {
+      headers: { 'Authorization': `Bearer ${tempEmailToken}` }
     })
-    const json = await res.json()
-    if (json.code === 200 && json.data) {
-      const mails = json.data.mails || []
-      if (mails.length === 0) {
-        listEl.innerHTML = '<p style="text-align:center;color:var(--text2)">暂无邮件</p>'
-      } else {
-        listEl.innerHTML = mails.map(m => `
-          <div style="padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="alert('发件人: ${m.from}\\n\\n${m.body}')">
-            <div style="font-weight:500">${m.subject}</div>
-            <div style="font-size:12px;color:var(--text2)">${m.from} · ${new Date(m.date).toLocaleString()}</div>
-          </div>
-        `).join('')
-      }
+    const data = await res.json()
+    const messages = data['hydra:member'] || []
+    if (messages.length === 0) {
+      listEl.innerHTML = '<p style="text-align:center;color:var(--text2)">暂无邮件</p>'
+      return
     }
+    listEl.innerHTML = messages.map(msg => `
+      <div style="padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer" data-id="${msg.id}">
+        <div style="font-weight:500">${msg.subject}</div>
+        <div style="font-size:12px;color:var(--text2)">${msg.from.address} · ${new Date(msg.createdAt).toLocaleString()}</div>
+      </div>
+    `).join('')
+    listEl.querySelectorAll('div[data-id]').forEach(el => {
+      el.addEventListener('click', async () => {
+        const id = el.dataset.id
+        const detailRes = await fetch(`https://api.mail.tm/messages/${id}`, {
+          headers: { 'Authorization': `Bearer ${tempEmailToken}` }
+        })
+        const detail = await detailRes.json()
+        alert(`发件人: ${detail.from.address}\n\n${detail.text || detail.html || '(无内容)'}`)
+      })
+    })
   } catch (e) {
     listEl.innerHTML = '<p style="text-align:center;color:#e74c3c">加载失败</p>'
   }
 }
+
+window.addEventListener('beforeunload', () => {
+  if (tempEmailPolling) clearInterval(tempEmailPolling)
+})
 
 async function clearShareHistory() {
   if (!confirm('确定清空所有分享记录吗？')) return
