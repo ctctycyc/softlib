@@ -178,6 +178,7 @@
   <div class="page" id="page-settings"></div>
   <div class="page" id="page-feedback"></div>
   <div class="page" id="page-shareHistory"></div>
+  <div class="page" id="page-tempmail"></div>
 </div>
 
 <div id="share-page" style="display:none">
@@ -243,7 +244,7 @@ const FREE_API = 'http://www.yx520.1td/API/dwz/api.php'
 let allFiles = [], currentFilter = 'all', currentUser = null, uploadTasks = [], shareFileData = null
 const shareCode = new URLSearchParams(location.search).get('code')
 
-// Splash
+
 const splash = document.getElementById('splash')
 const skipBtn = document.getElementById('skip-btn')
 let countdown = 5
@@ -264,7 +265,7 @@ function hideSplash() {
   }, 500)
 }
 
-// Auth
+
 let isLogin = true
 document.getElementById('toggle-link').addEventListener('click', () => {
   isLogin = !isLogin
@@ -285,15 +286,12 @@ document.getElementById('auth-btn').addEventListener('click', async () => {
   else checkAuth()
 })
 
-// Navigation
+
 document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => switchTab(item.dataset.tab)))
 
 document.getElementById('hidden-upload').addEventListener('change', async (e) => {
   for (const file of e.target.files) {
-    if (file.size > 50 * 1024 * 1024) {
-      alert('文件超过50MB，请压缩或使用其他方式')
-      continue
-    }
+    if (file.size > 50 * 1024 * 1024) { alert('文件超过50MB，请压缩或使用其他方式'); continue }
     const safeFile = new File([file], file.name.replace(/[^a-zA-Z0-9._-]/g, '_'), { type: file.type })
     addUploadTask(safeFile)
   }
@@ -336,7 +334,6 @@ function renderUploadTasks() {
     </div>`).join('')
 }
 
-// 确保所有函数挂载到 window
 window.switchTab = function(tab) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
@@ -348,6 +345,7 @@ window.switchTab = function(tab) {
   else if (tab === 'settings') buildSettingsPage()
   else if (tab === 'feedback') buildFeedbackPage()
   else if (tab === 'shareHistory') buildShareHistoryPage()
+  else if (tab === 'tempmail') buildTempmailPage()
 }
 
 window.renderFiles = function() {
@@ -481,7 +479,8 @@ function buildSettingsPage() {
   document.getElementById('page-settings').innerHTML = `
     <div style="padding:16px;cursor:pointer;font-weight:500" onclick="switchTab('me')">‹ 返回</div>
     <div class="card" onclick="showPasswordModal()">修改密码</div>
-    <div class="card" onclick="window.toggleTheme()">深色模式 (当前: <span id="theme-status">关闭</span>)</div>
+    <div class="card" onclick="switchTab('tempmail')">临时邮箱</div>
+    <div class="card" onclick="toggleTheme()">深色模式 (当前: <span id="theme-status">关闭</span>)</div>
     <div class="card">版本 1.0</div>
   `
   document.getElementById('theme-status').textContent = document.body.classList.contains('dark') ? '开启' : '关闭'
@@ -541,6 +540,94 @@ function buildShareHistoryPage() {
     <div id="share-history-list" style="padding:0 16px"></div>
   `
   loadShareHistory()
+}
+
+
+function buildTempmailPage() {
+  const page = document.getElementById('page-tempmail')
+  page.innerHTML = `
+    <div style="padding:16px;cursor:pointer;font-weight:500" onclick="switchTab('settings')">‹ 返回设置</div>
+    <div class="card" style="text-align:center">
+      <p style="font-size:14px;color:var(--text2);margin-bottom:12px">临时邮箱 (10分钟有效)</p>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <input type="text" id="tempmail-address" readonly placeholder="点击生成" style="flex:1;text-align:center;font-weight:500">
+        <button class="btn-primary btn-sm" id="copy-tempmail" style="width:auto">复制</button>
+      </div>
+      <button class="btn-primary" id="generate-tempmail" style="width:auto">生成临时邮箱</button>
+      <button class="btn-primary" id="refresh-mails" style="width:auto;margin-left:8px">刷新邮件</button>
+      <p id="tempmail-timer" style="font-size:12px;color:var(--text2);margin-top:8px"></p>
+    </div>
+    <div class="card" id="tempmail-list" style="min-height:200px">
+      <p style="text-align:center;color:var(--text2)">暂无邮件，生成邮箱后自动刷新</p>
+    </div>
+  `
+  document.getElementById('generate-tempmail').addEventListener('click', generateTempmail)
+  document.getElementById('refresh-mails').addEventListener('click', () => {
+    const email = document.getElementById('tempmail-address').value
+    if (email) fetchTempmails(email)
+  })
+  document.getElementById('copy-tempmail').addEventListener('click', () => {
+    const email = document.getElementById('tempmail-address').value
+    if (email) { navigator.clipboard.writeText(email).then(() => showToast('邮箱已复制')) }
+  })
+}
+
+async function generateTempmail() {
+  try {
+    const res = await fetch('https://api.tinyapi.to/p/v1/tempmail/generate', {
+      headers: { 'Authorization': `Bearer ${TINYAPI_KEY}` }
+    })
+    const json = await res.json()
+    if (json.code === 200 && json.data.email) {
+      document.getElementById('tempmail-address').value = json.data.email
+      showToast('临时邮箱已生成')
+      let seconds = json.data.expires_in
+      const timerEl = document.getElementById('tempmail-timer')
+      const countdown = setInterval(() => {
+        seconds--
+        if (seconds <= 0) {
+          clearInterval(countdown)
+          timerEl.textContent = '已过期'
+          document.getElementById('tempmail-address').value = ''
+        } else {
+          const m = Math.floor(seconds / 60)
+          const s = seconds % 60
+          timerEl.textContent = `剩余 ${m}:${s.toString().padStart(2, '0')}`
+        }
+      }, 1000)
+      fetchTempmails(json.data.email)
+    } else {
+      alert('生成失败：' + json.message)
+    }
+  } catch (e) {
+    alert('请求失败：' + e.message)
+  }
+}
+
+async function fetchTempmails(email) {
+  const listEl = document.getElementById('tempmail-list')
+  listEl.innerHTML = '<p style="text-align:center;color:var(--text2)">加载中...</p>'
+  try {
+    const res = await fetch(`https://api.tinyapi.to/p/v1/tempmail/mails?email=${encodeURIComponent(email)}`, {
+      headers: { 'Authorization': `Bearer ${TINYAPI_KEY}` }
+    })
+    const json = await res.json()
+    if (json.code === 200 && json.data) {
+      const mails = json.data.mails || []
+      if (mails.length === 0) {
+        listEl.innerHTML = '<p style="text-align:center;color:var(--text2)">暂无邮件</p>'
+      } else {
+        listEl.innerHTML = mails.map(m => `
+          <div style="padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="alert('发件人: ${m.from}\\n\\n${m.body}')">
+            <div style="font-weight:500">${m.subject}</div>
+            <div style="font-size:12px;color:var(--text2)">${m.from} · ${new Date(m.date).toLocaleString()}</div>
+          </div>
+        `).join('')
+      }
+    }
+  } catch (e) {
+    listEl.innerHTML = '<p style="text-align:center;color:#e74c3c">加载失败</p>'
+  }
 }
 
 async function clearShareHistory() {
