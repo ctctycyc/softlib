@@ -337,8 +337,10 @@ function renderUploadTasks() {
 window.switchTab = function(tab) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'))
-  document.getElementById('page-' + tab).classList.add('active')
-  document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add('active')
+  const page = document.getElementById('page-' + tab)
+  if (page) page.classList.add('active')
+  const nav = document.querySelector(`.nav-item[data-tab="${tab}"]`)
+  if (nav) nav.classList.add('active')
   if (tab === 'home') { buildHomePage(); loadHomeData() }
   else if (tab === 'files') buildFilesPage()
   else if (tab === 'me') { buildMePage(); loadFiles() }
