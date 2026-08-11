@@ -7,29 +7,17 @@
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     :root{
-      --bg:#f8f9fb;
-      --card-bg:#fff;
-      --text:#1a1a1a;
-      --text2:#6b7280;
-      --border:#eaecf0;
-      --chip-bg:#f0f2f5;
-      --chip-border:transparent;
-      --input-bg:#f2f4f7;
+      --bg:#f8f9fb;--card-bg:#fff;--text:#1a1a1a;--text2:#6b7280;--border:#eaecf0;
+      --chip-bg:#f0f2f5;--chip-border:transparent;--input-bg:#f2f4f7;
       --shadow:0 1px 2px rgba(0,0,0,0.04),0 2px 8px rgba(0,0,0,0.03);
     }
     body.dark{
-      --bg:#141a24;
-      --card-bg:#1e2633;
-      --text:#e4e7eb;
-      --text2:#a0a9b5;
-      --border:#2a3340;
-      --chip-bg:#1e2633;
-      --chip-border:#2a3340;
-      --input-bg:#18202b;
+      --bg:#141a24;--card-bg:#1e2633;--text:#e4e7eb;--text2:#a0a9b5;--border:#2a3340;
+      --chip-bg:#1e2633;--chip-border:#2a3340;--input-bg:#18202b;
       --shadow:0 1px 2px rgba(0,0,0,0.2),0 2px 8px rgba(0,0,0,0.15);
     }
     body{
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: var(--bg); height: 100vh; overflow: hidden; color: var(--text);
       transition: background 0.3s;
     }
@@ -81,14 +69,15 @@
       cursor:pointer;color:var(--text);transition:all 0.2s;
     }
     .chip.active{background:#4e6ef2;color:#fff;border-color:#4e6ef2}
-    .progress-bar{height:6px;background:rgba(0,0,0,0.05);border-radius:3px;margin:10px 0;overflow:hidden}
+    .progress-bar{height:6px;background:rgba(0,0,0,0.05);border-radius:3px;margin:8px 0;overflow:hidden}
     .progress-fill{height:100%;background:#4e6ef2;border-radius:3px;transition:width 0.3s}
     .splash{
       position:fixed;top:0;left:0;right:0;bottom:0;background:#4e6ef2;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      z-index:9999;
     }
     .splash h1{color:#fff;font-size:32px;font-weight:500;letter-spacing:1px}
-    .splash p{color:rgba(255,255,255,0.85);font-size:15px;margin-top:8px}
+    .splash p{color:rgba(255,255,255,0.85);font-size:15px;margin-top:8px;font-weight:300}
     .skip-btn{
       position:fixed;top:20px;right:20px;background:rgba(255,255,255,0.15);
       color:#fff;border:1px solid rgba(255,255,255,0.25);padding:6px 16px;
@@ -103,11 +92,11 @@
     .auth-card .sub{color:var(--text2);margin-bottom:24px;font-size:14px}
     .auth-card input{margin-bottom:14px}
     .auth-toggle{text-align:center;margin-top:16px;font-size:14px;color:var(--text2)}
-    .auth-toggle span{color:#4e6ef2;cursor:pointer}
+    .auth-toggle span{color:#4e6ef2;cursor:pointer;font-weight:500}
     .share-header{display:flex;align-items:center;padding:18px;background:var(--card-bg);border-bottom:1px solid var(--border)}
     .share-info-card{display:flex;align-items:center;gap:14px;padding:18px;background:var(--card-bg);margin:14px 16px;border-radius:14px;box-shadow:var(--shadow)}
     .share-file-item{display:flex;align-items:center;padding:14px 18px;background:var(--card-bg);margin:0 16px;border-radius:14px;margin-top:8px;box-shadow:var(--shadow)}
-    .save-bar{position:fixed;bottom:0;left:0;right:0;padding:14px 18px;background:var(--card-bg);border-top:1px solid var(--border);display:flex;justify-content:space-between}
+    .save-bar{position:fixed;bottom:0;left:0;right:0;padding:14px 18px;background:var(--card-bg);border-top:1px solid var(--border);display:flex;gap:8px}
     .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:10px 24px;border-radius:24px;font-size:14px;z-index:9999;opacity:0;transition:opacity 0.3s}
     .toast.show{opacity:1}
     .upload-panel{position:fixed;top:0;right:0;width:300px;max-width:85vw;height:100vh;background:var(--card-bg);z-index:150;transform:translateX(100%);transition:transform 0.3s;display:flex;flex-direction:column;box-shadow:-4px 0 20px rgba(0,0,0,0.05)}
@@ -122,9 +111,11 @@
     .home-item:last-child{border-bottom:none}
     .home-item .name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
     .home-item .time{font-size:12px;color:var(--text2);margin-left:8px}
-    .btn-sm{padding:4px 12px;font-size:12px;border-radius:6px;margin-left:6px}
+    .btn-sm{padding:4px 12px;font-size:12px;border-radius:6px;margin-left:6px;transition:all 0.2s;font-weight:500}
     .btn-outline{background:transparent;border:1px solid #4e6ef2;color:#4e6ef2}
+    .btn-outline:hover{background:rgba(78,110,242,0.04)}
     .btn-danger{background:transparent;border:1px solid #e74c3c;color:#e74c3c}
+    .btn-danger:hover{background:rgba(231,76,60,0.04)}
     .loading-spinner {
       display: flex; align-items: center; justify-content: center; padding: 40px 0;
       color: var(--text2); font-size: 14px;
@@ -136,13 +127,16 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .upload-progress-btn {
-      display: flex; align-items: center; gap: 4px;
+      display: inline-flex; align-items: center; gap: 4px;
       padding: 6px 12px; background: var(--card-bg); border: 1px solid var(--border);
       border-radius: 8px; color: var(--text2); font-size: 12px;
-      cursor: pointer; margin-top: 6px;
+      cursor: pointer; white-space: nowrap;
     }
     .upload-progress-btn:hover { background: var(--chip-bg); }
     .upload-progress-btn svg { width: 14px; height: 14px; }
+    .header-actions {
+      display: flex; align-items: center; gap: 8px;
+    }
   </style>
 </head>
 <body>
@@ -154,7 +148,7 @@
   <div class="auth-container">
     <div class="auth-card">
       <h2 id="auth-title">登录</h2>
-      <p class="sub" id="auth-sub">欢迎回来</p>
+      <p class="sub">欢迎回来</p>
       <input type="email" id="auth-email" placeholder="邮箱" autocomplete="email">
       <input type="password" id="auth-password" placeholder="密码">
       <button class="btn-primary" id="auth-btn">登录</button>
@@ -195,7 +189,7 @@
   </div>
   <div class="save-bar">
     <button class="btn-primary" id="direct-download-btn" style="flex:1">直接下载</button>
-    <button class="btn-primary" id="login-save-btn" style="flex:1;margin-left:8px">登录并保存</button>
+    <button class="btn-primary" id="login-save-btn" style="flex:1">登录并保存</button>
   </div>
 </div>
 
@@ -270,23 +264,17 @@ document.getElementById('auth-btn').addEventListener('click', async () => {
     document.getElementById('auth-page').style.display = 'none'
     await checkAuth()
     if (currentUser) {
-      if (pendingDirectDownload) {
-        handleDirectDownload()
-        pendingDirectDownload = false
-      } else {
-        saveFileToMyAccount()
-      }
+      if (pendingDirectDownload) { handleDirectDownload(); pendingDirectDownload = false }
+      else saveFileToMyAccount()
     }
-  } else {
-    checkAuth()
-  }
+  } else checkAuth()
 })
 
 
 document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => switchTab(item.dataset.tab)))
 document.getElementById('hidden-upload').addEventListener('change', async (e) => {
   for (const file of e.target.files) {
-    if (file.size > 50 * 1024 * 1024) { alert('文件超过50MB，请压缩或使用其他方式'); continue }
+    if (file.size > 50 * 1024 * 1024) { alert('文件超过50MB，请压缩'); continue }
     addUploadTask(file)
   }
   document.getElementById('hidden-upload').value = ''
@@ -328,10 +316,7 @@ function renderUploadTasks() {
     </div>`).join('')
 }
 
-function setLoading(containerId) {
-  const container = document.getElementById(containerId)
-  if (container) container.innerHTML = '<div class="loading-spinner">加载中...</div>'
-}
+function setLoading(id) { const el = document.getElementById(id); if (el) el.innerHTML = '<div class="loading-spinner">加载中...</div>' }
 
 window.switchTab = function(tab) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
@@ -424,6 +409,7 @@ function formatSize(bytes) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
 
+
 function buildHomePage() {
   document.getElementById('page-home').innerHTML = `
     <div style="padding:60px 16px 0;display:flex;align-items:center;justify-content:space-between">
@@ -431,17 +417,17 @@ function buildHomePage() {
         <div style="width:36px;height:36px;border-radius:50%;background:#4e6ef2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px">${currentUser?.email?.charAt(0)?.toUpperCase()||'U'}</div>
         <span style="font-weight:500">${currentUser?.email||''}</span>
       </div>
-      <div style="display:flex;flex-direction:column;align-items:center;">
-        <button class="btn-primary" style="width:auto;padding:6px 16px;border-radius:8px" onclick="document.getElementById('hidden-upload').click()">+ 上传</button>
+      <div class="header-actions">
         <div class="upload-progress-btn" id="home-upload-progress" title="上传进度">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          上传进度
+          <span>进度</span>
         </div>
+        <button class="btn-primary" style="padding:6px 16px;border-radius:8px" onclick="document.getElementById('hidden-upload').click()">+ 上传</button>
       </div>
     </div>
-    <div class="section-header"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>最近上传/转存</div>
+    <div class="section-header"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>最近上传/转存</div>
     <div class="card" id="recent-upload"><div class="loading-spinner">加载中...</div></div>
-    <div class="section-header"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>最近分享</div>
+    <div class="section-header"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>最近分享</div>
     <div class="card" id="recent-share"><div class="loading-spinner">加载中...</div></div>
   `
   document.getElementById('home-upload-progress').addEventListener('click', () => {
@@ -449,6 +435,7 @@ function buildHomePage() {
     document.getElementById('overlay').classList.add('show')
   })
 }
+
 
 function buildFilesPage() {
   document.getElementById('page-files').innerHTML = `
@@ -470,38 +457,51 @@ function buildFilesPage() {
   }))
 }
 
-function getTodayKey() {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
-}
-function getDownloadCount() {
-  const key = 'dl_' + getTodayKey()
-  return parseInt(localStorage.getItem(key) || '0')
-}
-function increaseDownloadCount() {
-  const key = 'dl_' + getTodayKey()
-  const count = getDownloadCount() + 1
-  localStorage.setItem(key, count)
-  return count
-}
+
+function getTodayKey() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` }
+
 function getRemainingDownloads() {
-  return Math.max(0, 5 - getDownloadCount())
+  const raw = localStorage.getItem('dl_data');
+  if (!raw) return 5;
+  try {
+    const data = JSON.parse(raw);
+    const today = getTodayKey();
+    if (data.date !== today) {
+      localStorage.setItem('dl_data', JSON.stringify({date: today, count: 0}));
+      return 5;
+    }
+    return Math.max(0, 5 - data.count);
+  } catch(e) { return 5; }
+}
+
+function increaseDownloadCount() {
+  const today = getTodayKey();
+  const raw = localStorage.getItem('dl_data');
+  let count = 0;
+  if (raw) {
+    try {
+      const data = JSON.parse(raw);
+      if (data.date === today) count = data.count;
+    } catch(e) {}
+  }
+  count++;
+  localStorage.setItem('dl_data', JSON.stringify({date: today, count}));
+  return count;
 }
 
 async function handleDirectDownload() {
-  if (!shareFileData) return alert('文件信息丢失，请刷新页面')
-  const remaining = getRemainingDownloads()
+  if (!shareFileData) return alert('文件信息丢失')
+  const remaining = getRemainingDownloads();
   if (remaining <= 0) return alert('今日直接下载次数已用完（每天5次），请明天再试')
   const { data } = await supabase.storage.from('user-files').createSignedUrl(shareFileData.storage_path, 60)
   if (data?.signedUrl) {
     window.open(data.signedUrl, '_blank')
-    increaseDownloadCount()
+    increaseDownloadCount();
     showToast(`下载成功，今日剩余 ${getRemainingDownloads()} 次`)
     if (document.getElementById('page-me').classList.contains('active')) buildMePage()
-  } else {
-    alert('无法获取下载链接')
-  }
+  } else alert('无法获取下载链接')
 }
+
 
 function buildMePage() {
   const remaining = getRemainingDownloads()
@@ -521,6 +521,7 @@ function buildMePage() {
   `
   updateMeStorage()
 }
+
 
 function buildSettingsPage() {
   document.getElementById('page-settings').innerHTML = `
@@ -582,30 +583,9 @@ function buildShareHistoryPage() {
   loadShareHistory()
 }
 
-function buildTempmailPage() {
-  document.getElementById('page-tempmail').innerHTML = `
-    <div style="padding:16px;cursor:pointer;font-weight:500" onclick="switchTab('settings')">‹ 返回设置</div>
-    <div class="card" style="text-align:center">
-      <p style="font-size:14px;color:var(--text2);margin-bottom:12px">临时邮箱（自动刷新）</p>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-        <input type="text" id="tempmail-address" readonly placeholder="点击生成" style="flex:1;text-align:center;font-weight:500" value="${tempEmailAddr}">
-        <button class="btn-primary btn-sm" id="copy-tempmail" style="width:auto">复制</button>
-      </div>
-      <button class="btn-primary" id="generate-tempmail" style="width:auto">${tempEmailAddr ? '重新生成' : '生成临时邮箱'}</button>
-    </div>
-    <div class="card" id="tempmail-list" style="min-height:200px"><p style="text-align:center;color:var(--text2)">暂无邮件，生成后自动刷新</p></div>
-  `
-  document.getElementById('generate-tempmail').addEventListener('click', generateTempmail)
-  document.getElementById('copy-tempmail').addEventListener('click', () => { if (tempEmailAddr) { navigator.clipboard.writeText(tempEmailAddr).then(() => showToast('邮箱已复制')) } })
-  if (tempEmailAddr) fetchTempmails()
-}
-
-async function generateTempmail() { /* ... 同之前 ... */ }
-async function fetchTempmails() { /* ... 同之前 ... */ }
 
 function showSharePage() {
   document.getElementById('share-page').style.display = 'block'
-  document.getElementById('upload-panel').classList.remove('open'); document.getElementById('overlay').classList.remove('show')
   loadShare(shareCode)
 }
 
@@ -627,7 +607,7 @@ async function loadShare(code) {
   shareFileData = links.files
   if (!shareFileData) {
     shareFileItem.style.display = 'none'; directDownloadBtn.style.display = 'none'; loginSaveBtn.style.display = 'none'
-    infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center">文件已被删除，无法下载</div>'; return
+    infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center">文件已被删除</div>'; return
   }
 
   document.getElementById('share-user-email').textContent = '用户'
@@ -645,11 +625,7 @@ async function loadShare(code) {
       isLogin = true
       document.getElementById('auth-title').textContent = '登录'
       document.getElementById('auth-btn').textContent = '登录并下载'
-      document.getElementById('toggle-text').textContent = '没有账号？'
-      document.getElementById('toggle-link').textContent = '注册'
-    } else {
-      handleDirectDownload()
-    }
+    } else handleDirectDownload()
   }
 
   loginSaveBtn.onclick = () => {
@@ -660,8 +636,6 @@ async function loadShare(code) {
       isLogin = true
       document.getElementById('auth-title').textContent = '登录'
       document.getElementById('auth-btn').textContent = '登录并保存'
-      document.getElementById('toggle-text').textContent = '没有账号？'
-      document.getElementById('toggle-link').textContent = '注册'
     }
   }
 }
