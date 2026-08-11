@@ -128,15 +128,12 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .upload-progress-btn {
       display: inline-flex; align-items: center; gap: 4px;
-      padding: 6px 12px; background: var(--card-bg); border: 1px solid var(--border);
+      padding: 6px 16px; background: var(--card-bg); border: 1px solid var(--border);
       border-radius: 8px; color: var(--text2); font-size: 12px;
-      cursor: pointer; white-space: nowrap;
+      cursor: pointer; white-space: nowrap; width: 100%;
     }
     .upload-progress-btn:hover { background: var(--chip-bg); }
     .upload-progress-btn svg { width: 14px; height: 14px; }
-    .header-actions {
-      display: flex; align-items: center; gap: 8px;
-    }
   </style>
 </head>
 <body>
@@ -417,12 +414,12 @@ function buildHomePage() {
         <div style="width:36px;height:36px;border-radius:50%;background:#4e6ef2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px">${currentUser?.email?.charAt(0)?.toUpperCase()||'U'}</div>
         <span style="font-weight:500">${currentUser?.email||''}</span>
       </div>
-      <div class="header-actions">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <button class="btn-primary" style="padding:6px 16px;border-radius:8px;width:100%;" onclick="document.getElementById('hidden-upload').click()">+ 上传</button>
         <div class="upload-progress-btn" id="home-upload-progress" title="上传进度">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           <span>进度</span>
         </div>
-        <button class="btn-primary" style="padding:6px 16px;border-radius:8px" onclick="document.getElementById('hidden-upload').click()">+ 上传</button>
       </div>
     </div>
     <div class="section-header"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>最近上传/转存</div>
