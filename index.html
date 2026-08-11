@@ -7,147 +7,152 @@
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     :root{
-      --bg: linear-gradient(160deg, #f7f9fc 0%, #eef1f6 100%);
-      --card-bg: rgba(255,255,255,0.75);
-      --text:#222;--text2:#6b7280;--border:rgba(0,0,0,0.04);
-      --chip-bg:rgba(255,255,255,0.7);--chip-border:rgba(0,0,0,0.06);
-      --input-bg:rgba(255,255,255,0.8);
-      --shadow:0 12px 40px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.02);
-      --backdrop: blur(24px);
+      --bg:#f8f9fb;
+      --card-bg:#ffffff;
+      --text:#1a1a1a;
+      --text2:#6b7280;
+      --border:#eaecf0;
+      --chip-bg:#f0f2f5;
+      --chip-border:transparent;
+      --input-bg:#f2f4f7;
+      --shadow:0 1px 2px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.03);
     }
     body.dark{
-      --bg: linear-gradient(160deg, #0f0f1a 0%, #1a1a2e 100%);
-      --card-bg:rgba(22,33,62,0.7);
-      --text:#e5e7eb;--text2:#9ca3af;--border:rgba(255,255,255,0.04);
-      --chip-bg:rgba(22,33,62,0.6);--chip-border:rgba(255,255,255,0.06);
-      --input-bg:rgba(15,15,35,0.7);
-      --shadow:0 12px 40px rgba(0,0,0,0.3);
+      --bg:#141a24;
+      --card-bg:#1e2633;
+      --text:#e4e7eb;
+      --text2:#a0a9b5;
+      --border:#2a3340;
+      --chip-bg:#1e2633;
+      --chip-border:#2a3340;
+      --input-bg:#18202b;
+      --shadow:0 1px 2px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.15);
     }
     body{
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background: var(--bg); height: 100vh; overflow: hidden; color: var(--text);
-      transition: background 0.5s ease;
+      transition: background 0.3s;
+      letter-spacing: -0.01em;
     }
     .page{display:none;height:100vh;overflow-y:auto;padding-bottom:70px}
-    .page.active{display:block;animation: pageIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)}
-    @keyframes pageIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+    .page.active{display:block}
     .bottom-nav{
       position:fixed;bottom:0;left:0;right:0;height:60px;
-      background:var(--card-bg);-webkit-backdrop-filter:var(--backdrop);backdrop-filter:var(--backdrop);
-      display:none;border-top:1px solid var(--border);z-index:100;
+      background:var(--card-bg);border-top:1px solid var(--border);z-index:100;
+      display:none;
     }
     .nav-item{
       flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-      font-size:11px;color:var(--text2);cursor:pointer;transition:color 0.2s, transform 0.2s;
+      font-size:11px;color:var(--text2);cursor:pointer;
     }
-    .nav-item.active{color:#4e6ef2;transform:scale(1.05)}
-    .nav-item:active{transform:scale(0.95)}
-    .nav-item .nav-icon{width:24px;height:24px;margin-bottom:2px;transition:stroke 0.3s}
+    .nav-item.active{color:#4e6ef2;font-weight:500}
+    .nav-item .nav-icon{width:22px;height:22px;margin-bottom:2px;opacity:0.8}
     .btn-primary{
-      background:linear-gradient(135deg, #4e6ef2 0%, #6d7cf7 100%);
-      color:#fff;border:none;border-radius:14px;padding:11px 22px;
-      font-size:14px;font-weight:500;cursor:pointer;
-      transition:all 0.25s;box-shadow:0 4px 16px rgba(78,110,242,0.25);
+      background:#4e6ef2;color:#fff;border:none;border-radius:8px;padding:10px 18px;
+      font-size:14px;font-weight:500;cursor:pointer;transition:background 0.2s;
+      letter-spacing: 0.01em;
     }
-    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(78,110,242,0.35)}
-    .btn-primary:active{transform:scale(0.97)}
+    .btn-primary:hover{background:#4462d0}
+    .btn-primary:active{transform:scale(0.98)}
     .fab{
-      position:fixed;right:20px;bottom:80px;width:52px;height:52px;border-radius:50%;
-      background:linear-gradient(135deg, #4e6ef2 0%, #6d7cf7 100%);
-      color:#fff;border:none;font-size:26px;
-      box-shadow:0 8px 24px rgba(78,110,242,0.35);z-index:99;cursor:pointer;
+      position:fixed;right:20px;bottom:80px;width:46px;height:46px;border-radius:50%;
+      background:#4e6ef2;color:#fff;border:none;font-size:22px;
+      box-shadow:0 4px 12px rgba(78,110,242,0.25);z-index:99;cursor:pointer;
       display:flex;align-items:center;justify-content:center;
-      transition:all 0.3s;animation: fabIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
-    @keyframes fabIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
-    .fab:active{transform:scale(0.9) rotate(90deg)}
     input{
-      width:100%;padding:13px 16px;border:1px solid var(--border);border-radius:14px;
+      width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:8px;
       font-size:14px;outline:none;background:var(--input-bg);color:var(--text);
-      transition:all 0.3s;-webkit-backdrop-filter:var(--backdrop);backdrop-filter:var(--backdrop);
     }
-    input:focus{border-color:#4e6ef2;box-shadow:0 0 0 4px rgba(78,110,242,0.08)}
+    input:focus{border-color:#4e6ef2;box-shadow:0 0 0 3px rgba(78,110,242,0.08)}
     .card{
-      background:var(--card-bg);border-radius:20px;padding:18px;margin:12px 16px;
-      box-shadow:var(--shadow);transition:all 0.3s;
-      -webkit-backdrop-filter:var(--backdrop);backdrop-filter:var(--backdrop);
-      animation: cardFadeIn 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+      background:var(--card-bg);border-radius:12px;padding:16px;margin:12px 16px;
+      box-shadow:var(--shadow);
     }
-    @keyframes cardFadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-    .card:active{transform:scale(0.99)}
     .file-row{
       display:flex;align-items:center;padding:14px 0;border-bottom:1px solid var(--border);
-      transition:background 0.2s;
     }
-    .file-row:hover{background:rgba(78,110,242,0.02)}
     .file-row:last-child{border-bottom:none}
-    .file-icon{width:46px;height:46px;margin-right:14px;display:flex;align-items:center;justify-content:center;background:rgba(78,110,242,0.06);border-radius:14px;transition:transform 0.2s}
-    .file-row:hover .file-icon{transform:scale(1.04)}
+    .file-icon{width:40px;height:40px;margin-right:12px;display:flex;align-items:center;justify-content:center;background:rgba(78,110,242,0.06);border-radius:10px}
     .file-info{flex:1;min-width:0}
     .file-name{font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .file-meta{font-size:12px;color:var(--text2);margin-top:2px}
-    .chip-scroll{display:flex;gap:8px;overflow-x:auto;padding:14px 16px}
+    .chip-scroll{display:flex;gap:8px;overflow-x:auto;padding:12px 16px}
     .chip{
-      padding:7px 18px;border-radius:22px;font-size:13px;font-weight:500;
+      padding:6px 18px;border-radius:20px;font-size:13px;white-space:nowrap;
       background:var(--chip-bg);border:1px solid var(--chip-border);
-      cursor:pointer;color:var(--text);transition:all 0.3s;
-      -webkit-backdrop-filter:var(--backdrop);backdrop-filter:var(--backdrop);
+      cursor:pointer;color:var(--text);transition:all 0.2s;
     }
-    .chip.active{background:#4e6ef2;color:#fff;border-color:#4e6ef2;box-shadow:0 4px 12px rgba(78,110,242,0.25)}
-    .chip:active{transform:scale(0.96)}
-    .progress-bar{height:6px;background:rgba(0,0,0,0.04);border-radius:3px;margin:10px 0;overflow:hidden}
-    .progress-fill{height:100%;background:linear-gradient(90deg, #4e6ef2, #6d7cf7);border-radius:3px;transition:width 0.6s ease}
+    .chip.active{background:#4e6ef2;color:#fff;border-color:#4e6ef2;box-shadow:0 2px 6px rgba(78,110,242,0.2)}
+    .progress-bar{height:6px;background:rgba(0,0,0,0.05);border-radius:3px;margin:10px 0;overflow:hidden}
+    .progress-fill{height:100%;background:#4e6ef2;border-radius:3px;transition:width 0.3s}
     .splash{
-      position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(145deg, #4e6ef2 0%, #6d7cf7 100%);
+      position:fixed;top:0;left:0;right:0;bottom:0;background:#4e6ef2;
       display:flex;flex-direction:column;align-items:center;justify-content:center;
       z-index:9999;
     }
-    .splash h1{color:#fff;font-size:32px;font-weight:400;letter-spacing:3px;animation: splashText 1s ease}
-    .splash p{color:rgba(255,255,255,0.8);font-size:15px;margin-top:8px;font-weight:300;animation: splashText 1s ease 0.15s both}
-    @keyframes splashText{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .splash h1{color:#fff;font-size:32px;font-weight:500;letter-spacing:1px}
+    .splash p{color:rgba(255,255,255,0.85);font-size:15px;margin-top:8px;font-weight:300}
     .skip-btn{
       position:fixed;top:20px;right:20px;background:rgba(255,255,255,0.15);
-      color:#fff;border:1px solid rgba(255,255,255,0.25);padding:7px 18px;
-      border-radius:24px;font-size:13px;z-index:10000;cursor:pointer;
-      backdrop-filter:blur(10px);transition:background 0.3s;
+      color:#fff;border:1px solid rgba(255,255,255,0.25);padding:6px 16px;
+      border-radius:20px;font-size:13px;z-index:10000;cursor:pointer;
     }
-    .skip-btn:hover{background:rgba(255,255,255,0.25)}
     .auth-container{display:flex;align-items:center;justify-content:center;height:100vh}
     .auth-card{
-      background:var(--card-bg);padding:36px 28px;border-radius:24px;
-      box-shadow:var(--shadow);width:90%;max-width:400px;
-      -webkit-backdrop-filter:var(--backdrop);backdrop-filter:var(--backdrop);
-      animation: cardFadeIn 0.5s ease;
+      background:var(--card-bg);padding:32px 28px;border-radius:16px;
+      box-shadow:var(--shadow);width:90%;max-width:380px;
     }
-    .auth-card h2{font-size:26px;font-weight:500;margin-bottom:4px}
+    .auth-card h2{font-size:24px;font-weight:500;margin-bottom:4px}
     .auth-card .sub{color:var(--text2);margin-bottom:24px;font-size:14px}
     .auth-card input{margin-bottom:14px}
     .auth-toggle{text-align:center;margin-top:16px;font-size:14px;color:var(--text2)}
     .auth-toggle span{color:#4e6ef2;cursor:pointer;font-weight:500}
     .share-header{display:flex;align-items:center;padding:18px;background:var(--card-bg);border-bottom:1px solid var(--border)}
-    .share-info-card{display:flex;align-items:center;gap:14px;padding:18px;background:var(--card-bg);margin:14px 16px;border-radius:18px}
-    .share-controls{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--card-bg);margin:0 16px;border-radius:18px}
-    .share-file-item{display:flex;align-items:center;padding:14px 18px;background:var(--card-bg);margin:0 16px;border-radius:18px;margin-top:8px}
+    .share-info-card{display:flex;align-items:center;gap:14px;padding:18px;background:var(--card-bg);margin:14px 16px;border-radius:14px;box-shadow:var(--shadow)}
+    .share-controls{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--card-bg);margin:0 16px;border-radius:14px;box-shadow:var(--shadow)}
+    .share-file-item{display:flex;align-items:center;padding:14px 18px;background:var(--card-bg);margin:0 16px;border-radius:14px;margin-top:8px;box-shadow:var(--shadow)}
     .save-bar{position:fixed;bottom:0;left:0;right:0;padding:14px 18px;background:var(--card-bg);border-top:1px solid var(--border);display:flex;justify-content:flex-start}
-    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 24px;border-radius:24px;font-size:14px;z-index:9999;opacity:0;transition:opacity 0.3s}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:10px 24px;border-radius:24px;font-size:14px;z-index:9999;opacity:0;transition:opacity 0.3s}
     .toast.show{opacity:1}
-    .upload-panel{position:fixed;top:0;right:0;width:320px;max-width:85vw;height:100vh;background:var(--card-bg);z-index:150;transform:translateX(100%);transition:transform 0.3s;display:flex;flex-direction:column}
+    .upload-panel{position:fixed;top:0;right:0;width:300px;max-width:85vw;height:100vh;background:var(--card-bg);z-index:150;transform:translateX(100%);transition:transform 0.3s;display:flex;flex-direction:column;box-shadow:-4px 0 20px rgba(0,0,0,0.05)}
     .upload-panel.open{transform:translateX(0)}
     .upload-panel-header{padding:18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
     .upload-panel-body{flex:1;overflow-y:auto;padding:18px}
     .overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:149;display:none}
     .overlay.show{display:block}
-    .section-header{display:flex;align-items:center;gap:8px;margin:22px 16px 10px;font-size:14px;color:var(--text2);font-weight:500}
+    .section-header{display:flex;align-items:center;gap:6px;margin:22px 16px 10px;font-size:14px;color:var(--text2);font-weight:500}
     .section-header svg{width:18px;height:18px;opacity:0.7}
     .home-item{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);font-size:14px}
     .home-item:last-child{border-bottom:none}
     .home-item .name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
     .home-item .time{font-size:12px;color:var(--text2);margin-left:8px}
-    .btn-sm{padding:5px 14px;font-size:12px;border-radius:10px;margin-left:6px;transition:all 0.2s;font-weight:500}
+    .btn-sm{padding:4px 12px;font-size:12px;border-radius:6px;margin-left:6px;transition:all 0.2s;font-weight:500}
     .btn-outline{background:transparent;border:1px solid #4e6ef2;color:#4e6ef2}
     .btn-outline:hover{background:rgba(78,110,242,0.04)}
     .btn-danger{background:transparent;border:1px solid #e74c3c;color:#e74c3c}
     .btn-danger:hover{background:rgba(231,76,60,0.04)}
+
+    /* 加载中动画 */
+    .loading-spinner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 0;
+      color: var(--text2);
+      font-size: 14px;
+    }
+    .loading-spinner::before {
+      content: "";
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: #4e6ef2;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -183,13 +188,13 @@
 
 <div id="share-page" style="display:none">
   <div class="share-header">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4e6ef2" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4e6ef2" stroke-width="2"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
     <span style="font-weight:500;margin-left:8px;color:#4e6ef2">极简云</span>
   </div>
   <div class="share-info-card" id="share-info-card">
-    <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg, #4e6ef2, #6d7cf7);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px">U</div>
+    <div style="width:44px;height:44px;border-radius:50%;background:#4e6ef2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px">U</div>
     <div style="flex:1"><div style="font-weight:500" id="share-user-email">用户</div><div style="font-size:12px;color:var(--text2)">分享的文件</div></div>
-    <div style="background:rgba(78,110,242,0.08);padding:5px 14px;border-radius:20px;font-size:12px;color:#4e6ef2;font-weight:500">来自分享</div>
+    <div style="background:rgba(78,110,242,0.08);padding:4px 12px;border-radius:20px;font-size:12px;color:#4e6ef2;font-weight:500">来自分享</div>
   </div>
   <div class="share-controls">
     <div style="display:flex;align-items:center;gap:8px"><span style="font-weight:500">文件列表</span><span style="font-size:12px;color:var(--text2)">1项</span></div>
@@ -243,41 +248,35 @@ const FREE_API = 'http://www.yx520.1td/API/dwz/api.php'
 
 let allFiles = [], currentFilter = 'all', currentUser = null, uploadTasks = [], shareFileData = null
 const shareCode = new URLSearchParams(location.search).get('code')
+let tempEmailAddr = '', tempEmailToken = '', tempEmailPolling = null
 
-
-const splash = document.getElementById('splash')
-const skipBtn = document.getElementById('skip-btn')
-let countdown = 5
-skipBtn.textContent = countdown + 's 跳过'
+// Splash
+const splash = document.getElementById('splash'), skipBtn = document.getElementById('skip-btn')
+let countdown = 5; skipBtn.textContent = countdown + 's 跳过'
 const timer = setInterval(() => { countdown--; skipBtn.textContent = countdown + 's 跳过'; if (countdown <= 0) { clearInterval(timer); hideSplash() } }, 1000)
 skipBtn.addEventListener('click', () => { clearInterval(timer); hideSplash() })
 
 function hideSplash() {
-  splash.style.transition = 'opacity 0.5s'
-  splash.style.opacity = '0'
+  splash.style.transition = 'opacity 0.4s'; splash.style.opacity = '0'
   setTimeout(() => {
-    splash.style.display = 'none'
-    skipBtn.style.display = 'none'
+    splash.style.display = 'none'; skipBtn.style.display = 'none'
     document.getElementById('upload-panel').classList.remove('open')
     document.getElementById('overlay').classList.remove('show')
-    if (shareCode) showSharePage()
-    else checkAuth()
-  }, 500)
+    if (shareCode) showSharePage(); else checkAuth()
+  }, 400)
 }
 
-
+// Auth
 let isLogin = true
 document.getElementById('toggle-link').addEventListener('click', () => {
   isLogin = !isLogin
   document.getElementById('auth-title').textContent = isLogin ? '登录' : '注册'
-  document.getElementById('auth-sub').textContent = isLogin ? '欢迎回来' : '创建新账号'
   document.getElementById('auth-btn').textContent = isLogin ? '登录' : '注册'
   document.getElementById('toggle-text').textContent = isLogin ? '没有账号？' : '已有账号？'
   document.getElementById('toggle-link').textContent = isLogin ? '注册' : '登录'
 })
 document.getElementById('auth-btn').addEventListener('click', async () => {
-  const email = document.getElementById('auth-email').value.trim()
-  const password = document.getElementById('auth-password').value
+  const email = document.getElementById('auth-email').value.trim(), password = document.getElementById('auth-password').value
   if (!email || !password) return alert('请填写邮箱和密码')
   const { error } = isLogin ? await supabase.auth.signInWithPassword({ email, password }) : await supabase.auth.signUp({ email, password })
   if (error) return alert(error.message)
@@ -286,29 +285,24 @@ document.getElementById('auth-btn').addEventListener('click', async () => {
   else checkAuth()
 })
 
-
+// Navigation
 document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => switchTab(item.dataset.tab)))
-
 document.getElementById('hidden-upload').addEventListener('change', async (e) => {
   for (const file of e.target.files) {
     if (file.size > 50 * 1024 * 1024) { alert('文件超过50MB，请压缩或使用其他方式'); continue }
-    const safeFile = new File([file], file.name.replace(/[^a-zA-Z0-9._-]/g, '_'), { type: file.type })
-    addUploadTask(safeFile)
+    addUploadTask(new File([file], file.name.replace(/[^a-zA-Z0-9._-]/g, '_'), { type: file.type }))
   }
   document.getElementById('hidden-upload').value = ''
 })
 
 function addUploadTask(file) {
   const task = { id: Date.now(), name: file.name, progress: 0, status: 'waiting', file }
-  uploadTasks.push(task)
-  renderUploadTasks()
-  startUpload(task)
+  uploadTasks.push(task); renderUploadTasks(); startUpload(task)
 }
 
 async function startUpload(task) {
   if (!currentUser) return
-  task.status = 'uploading'
-  renderUploadTasks()
+  task.status = 'uploading'; renderUploadTasks()
   const path = `${currentUser.id}/${Date.now()}_${task.file.name}`
   const interval = setInterval(() => {
     if (task.progress < 90) { task.progress += Math.random() * 15; if (task.progress > 90) task.progress = 90; renderUploadTasks() }
@@ -320,18 +314,23 @@ async function startUpload(task) {
     await supabase.from('files').insert({ user_id: currentUser.id, name: task.file.name, size: task.file.size, type: task.file.type, storage_path: path, source: 'upload' })
     task.progress = 100; task.status = 'success'
   } catch (err) { clearInterval(interval); task.status = 'error'; task.errorMsg = err.message }
-  renderUploadTasks()
-  loadFiles()
+  renderUploadTasks(); loadFiles()
   if (document.getElementById('page-home').classList.contains('active')) loadHomeData()
 }
 
 function renderUploadTasks() {
   document.getElementById('upload-task-list').innerHTML = uploadTasks.map(t => `
-    <div style="margin-bottom:14px">
+    <div style="margin-bottom:12px">
       <div style="display:flex;justify-content:space-between"><span>${t.name}</span><span style="color:${t.status==='success'?'#27ae60':t.status==='error'?'#e74c3c':'#666'}">${t.status==='waiting'?'等待':t.status==='uploading'?'上传中':t.status==='success'?'完成':'失败'}</span></div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${t.progress}%;background:${t.status==='error'?'#e74c3c':'linear-gradient(90deg, #4e6ef2, #6d7cf7)'}"></div></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${t.progress}%;background:${t.status==='error'?'#e74c3c':'#4e6ef2'}"></div></div>
       ${t.status==='error'?`<div style="font-size:12px;color:#e74c3c">${t.errorMsg}</div>`:''}
     </div>`).join('')
+}
+
+// 统一的加载指示器添加函数
+function setLoading(containerId) {
+  const container = document.getElementById(containerId)
+  if (container) container.innerHTML = '<div class="loading-spinner">加载中...</div>'
 }
 
 window.switchTab = function(tab) {
@@ -341,12 +340,30 @@ window.switchTab = function(tab) {
   if (page) page.classList.add('active')
   const nav = document.querySelector(`.nav-item[data-tab="${tab}"]`)
   if (nav) nav.classList.add('active')
-  if (tab === 'home') { buildHomePage(); loadHomeData() }
-  else if (tab === 'files') buildFilesPage()
-  else if (tab === 'me') { buildMePage(); loadFiles() }
+
+  // 先显示加载状态
+  if (tab === 'home') {
+    setLoading('page-home')
+    buildHomePage()
+    loadHomeData()
+  }
+  else if (tab === 'files') {
+    setLoading('page-files')
+    buildFilesPage()
+    if (!allFiles.length) loadFiles().then(() => renderFiles())
+    else renderFiles()
+  }
+  else if (tab === 'me') {
+    setLoading('page-me')
+    buildMePage()
+    loadFiles().then(() => updateMeStorage())
+  }
   else if (tab === 'settings') buildSettingsPage()
   else if (tab === 'feedback') buildFeedbackPage()
-  else if (tab === 'shareHistory') buildShareHistoryPage()
+  else if (tab === 'shareHistory') {
+    setLoading('page-shareHistory')
+    buildShareHistoryPage()
+  }
   else if (tab === 'tempmail') buildTempmailPage()
 }
 
@@ -361,7 +378,7 @@ window.renderFiles = function() {
     else if (currentFilter === 'archive') filtered = filtered.filter(f => /zip|rar|7z|tar|gz/.test(f.type||''))
     else if (currentFilter === 'other') filtered = filtered.filter(f => f.type && !f.type.startsWith('image/') && !f.type.startsWith('video/') && !/zip|rar|7z|tar|gz/.test(f.type))
   }
-  container.innerHTML = filtered.length === 0 ? '<div style="text-align:center;padding:48px;color:var(--text2)">暂无文件</div>' : filtered.map(f => `
+  container.innerHTML = filtered.length === 0 ? '<div style="text-align:center;padding:40px;color:var(--text2)">暂无文件</div>' : filtered.map(f => `
     <div class="file-row">
       <div class="file-icon">${getFileIconHTML(f.type)}</div>
       <div class="file-info"><div class="file-name">${f.name}</div><div class="file-meta">${formatSize(f.size)} · ${new Date(f.created_at).toLocaleDateString()}</div></div>
@@ -378,7 +395,7 @@ window.renderFiles = function() {
   })
   document.querySelectorAll('[data-share]').forEach(btn => {
     btn.onclick = async () => {
-      const days = prompt('请输入过期天数（0=永久有效，默认7天）：', '7')
+      const days = prompt('过期天数（0=永久，默认7天）：', '7')
       if (days === null) return
       const dayNum = parseInt(days)
       if (isNaN(dayNum) || dayNum < 0) { alert('请输入有效天数'); return }
@@ -421,8 +438,7 @@ function getFileIconHTML(type) {
 
 function formatSize(bytes) {
   if (!bytes) return '0 B'
-  const k = 1024, sizes = ['B','KB','MB','GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  const k = 1024, sizes = ['B','KB','MB','GB'], i = Math.floor(Math.log(bytes) / Math.log(k))
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
 }
 
@@ -430,28 +446,28 @@ function buildHomePage() {
   document.getElementById('page-home').innerHTML = `
     <div style="padding:60px 16px 0;display:flex;align-items:center;justify-content:space-between">
       <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#4e6ef2,#6d7cf7);color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px">${currentUser?.email?.charAt(0)?.toUpperCase()||'U'}</div>
+        <div style="width:36px;height:36px;border-radius:50%;background:#4e6ef2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px">${currentUser?.email?.charAt(0)?.toUpperCase()||'U'}</div>
         <span style="font-weight:500">${currentUser?.email||''}</span>
       </div>
-      <button class="btn-primary" style="width:auto;padding:7px 18px;border-radius:24px" onclick="document.getElementById('hidden-upload').click()">+ 上传</button>
+      <button class="btn-primary" style="width:auto;padding:6px 16px;border-radius:8px" onclick="document.getElementById('hidden-upload').click()">+ 上传</button>
     </div>
     <div class="section-header"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>最近上传/转存</div>
-    <div class="card" id="recent-upload"></div>
+    <div class="card" id="recent-upload"><div class="loading-spinner">加载中...</div></div>
     <div class="section-header"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>最近分享</div>
-    <div class="card" id="recent-share"></div>
+    <div class="card" id="recent-share"><div class="loading-spinner">加载中...</div></div>
   `
 }
 
 function buildFilesPage() {
   document.getElementById('page-files').innerHTML = `
-    <div style="padding:14px 16px;background:var(--card-bg);border-bottom:1px solid var(--border)">
+    <div style="padding:12px 16px;background:var(--card-bg);border-bottom:1px solid var(--border)">
       <h3 style="font-weight:500">云文件</h3>
       <input type="text" id="search-input" placeholder="搜索文件..." oninput="window.renderFiles()" style="margin-top:8px">
     </div>
     <div class="chip-scroll">
       <div class="chip active" data-filter="all">全部</div><div class="chip" data-filter="image">图片</div><div class="chip" data-filter="video">视频</div><div class="chip" data-filter="archive">压缩包</div><div class="chip" data-filter="other">其他</div>
     </div>
-    <div id="file-container" style="padding:0 16px"></div>
+    <div id="file-container" style="padding:0 16px"><div class="loading-spinner">加载中...</div></div>
     <button class="fab" onclick="document.getElementById('hidden-upload').click()">+</button>
   `
   document.querySelectorAll('.chip').forEach(chip => chip.addEventListener('click', () => {
@@ -460,21 +476,19 @@ function buildFilesPage() {
     currentFilter = chip.dataset.filter
     window.renderFiles()
   }))
-  window.renderFiles()
 }
 
 function buildMePage() {
   document.getElementById('page-me').innerHTML = `
     <div class="card" style="display:flex;align-items:center;gap:14px">
-      <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#4e6ef2,#6d7cf7);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px">U</div>
+      <div style="width:46px;height:46px;border-radius:50%;background:#4e6ef2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px">U</div>
       <div><div style="font-weight:500">${currentUser?.email||''}</div></div>
     </div>
-    <div class="card"><span>已用 <span id="used-size">0 B</span> / 1 GB</span><div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div></div>
+    <div class="card"><span>已用 <span id="used-size">计算中...</span> / 1 GB</span><div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div></div>
     <div class="card" style="display:flex;justify-content:space-between;align-items:center" onclick="switchTab('shareHistory')"><span>分享历史</span><span style="color:var(--text2)">›</span></div>
     <div class="card" onclick="switchTab('settings')"><div style="display:flex;align-items:center;gap:10px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>设置</span></div></div>
     <div class="card" onclick="switchTab('feedback')"><div style="display:flex;align-items:center;gap:10px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>反馈</span></div></div>
   `
-  updateMeStorage()
 }
 
 function buildSettingsPage() {
@@ -490,15 +504,15 @@ function buildSettingsPage() {
 
 function showPasswordModal() {
   const modal = document.createElement('div')
-  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:center;justify-content:center'
+  modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:200;display:flex;align-items:center;justify-content:center'
   modal.innerHTML = `
-    <div style="background:var(--card-bg);border-radius:20px;padding:24px;width:320px;backdrop-filter:var(--backdrop);box-shadow:var(--shadow)">
+    <div style="background:var(--card-bg);border-radius:16px;padding:24px;width:320px;box-shadow:var(--shadow)">
       <h3 style="margin-bottom:16px;font-weight:500">修改密码</h3>
       <input type="password" id="old-pwd" placeholder="旧密码">
       <input type="password" id="new-pwd1" placeholder="新密码">
       <input type="password" id="new-pwd2" placeholder="确认新密码">
       <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
-        <button class="btn-primary" style="background:#eee;color:#333" id="cancel-pwd">取消</button>
+        <button class="btn-primary" style="background:#e5e7eb;color:#333" id="cancel-pwd">取消</button>
         <button class="btn-primary" id="confirm-pwd">确认</button>
       </div>
     </div>
@@ -507,17 +521,10 @@ function showPasswordModal() {
   modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove() })
   document.getElementById('cancel-pwd').addEventListener('click', () => modal.remove())
   document.getElementById('confirm-pwd').addEventListener('click', async () => {
-    const oldPwd = document.getElementById('old-pwd').value
-    const newPwd1 = document.getElementById('new-pwd1').value
-    const newPwd2 = document.getElementById('new-pwd2').value
+    const oldPwd = document.getElementById('old-pwd').value, newPwd1 = document.getElementById('new-pwd1').value, newPwd2 = document.getElementById('new-pwd2').value
     if (!oldPwd || !newPwd1 || !newPwd2) return alert('请填写完整')
     if (newPwd1 !== newPwd2) return alert('两次新密码不一致')
-    try {
-      const { error } = await supabase.auth.updateUser({ password: newPwd1 })
-      if (error) throw error
-      showToast('密码修改成功')
-      modal.remove()
-    } catch (e) { alert('修改失败：' + e.message) }
+    try { const { error } = await supabase.auth.updateUser({ password: newPwd1 }); if (error) throw error; showToast('密码修改成功'); modal.remove() } catch (e) { alert('修改失败：' + e.message) }
   })
 }
 
@@ -539,19 +546,13 @@ function buildShareHistoryPage() {
       <h3 style="font-weight:500">分享历史</h3>
       <button class="btn-primary btn-sm" style="background:#e74c3c" onclick="clearShareHistory()">清空记录</button>
     </div>
-    <div id="share-history-list" style="padding:0 16px"></div>
+    <div id="share-history-list" style="padding:0 16px"><div class="loading-spinner">加载中...</div></div>
   `
   loadShareHistory()
 }
 
-
-let tempEmailAddr = ''
-let tempEmailToken = ''
-let tempEmailPolling = null
-
 function buildTempmailPage() {
-  const page = document.getElementById('page-tempmail')
-  page.innerHTML = `
+  document.getElementById('page-tempmail').innerHTML = `
     <div style="padding:16px;cursor:pointer;font-weight:500" onclick="switchTab('settings')">‹ 返回设置</div>
     <div class="card" style="text-align:center">
       <p style="font-size:14px;color:var(--text2);margin-bottom:12px">临时邮箱（自动刷新）</p>
@@ -561,125 +562,70 @@ function buildTempmailPage() {
       </div>
       <button class="btn-primary" id="generate-tempmail" style="width:auto">${tempEmailAddr ? '重新生成' : '生成临时邮箱'}</button>
     </div>
-    <div class="card" id="tempmail-list" style="min-height:200px">
-      <p style="text-align:center;color:var(--text2)">暂无邮件，生成邮箱后自动刷新</p>
-    </div>
+    <div class="card" id="tempmail-list" style="min-height:200px"><p style="text-align:center;color:var(--text2)">暂无邮件，生成后自动刷新</p></div>
   `
   document.getElementById('generate-tempmail').addEventListener('click', generateTempmail)
-  document.getElementById('copy-tempmail').addEventListener('click', () => {
-    if (tempEmailAddr) { navigator.clipboard.writeText(tempEmailAddr).then(() => showToast('邮箱已复制')) }
-  })
-  if (tempEmailAddr) {
-    fetchTempmails()
-  }
+  document.getElementById('copy-tempmail').addEventListener('click', () => { if (tempEmailAddr) { navigator.clipboard.writeText(tempEmailAddr).then(() => showToast('邮箱已复制')) } })
+  if (tempEmailAddr) fetchTempmails()
 }
 
 async function generateTempmail() {
   if (tempEmailPolling) clearInterval(tempEmailPolling)
   try {
-    const domainRes = await fetch('https://api.mail.tm/domains')
-    const domains = await domainRes.json()
-    const domain = domains['hydra:member'][0].domain
-    const username = Math.random().toString(36).substring(2, 10)
-    const password = Math.random().toString(36).substring(2, 15)
-    const accountRes = await fetch('https://api.mail.tm/accounts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ address: username + '@' + domain, password })
-    })
+    const domainRes = await fetch('https://api.mail.tm/domains'), domains = await domainRes.json()
+    const domain = domains['hydra:member'][0].domain, username = Math.random().toString(36).substring(2, 10), password = Math.random().toString(36).substring(2, 15)
+    const accountRes = await fetch('https://api.mail.tm/accounts', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({address:username+'@'+domain, password}) })
     const account = await accountRes.json()
-    const tokenRes = await fetch('https://api.mail.tm/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ address: account.address, password })
-    })
+    const tokenRes = await fetch('https://api.mail.tm/token', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({address:account.address, password}) })
     const tokenData = await tokenRes.json()
-    tempEmailAddr = account.address
-    tempEmailToken = tokenData.token
-    document.getElementById('tempmail-address').value = tempEmailAddr
-    showToast('临时邮箱已生成')
-    fetchTempmails()
-    tempEmailPolling = setInterval(fetchTempmails, 10000)
-  } catch (e) {
-    alert('生成失败，请检查网络')
-  }
+    tempEmailAddr = account.address; tempEmailToken = tokenData.token
+    document.getElementById('tempmail-address').value = tempEmailAddr; showToast('临时邮箱已生成')
+    fetchTempmails(); tempEmailPolling = setInterval(fetchTempmails, 10000)
+  } catch (e) { alert('生成失败，请检查网络') }
 }
 
 async function fetchTempmails() {
   if (!tempEmailToken) return
-  const listEl = document.getElementById('tempmail-list')
-  if (!listEl) return
-  listEl.innerHTML = '<p style="text-align:center;color:var(--text2)">加载中...</p>'
+  const listEl = document.getElementById('tempmail-list'); if (!listEl) return
+  listEl.innerHTML = '<div class="loading-spinner">加载中...</div>'
   try {
-    const res = await fetch('https://api.mail.tm/messages', {
-      headers: { 'Authorization': `Bearer ${tempEmailToken}` }
-    })
-    const data = await res.json()
-    const messages = data['hydra:member'] || []
-    if (messages.length === 0) {
-      listEl.innerHTML = '<p style="text-align:center;color:var(--text2)">暂无邮件</p>'
-      return
-    }
+    const res = await fetch('https://api.mail.tm/messages', { headers:{'Authorization':`Bearer ${tempEmailToken}`} })
+    const data = await res.json(); const messages = data['hydra:member'] || []
+    if (messages.length === 0) { listEl.innerHTML = '<p style="text-align:center;color:var(--text2)">暂无邮件</p>'; return }
     listEl.innerHTML = messages.map(msg => `
       <div style="padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer" data-id="${msg.id}">
         <div style="font-weight:500">${msg.subject}</div>
         <div style="font-size:12px;color:var(--text2)">${msg.from.address} · ${new Date(msg.createdAt).toLocaleString()}</div>
-      </div>
-    `).join('')
-    listEl.querySelectorAll('div[data-id]').forEach(el => {
-      el.addEventListener('click', async () => {
-        const id = el.dataset.id
-        const detailRes = await fetch(`https://api.mail.tm/messages/${id}`, {
-          headers: { 'Authorization': `Bearer ${tempEmailToken}` }
-        })
-        const detail = await detailRes.json()
-        alert(`发件人: ${detail.from.address}\n\n${detail.text || detail.html || '(无内容)'}`)
-      })
-    })
-  } catch (e) {
-    listEl.innerHTML = '<p style="text-align:center;color:#e74c3c">加载失败</p>'
-  }
+      </div>`).join('')
+    listEl.querySelectorAll('div[data-id]').forEach(el => el.addEventListener('click', async () => {
+      const detailRes = await fetch(`https://api.mail.tm/messages/${el.dataset.id}`, { headers:{'Authorization':`Bearer ${tempEmailToken}`} })
+      const detail = await detailRes.json()
+      alert(`发件人: ${detail.from.address}\n\n${detail.text || detail.html || '(无内容)'}`)
+    }))
+  } catch (e) { listEl.innerHTML = '<p style="text-align:center;color:#e74c3c">加载失败</p>' }
 }
 
-window.addEventListener('beforeunload', () => {
-  if (tempEmailPolling) clearInterval(tempEmailPolling)
-})
+window.addEventListener('beforeunload', () => { if (tempEmailPolling) clearInterval(tempEmailPolling) })
 
 async function clearShareHistory() {
   if (!confirm('确定清空所有分享记录吗？')) return
   await supabase.from('share_links').delete().eq('creator_id', currentUser.id)
-  loadShareHistory()
-  showToast('分享记录已清空')
+  loadShareHistory(); showToast('分享记录已清空')
 }
 
 function showSharePage() {
   document.getElementById('share-page').style.display = 'block'
-  document.getElementById('upload-panel').classList.remove('open')
-  document.getElementById('overlay').classList.remove('show')
+  document.getElementById('upload-panel').classList.remove('open'); document.getElementById('overlay').classList.remove('show')
   loadShare(shareCode)
 }
 
 async function loadShare(code) {
-  const shareFileItem = document.getElementById('share-file-item')
-  const loginSaveBtn = document.getElementById('login-save-btn')
-  const infoCard = document.getElementById('share-info-card')
+  const shareFileItem = document.getElementById('share-file-item'), loginSaveBtn = document.getElementById('login-save-btn'), infoCard = document.getElementById('share-info-card')
   const { data: links, error } = await supabase.from('share_links').select('*, files(*)').eq('code', code).maybeSingle()
-  if (error || !links) {
-    shareFileItem.style.display = 'none'; loginSaveBtn.style.display = 'none'
-    infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center;width:100%">分享不存在或已失效</div>'
-    return
-  }
-  if (links.expires_at && new Date(links.expires_at) < new Date()) {
-    shareFileItem.style.display = 'none'; loginSaveBtn.style.display = 'none'
-    infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center;width:100%">分享已过期</div>'
-    return
-  }
+  if (error || !links) { shareFileItem.style.display = 'none'; loginSaveBtn.style.display = 'none'; infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center">分享不存在或已失效</div>'; return }
+  if (links.expires_at && new Date(links.expires_at) < new Date()) { shareFileItem.style.display = 'none'; loginSaveBtn.style.display = 'none'; infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center">分享已过期</div>'; return }
   shareFileData = links.files
-  if (!shareFileData) {
-    shareFileItem.style.display = 'none'; loginSaveBtn.style.display = 'none'
-    infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center;width:100%">文件已被删除，无法下载</div>'
-    return
-  }
+  if (!shareFileData) { shareFileItem.style.display = 'none'; loginSaveBtn.style.display = 'none'; infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center">文件已被删除，无法下载</div>'; return }
   document.getElementById('share-user-email').textContent = '用户'
   document.getElementById('share-file-name').textContent = shareFileData.name
   document.getElementById('share-file-meta').textContent = formatSize(shareFileData.size)
@@ -688,13 +634,9 @@ async function loadShare(code) {
   loginSaveBtn.onclick = () => {
     if (currentUser) saveFileToMyAccount()
     else {
-      document.getElementById('auth-page').style.display = 'block'
-      isLogin = true
+      document.getElementById('auth-page').style.display = 'block'; isLogin = true
       document.getElementById('auth-title').textContent = '登录'
-      document.getElementById('auth-sub').textContent = '登录后保存文件'
       document.getElementById('auth-btn').textContent = '登录并保存'
-      document.getElementById('toggle-text').textContent = '没有账号？'
-      document.getElementById('toggle-link').textContent = '注册'
     }
   }
 }
@@ -703,14 +645,12 @@ async function saveFileToMyAccount() {
   if (!shareFileData || !currentUser) return
   showToast('正在保存...')
   try {
-    const { data: urlData, error: urlError } = await supabase.storage.from('user-files').createSignedUrl(shareFileData.storage_path, 60)
-    if (urlError || !urlData?.signedUrl) throw new Error('无法获取源文件链接')
-    const res = await fetch(urlData.signedUrl)
-    if (!res.ok) throw new Error('下载源文件失败')
-    const blob = await res.blob()
-    const newPath = `${currentUser.id}/${Date.now()}_${shareFileData.name}`
-    const { error: uploadError } = await supabase.storage.from('user-files').upload(newPath, blob, { contentType: blob.type || 'application/octet-stream' })
-    if (uploadError) throw uploadError
+    const { data: urlData } = await supabase.storage.from('user-files').createSignedUrl(shareFileData.storage_path, 60)
+    if (!urlData?.signedUrl) throw new Error('无法获取源文件链接')
+    const res = await fetch(urlData.signedUrl); if (!res.ok) throw new Error('下载源文件失败')
+    const blob = await res.blob(); const newPath = `${currentUser.id}/${Date.now()}_${shareFileData.name}`
+    const { error } = await supabase.storage.from('user-files').upload(newPath, blob, { contentType: blob.type || 'application/octet-stream' })
+    if (error) throw error
     await supabase.from('files').insert({ user_id: currentUser.id, name: shareFileData.name, size: blob.size, type: blob.type, storage_path: newPath, source: 'save' })
     showToast('文件已保存到你的网盘')
   } catch (err) { showToast('保存失败：' + err.message) }
@@ -720,15 +660,9 @@ async function loadFiles() {
   if (!currentUser) return
   const { data } = await supabase.from('files').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false })
   allFiles = data || []
-  updateMeStorage()
 }
 
-function showToast(msg) {
-  const toast = document.getElementById('toast')
-  toast.textContent = msg
-  toast.classList.add('show')
-  setTimeout(() => toast.classList.remove('show'), 2000)
-}
+function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000) }
 
 async function checkAuth() {
   const { data: { session } } = await supabase.auth.getSession()
@@ -737,46 +671,35 @@ async function checkAuth() {
     document.getElementById('auth-page').style.display = 'none'
     document.getElementById('main-container').style.display = 'block'
     document.getElementById('bottom-nav').style.display = 'flex'
-    switchTab('home')
-    loadFiles()
-  } else {
-    document.getElementById('auth-page').style.display = 'block'
-  }
+    switchTab('home'); loadFiles()
+  } else { document.getElementById('auth-page').style.display = 'block' }
 }
 
 async function loadHomeData() {
   if (!currentUser) return
   const { data: recent } = await supabase.from('files').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }).limit(10)
-  const uploadDiv = document.getElementById('recent-upload')
-  if (uploadDiv) {
-    const items = recent || []
-    uploadDiv.innerHTML = items.length === 0 ? '<div class="home-item" style="color:var(--text2)">暂无记录</div>' : items.map(f => `<div class="home-item"><span class="name">${f.name}</span><span class="time">${f.source==='save'?'转存':'上传'} · ${new Date(f.created_at).toLocaleDateString()}</span></div>`).join('')
-  }
+  const uploadDiv = document.getElementById('recent-upload'); if (uploadDiv) uploadDiv.innerHTML = (recent && recent.length) ? recent.map(f => `<div class="home-item"><span class="name">${f.name}</span><span class="time">${f.source==='save'?'转存':'上传'} · ${new Date(f.created_at).toLocaleDateString()}</span></div>`).join('') : '<div class="home-item" style="color:var(--text2)">暂无记录</div>'
   const { data: shares } = await supabase.from('share_links').select('files(name), created_at').eq('creator_id', currentUser.id).order('created_at', { ascending: false }).limit(5)
-  const shareDiv = document.getElementById('recent-share')
-  if (shareDiv) shareDiv.innerHTML = (shares && shares.length > 0) ? shares.map(s => `<div class="home-item"><span class="name">${s.files?.name||'未知'}</span><span class="time">${new Date(s.created_at).toLocaleDateString()}</span></div>`).join('') : '<div class="home-item" style="color:var(--text2)">暂无分享</div>'
+  const shareDiv = document.getElementById('recent-share'); if (shareDiv) shareDiv.innerHTML = (shares && shares.length) ? shares.map(s => `<div class="home-item"><span class="name">${s.files?.name||'未知'}</span><span class="time">${new Date(s.created_at).toLocaleDateString()}</span></div>`).join('') : '<div class="home-item" style="color:var(--text2)">暂无分享</div>'
 }
 
 function updateMeStorage() {
   const totalSize = allFiles.reduce((sum, f) => sum + (f.size || 0), 0)
-  const usedEl = document.getElementById('used-size')
-  const fillEl = document.getElementById('progress-fill')
+  const usedEl = document.getElementById('used-size'), fillEl = document.getElementById('progress-fill')
   if (usedEl) usedEl.textContent = formatSize(totalSize)
   if (fillEl) fillEl.style.width = Math.min((totalSize / (1024*1024*1024)) * 100, 100) + '%'
 }
 
 async function loadShareHistory() {
   const { data } = await supabase.from('share_links').select('files(name), code, created_at').eq('creator_id', currentUser?.id).order('created_at', { ascending: false })
-  const container = document.getElementById('share-history-list')
-  if (!container) return
+  const container = document.getElementById('share-history-list'); if (!container) return
   container.innerHTML = (!data || data.length === 0) ? '<div style="padding:24px;text-align:center;color:var(--text2)">暂无分享记录</div>' : data.map(s => `<div class="file-row"><div class="file-info"><div class="file-name">${s.files?.name||'未知'}</div><div class="file-meta">提取码: ${s.code} · ${new Date(s.created_at).toLocaleDateString()}</div></div></div>`).join('')
 }
 
 window.toggleTheme = () => {
   document.body.classList.toggle('dark')
   localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light')
-  const el = document.getElementById('theme-status')
-  if (el) el.textContent = document.body.classList.contains('dark') ? '开启' : '关闭'
+  const el = document.getElementById('theme-status'); if (el) el.textContent = document.body.classList.contains('dark') ? '开启' : '关闭'
 }
 
 document.getElementById('close-upload-panel').addEventListener('click', () => { document.getElementById('upload-panel').classList.remove('open'); document.getElementById('overlay').classList.remove('show') })
