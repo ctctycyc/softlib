@@ -130,7 +130,7 @@
       display: inline-flex; align-items: center; gap: 4px;
       padding: 6px 16px; background: var(--card-bg); border: 1px solid var(--border);
       border-radius: 8px; color: var(--text2); font-size: 12px;
-      cursor: pointer; white-space: nowrap; width: 100%;
+      cursor: pointer; white-space: nowrap;
     }
     .upload-progress-btn:hover { background: var(--chip-bg); }
     .upload-progress-btn svg { width: 14px; height: 14px; }
@@ -251,20 +251,29 @@ document.getElementById('toggle-link').addEventListener('click', () => {
   document.getElementById('toggle-text').textContent = isLogin ? '没有账号？' : '已有账号？'
   document.getElementById('toggle-link').textContent = isLogin ? '注册' : '登录'
 })
+
 document.getElementById('auth-btn').addEventListener('click', async () => {
   const email = document.getElementById('auth-email').value.trim(), password = document.getElementById('auth-password').value
   if (!email || !password) return alert('请填写邮箱和密码')
   const { error } = isLogin ? await supabase.auth.signInWithPassword({ email, password }) : await supabase.auth.signUp({ email, password })
   if (error) return alert(error.message)
   if (!isLogin) alert('注册成功，已自动登录')
+  await checkAuth()
+  if (!currentUser) return
+  document.getElementById('auth-page').style.display = 'none'
   if (shareCode) {
-    document.getElementById('auth-page').style.display = 'none'
-    await checkAuth()
-    if (currentUser) {
-      if (pendingDirectDownload) { handleDirectDownload(); pendingDirectDownload = false }
-      else saveFileToMyAccount()
+    if (pendingDirectDownload) {
+      pendingDirectDownload = false
+      handleDirectDownload()
+    } else {
+      saveFileToMyAccount()
     }
-  } else checkAuth()
+  } else {
+    document.getElementById('main-container').style.display = 'block'
+    document.getElementById('bottom-nav').style.display = 'flex'
+    switchTab('home')
+    loadFiles()
+  }
 })
 
 
@@ -415,7 +424,7 @@ function buildHomePage() {
         <span style="font-weight:500">${currentUser?.email||''}</span>
       </div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
-        <button class="btn-primary" style="padding:6px 16px;border-radius:8px;width:100%;" onclick="document.getElementById('hidden-upload').click()">+ 上传</button>
+        <button class="btn-primary" style="padding:6px 16px;border-radius:8px;" onclick="document.getElementById('hidden-upload').click()">+ 上传</button>
         <div class="upload-progress-btn" id="home-upload-progress" title="上传进度">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           <span>进度</span>
@@ -432,7 +441,6 @@ function buildHomePage() {
     document.getElementById('overlay').classList.add('show')
   })
 }
-
 
 function buildFilesPage() {
   document.getElementById('page-files').innerHTML = `
@@ -456,7 +464,6 @@ function buildFilesPage() {
 
 
 function getTodayKey() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}` }
-
 function getRemainingDownloads() {
   const raw = localStorage.getItem('dl_data');
   if (!raw) return 5;
@@ -469,16 +476,12 @@ function getRemainingDownloads() {
     return Math.max(0, 5 - data.count);
   } catch(e) { return 5; }
 }
-
 function increaseDownloadCount() {
   const today = getTodayKey();
   const raw = localStorage.getItem('dl_data');
   let count = 0;
   if (raw) {
-    try {
-      const data = JSON.parse(raw);
-      if (data.date === today) count = data.count;
-    } catch(e) {}
+    try { const data = JSON.parse(raw); if (data.date === today) count = data.count; } catch(e) {}
   }
   count++;
   localStorage.setItem('dl_data', JSON.stringify({date: today, count}));
@@ -487,17 +490,50 @@ function increaseDownloadCount() {
 
 async function handleDirectDownload() {
   if (!shareFileData) return alert('文件信息丢失')
-  const remaining = getRemainingDownloads();
+  const remaining = getRemainingDownloads()
   if (remaining <= 0) return alert('今日直接下载次数已用完（每天5次），请明天再试')
   const { data } = await supabase.storage.from('user-files').createSignedUrl(shareFileData.storage_path, 60)
   if (data?.signedUrl) {
     window.open(data.signedUrl, '_blank')
-    increaseDownloadCount();
+    increaseDownloadCount()
     showToast(`下载成功，今日剩余 ${getRemainingDownloads()} 次`)
     if (document.getElementById('page-me').classList.contains('active')) buildMePage()
   } else alert('无法获取下载链接')
 }
 
+async function saveFileToMyAccount() {
+  if (!shareFileData) return alert('文件信息丢失')
+  if (!currentUser) return alert('请先登录')
+  showToast('正在转存...')
+  try {
+    const { data: urlData, error: urlError } = await supabase.storage
+      .from('user-files')
+      .createSignedUrl(shareFileData.storage_path, 60)
+    if (urlError || !urlData?.signedUrl) throw new Error('无法获取源文件链接')
+    const res = await fetch(urlData.signedUrl)
+    if (!res.ok) throw new Error('下载源文件失败')
+    const blob = await res.blob()
+    const ext = shareFileData.name.includes('.') ? shareFileData.name.split('.').pop() : ''
+    const safeName = Date.now() + (ext ? '.' + ext : '')
+    const newPath = `${currentUser.id}/${safeName}`
+    const { error: uploadError } = await supabase.storage
+      .from('user-files')
+      .upload(newPath, blob, { contentType: blob.type || 'application/octet-stream' })
+    if (uploadError) throw uploadError
+    const { error: dbError } = await supabase.from('files').insert({
+      user_id: currentUser.id,
+      name: shareFileData.name,
+      size: blob.size,
+      type: blob.type,
+      storage_path: newPath,
+      source: 'save'
+    })
+    if (dbError) throw dbError
+    showToast('转存成功！')
+  } catch (err) {
+    alert('转存失败：' + err.message)
+  }
+}
 
 function buildMePage() {
   const remaining = getRemainingDownloads()
@@ -676,34 +712,24 @@ async function loadShare(code) {
       isLogin = true
       document.getElementById('auth-title').textContent = '登录'
       document.getElementById('auth-btn').textContent = '登录并下载'
+      document.getElementById('toggle-text').textContent = '没有账号？'
+      document.getElementById('toggle-link').textContent = '注册'
     } else handleDirectDownload()
   }
 
   loginSaveBtn.onclick = () => {
-    if (currentUser) saveFileToMyAccount()
-    else {
+    if (currentUser) {
+      saveFileToMyAccount()
+    } else {
       pendingDirectDownload = false
       document.getElementById('auth-page').style.display = 'block'
       isLogin = true
       document.getElementById('auth-title').textContent = '登录'
       document.getElementById('auth-btn').textContent = '登录并保存'
+      document.getElementById('toggle-text').textContent = '没有账号？'
+      document.getElementById('toggle-link').textContent = '注册'
     }
   }
-}
-
-async function saveFileToMyAccount() {
-  if (!shareFileData || !currentUser) return
-  showToast('正在保存...')
-  try {
-    const { data: urlData } = await supabase.storage.from('user-files').createSignedUrl(shareFileData.storage_path, 60)
-    if (!urlData?.signedUrl) throw new Error('无法获取源文件链接')
-    const res = await fetch(urlData.signedUrl); if (!res.ok) throw new Error('下载源文件失败')
-    const blob = await res.blob(); const newPath = `${currentUser.id}/${Date.now()}_${shareFileData.name.replace(/[\\/:*?"<>|]/g, '_')}`
-    const { error } = await supabase.storage.from('user-files').upload(newPath, blob, { contentType: blob.type || 'application/octet-stream' })
-    if (error) throw error
-    await supabase.from('files').insert({ user_id: currentUser.id, name: shareFileData.name, size: blob.size, type: blob.type, storage_path: newPath, source: 'save' })
-    showToast('文件已保存到你的网盘')
-  } catch (err) { showToast('保存失败：' + err.message) }
 }
 
 async function loadFiles() {
@@ -721,7 +747,8 @@ async function checkAuth() {
     document.getElementById('auth-page').style.display = 'none'
     document.getElementById('main-container').style.display = 'block'
     document.getElementById('bottom-nav').style.display = 'flex'
-    switchTab('home'); loadFiles()
+    switchTab('home')
+    loadFiles()
   } else {
     document.getElementById('auth-page').style.display = 'block'
   }
