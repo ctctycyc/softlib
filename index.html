@@ -31,8 +31,7 @@
     body{
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background: var(--bg); height: 100vh; overflow: hidden; color: var(--text);
-      transition: background 0.3s;
-      letter-spacing: -0.01em;
+      transition: background 0.3s; letter-spacing: -0.01em;
     }
     .page{display:none;height:100vh;overflow-y:auto;padding-bottom:70px}
     .page.active{display:block}
@@ -50,7 +49,6 @@
     .btn-primary{
       background:#4e6ef2;color:#fff;border:none;border-radius:8px;padding:10px 18px;
       font-size:14px;font-weight:500;cursor:pointer;transition:background 0.2s;
-      letter-spacing: 0.01em;
     }
     .btn-primary:hover{background:#4462d0}
     .btn-primary:active{transform:scale(0.98)}
@@ -112,7 +110,7 @@
     .share-info-card{display:flex;align-items:center;gap:14px;padding:18px;background:var(--card-bg);margin:14px 16px;border-radius:14px;box-shadow:var(--shadow)}
     .share-controls{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--card-bg);margin:0 16px;border-radius:14px;box-shadow:var(--shadow)}
     .share-file-item{display:flex;align-items:center;padding:14px 18px;background:var(--card-bg);margin:0 16px;border-radius:14px;margin-top:8px;box-shadow:var(--shadow)}
-    .save-bar{position:fixed;bottom:0;left:0;right:0;padding:14px 18px;background:var(--card-bg);border-top:1px solid var(--border);display:flex;justify-content:flex-start}
+    .save-bar{position:fixed;bottom:0;left:0;right:0;padding:14px 18px;background:var(--card-bg);border-top:1px solid var(--border);display:flex;justify-content:space-between}
     .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1f2937;color:#fff;padding:10px 24px;border-radius:24px;font-size:14px;z-index:9999;opacity:0;transition:opacity 0.3s}
     .toast.show{opacity:1}
     .upload-panel{position:fixed;top:0;right:0;width:300px;max-width:85vw;height:100vh;background:var(--card-bg);z-index:150;transform:translateX(100%);transition:transform 0.3s;display:flex;flex-direction:column;box-shadow:-4px 0 20px rgba(0,0,0,0.05)}
@@ -132,8 +130,6 @@
     .btn-outline:hover{background:rgba(78,110,242,0.04)}
     .btn-danger{background:transparent;border:1px solid #e74c3c;color:#e74c3c}
     .btn-danger:hover{background:rgba(231,76,60,0.04)}
-
-    /* 加载中动画 */
     .loading-spinner {
       display: flex;
       align-items: center;
@@ -153,6 +149,24 @@
       margin-right: 8px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    /* 长方形进度按钮 */
+    .upload-progress-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text2);
+      font-size: 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      margin-top: 6px;
+      transition: background 0.2s;
+    }
+    .upload-progress-btn:hover { background: var(--chip-bg); }
+    .upload-progress-btn svg { width: 14px; height: 14px; }
   </style>
 </head>
 <body>
@@ -196,22 +210,16 @@
     <div style="flex:1"><div style="font-weight:500" id="share-user-email">用户</div><div style="font-size:12px;color:var(--text2)">分享的文件</div></div>
     <div style="background:rgba(78,110,242,0.08);padding:4px 12px;border-radius:20px;font-size:12px;color:#4e6ef2;font-weight:500">来自分享</div>
   </div>
-  <div class="share-controls">
-    <div style="display:flex;align-items:center;gap:8px"><span style="font-weight:500">文件列表</span><span style="font-size:12px;color:var(--text2)">1项</span></div>
-    <div style="display:flex;align-items:center;gap:12px">
-      <input type="checkbox" style="width:18px;height:18px;accent-color:#4e6ef2" checked disabled>
-    </div>
-  </div>
   <div class="share-file-item" id="share-file-item">
     <div class="file-icon" id="share-file-icon"></div>
     <div class="file-info">
       <div class="file-name" id="share-file-name"></div>
       <div class="file-meta" id="share-file-meta"></div>
     </div>
-    <input type="checkbox" style="width:18px;height:18px;accent-color:#4e6ef2" checked disabled>
   </div>
   <div class="save-bar">
-    <button class="btn-primary" id="login-save-btn">登录并保存</button>
+    <button class="btn-primary" id="direct-download-btn" style="flex:1">直接下载</button>
+    <button class="btn-primary" id="login-save-btn" style="flex:1;margin-left:8px">登录并保存</button>
   </div>
 </div>
 
@@ -250,7 +258,7 @@ let allFiles = [], currentFilter = 'all', currentUser = null, uploadTasks = [], 
 const shareCode = new URLSearchParams(location.search).get('code')
 let tempEmailAddr = '', tempEmailToken = '', tempEmailPolling = null
 
-// Splash
+
 const splash = document.getElementById('splash'), skipBtn = document.getElementById('skip-btn')
 let countdown = 5; skipBtn.textContent = countdown + 's 跳过'
 const timer = setInterval(() => { countdown--; skipBtn.textContent = countdown + 's 跳过'; if (countdown <= 0) { clearInterval(timer); hideSplash() } }, 1000)
@@ -266,7 +274,6 @@ function hideSplash() {
   }, 400)
 }
 
-// Auth
 let isLogin = true
 document.getElementById('toggle-link').addEventListener('click', () => {
   isLogin = !isLogin
@@ -285,12 +292,14 @@ document.getElementById('auth-btn').addEventListener('click', async () => {
   else checkAuth()
 })
 
-// Navigation
+
 document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => switchTab(item.dataset.tab)))
 document.getElementById('hidden-upload').addEventListener('change', async (e) => {
   for (const file of e.target.files) {
     if (file.size > 50 * 1024 * 1024) { alert('文件超过50MB，请压缩或使用其他方式'); continue }
-    addUploadTask(new File([file], file.name.replace(/[^a-zA-Z0-9._-]/g, '_'), { type: file.type }))
+    
+    const safeName = file.name.replace(/[\\/:*?"<>|]/g, '_')
+    addUploadTask(new File([file], safeName, { type: file.type }))
   }
   document.getElementById('hidden-upload').value = ''
 })
@@ -301,21 +310,27 @@ function addUploadTask(file) {
 }
 
 async function startUpload(task) {
-  if (!currentUser) return
+  if (!currentUser) { task.status = 'error'; task.errorMsg = '未登录'; renderUploadTasks(); return }
   task.status = 'uploading'; renderUploadTasks()
   const path = `${currentUser.id}/${Date.now()}_${task.file.name}`
-  const interval = setInterval(() => {
-    if (task.progress < 90) { task.progress += Math.random() * 15; if (task.progress > 90) task.progress = 90; renderUploadTasks() }
-  }, 300)
   try {
     const { error } = await supabase.storage.from('user-files').upload(path, task.file, { contentType: 'application/octet-stream' })
-    clearInterval(interval)
-    if (error) throw error
-    await supabase.from('files').insert({ user_id: currentUser.id, name: task.file.name, size: task.file.size, type: task.file.type, storage_path: path, source: 'upload' })
-    task.progress = 100; task.status = 'success'
-  } catch (err) { clearInterval(interval); task.status = 'error'; task.errorMsg = err.message }
-  renderUploadTasks(); loadFiles()
+    if (error) { task.status = 'error'; task.errorMsg = '上传失败：' + error.message; renderUploadTasks(); return }
+    const { error: dbError } = await supabase.from('files').insert({
+      user_id: currentUser.id,
+      name: task.file.name,
+      size: task.file.size,
+      type: task.file.type,
+      storage_path: path,
+      source: 'upload'
+    })
+    if (dbError) { task.status = 'error'; task.errorMsg = '记录写入失败：' + dbError.message; }
+    else { task.progress = 100; task.status = 'success'; }
+  } catch (err) { task.status = 'error'; task.errorMsg = '请求异常：' + err.message; }
+  renderUploadTasks()
+  await loadFiles()
   if (document.getElementById('page-home').classList.contains('active')) loadHomeData()
+  if (document.getElementById('page-files').classList.contains('active')) renderFiles()
 }
 
 function renderUploadTasks() {
@@ -327,7 +342,6 @@ function renderUploadTasks() {
     </div>`).join('')
 }
 
-// 统一的加载指示器添加函数
 function setLoading(containerId) {
   const container = document.getElementById(containerId)
   if (container) container.innerHTML = '<div class="loading-spinner">加载中...</div>'
@@ -340,30 +354,12 @@ window.switchTab = function(tab) {
   if (page) page.classList.add('active')
   const nav = document.querySelector(`.nav-item[data-tab="${tab}"]`)
   if (nav) nav.classList.add('active')
-
-  // 先显示加载状态
-  if (tab === 'home') {
-    setLoading('page-home')
-    buildHomePage()
-    loadHomeData()
-  }
-  else if (tab === 'files') {
-    setLoading('page-files')
-    buildFilesPage()
-    if (!allFiles.length) loadFiles().then(() => renderFiles())
-    else renderFiles()
-  }
-  else if (tab === 'me') {
-    setLoading('page-me')
-    buildMePage()
-    loadFiles().then(() => updateMeStorage())
-  }
+  if (tab === 'home') { setLoading('page-home'); buildHomePage(); loadHomeData() }
+  else if (tab === 'files') { setLoading('page-files'); buildFilesPage(); if (!allFiles.length) loadFiles().then(() => renderFiles()); else renderFiles() }
+  else if (tab === 'me') { setLoading('page-me'); buildMePage(); loadFiles().then(() => updateMeStorage()) }
   else if (tab === 'settings') buildSettingsPage()
   else if (tab === 'feedback') buildFeedbackPage()
-  else if (tab === 'shareHistory') {
-    setLoading('page-shareHistory')
-    buildShareHistoryPage()
-  }
+  else if (tab === 'shareHistory') { setLoading('page-shareHistory'); buildShareHistoryPage() }
   else if (tab === 'tempmail') buildTempmailPage()
 }
 
@@ -388,6 +384,7 @@ window.renderFiles = function() {
         <button class="btn-primary btn-sm btn-danger" data-delete="${f.id}" data-path="${f.storage_path}" data-name="${f.name}">删除</button>
       </div>
     </div>`).join('')
+ 
   document.querySelectorAll('[data-view]').forEach(btn => {
     btn.onclick = () => supabase.storage.from('user-files').createSignedUrl(btn.dataset.view, 60).then(({ data }) => {
       if (data?.signedUrl) { window.open(data.signedUrl, '_blank'); addBrowseHistory(btn.dataset.name); if (document.getElementById('page-home').classList.contains('active')) loadHomeData() }
@@ -449,13 +446,23 @@ function buildHomePage() {
         <div style="width:36px;height:36px;border-radius:50%;background:#4e6ef2;color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px">${currentUser?.email?.charAt(0)?.toUpperCase()||'U'}</div>
         <span style="font-weight:500">${currentUser?.email||''}</span>
       </div>
-      <button class="btn-primary" style="width:auto;padding:6px 16px;border-radius:8px" onclick="document.getElementById('hidden-upload').click()">+ 上传</button>
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <button class="btn-primary" style="width:auto;padding:6px 16px;border-radius:8px" onclick="document.getElementById('hidden-upload').click()">+ 上传</button>
+        <div class="upload-progress-btn" id="home-upload-progress" title="上传进度">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          上传进度
+        </div>
+      </div>
     </div>
     <div class="section-header"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>最近上传/转存</div>
     <div class="card" id="recent-upload"><div class="loading-spinner">加载中...</div></div>
     <div class="section-header"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>最近分享</div>
     <div class="card" id="recent-share"><div class="loading-spinner">加载中...</div></div>
   `
+  document.getElementById('home-upload-progress').addEventListener('click', () => {
+    document.getElementById('upload-panel').classList.add('open')
+    document.getElementById('overlay').classList.add('show')
+  })
 }
 
 function buildFilesPage() {
@@ -620,17 +627,43 @@ function showSharePage() {
 }
 
 async function loadShare(code) {
-  const shareFileItem = document.getElementById('share-file-item'), loginSaveBtn = document.getElementById('login-save-btn'), infoCard = document.getElementById('share-info-card')
+  const shareFileItem = document.getElementById('share-file-item')
+  const directDownloadBtn = document.getElementById('direct-download-btn')
+  const loginSaveBtn = document.getElementById('login-save-btn')
+  const infoCard = document.getElementById('share-info-card')
+
   const { data: links, error } = await supabase.from('share_links').select('*, files(*)').eq('code', code).maybeSingle()
-  if (error || !links) { shareFileItem.style.display = 'none'; loginSaveBtn.style.display = 'none'; infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center">分享不存在或已失效</div>'; return }
-  if (links.expires_at && new Date(links.expires_at) < new Date()) { shareFileItem.style.display = 'none'; loginSaveBtn.style.display = 'none'; infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center">分享已过期</div>'; return }
+  if (error || !links) {
+    shareFileItem.style.display = 'none'; directDownloadBtn.style.display = 'none'; loginSaveBtn.style.display = 'none'
+    infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center">分享不存在或已失效</div>'; return
+  }
+  if (links.expires_at && new Date(links.expires_at) < new Date()) {
+    shareFileItem.style.display = 'none'; directDownloadBtn.style.display = 'none'; loginSaveBtn.style.display = 'none'
+    infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center">分享已过期</div>'; return
+  }
   shareFileData = links.files
-  if (!shareFileData) { shareFileItem.style.display = 'none'; loginSaveBtn.style.display = 'none'; infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center">文件已被删除，无法下载</div>'; return }
+  if (!shareFileData) {
+    shareFileItem.style.display = 'none'; directDownloadBtn.style.display = 'none'; loginSaveBtn.style.display = 'none'
+    infoCard.innerHTML = '<div style="color:#e74c3c;text-align:center">文件已被删除，无法下载</div>'; return
+  }
+
   document.getElementById('share-user-email').textContent = '用户'
   document.getElementById('share-file-name').textContent = shareFileData.name
   document.getElementById('share-file-meta').textContent = formatSize(shareFileData.size)
   document.getElementById('share-file-icon').innerHTML = getFileIconHTML(shareFileData.type)
-  shareFileItem.style.display = 'flex'; loginSaveBtn.style.display = 'flex'
+
+  shareFileItem.style.display = 'flex'
+  directDownloadBtn.style.display = 'block'
+  loginSaveBtn.style.display = 'block'
+
+  
+  directDownloadBtn.onclick = async () => {
+    const { data } = await supabase.storage.from('user-files').createSignedUrl(shareFileData.storage_path, 60)
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank')
+    else alert('无法获取下载链接')
+  }
+
+  
   loginSaveBtn.onclick = () => {
     if (currentUser) saveFileToMyAccount()
     else {
